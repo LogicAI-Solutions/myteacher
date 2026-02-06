@@ -9,6 +9,8 @@ class StudentBase(BaseModel):
     parent_phone: Optional[str] = None
     parent_email: Optional[str] = None
     school_year: Optional[str] = None
+    school: Optional[str] = None
+    intended_profession: Optional[str] = None
     class_type: Optional[str] = None
     active: bool = True
 
@@ -20,6 +22,10 @@ class Student(StudentBase):
     owner_id: int
     class Config:
         from_attributes = True
+
+class StudentListResponse(BaseModel):
+    items: List['Student']
+    total: int
 
 class StudentEvolutionPoint(BaseModel):
     date: datetime.date

@@ -43,6 +43,15 @@ def update_payment(
 ):
     return payment_crud.update_payment(db, payment_id=payment_id, payment_data=payment)
 
+@router.get("/payments/stats")
+def get_payment_stats(
+    month: int,
+    year: int,
+    db: Session = Depends(database.get_db),
+    current_user: user_schemas.User = Depends(security.get_current_user)
+):
+    return payment_crud.get_payment_stats(db, user_id=current_user.id, month=month, year=year)
+
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -101,20 +110,22 @@ def generate_monthly_report(
     
     # Summary
     document.add_heading('Resumo do Mês', level=1)
-    table_stats = document.add_table(rows=1, cols=3)
+    table_stats = document.add_table(rows=1, cols=4)
     table_stats.style = 'Table Grid'
     hdr_stats = table_stats.rows[0].cells
     hdr_stats[0].text = 'Total Alunos'
-    hdr_stats[1].text = 'Recebido'
+    hdr_stats[1].text = 'Pagos'
     hdr_stats[2].text = 'Pendentes'
+    hdr_stats[3].text = 'Total Recebido'
     
     for cell in hdr_stats:
         cell.paragraphs[0].runs[0].bold = True
         
     row_stats = table_stats.add_row().cells
     row_stats[0].text = str(total_students)
-    row_stats[1].text = f"R$ {total_received:.2f}"
+    row_stats[1].text = str(paid_count)
     row_stats[2].text = str(pending_count)
+    row_stats[3].text = f"R$ {total_received:.2f}"
     
     # Detailed List
     document.add_heading('Detalhamento por Aluno', level=1)

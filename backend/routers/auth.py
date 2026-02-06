@@ -9,8 +9,8 @@ router = APIRouter()
 
 @router.post("/token", response_model=auth_schemas.Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(database.get_db)):
-    print(f"LOGIN ATTEMPT: username='{form_data.username}', password='{form_data.password}'")
-    user = users_crud.get_user_by_email(db, email=form_data.username)
+    print(f"LOGIN ATTEMPT: nickname='{form_data.username}', password='{form_data.password}'")
+    user = users_crud.get_user_by_nickname(db, nickname=form_data.username)
     print(f"USER FOUND: {user}")
     if user:
          print(f"HASH MATCH: {security.verify_password(form_data.password, user.hashed_password)}")
@@ -18,7 +18,15 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         print("LOGIN FAILED: Invalid credentials")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Usuário ou senha incorretos",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not user.is_active:
+        print("LOGIN FAILED: User inactive")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Sua conta está inativa. Por favor, entre em contato com o suporte.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = security.timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)

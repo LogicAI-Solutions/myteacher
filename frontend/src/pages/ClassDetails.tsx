@@ -13,6 +13,7 @@ interface Student {
     parent_name?: string;
     parent_phone?: string;
     parent_email?: string;
+    active?: boolean;
 }
 
 interface ClassModel {
@@ -269,8 +270,8 @@ export const ClassDetails = () => {
 
     const loadAllStudents = async () => {
         try {
-            const res = await api.get('/students/');
-            setAllStudents(res.data);
+            const res = await api.get('/students/?limit=1000');
+            setAllStudents(res.data.items);
             setShowEnrollModal(true);
         } catch (e) { console.error(e); }
     };
@@ -458,12 +459,20 @@ export const ClassDetails = () => {
 
         setSaving(true);
 
-        const logs = Object.values(attendanceLogs).filter(l => students.find(s => s.id === l.student_id));
-        console.log("Logs:", logs);
+        let logsToProcess = Object.values(attendanceLogs).filter(l => students.find(s => s.id === l.student_id));
+
+        // Se for nova chamada, não salvar presença para alunos inativos
+        if (!editingSessionId) {
+            logsToProcess = logsToProcess.filter(l => {
+                const s = students.find(std => std.id === l.student_id);
+                return s?.active !== false;
+            });
+        }
+
         const payload = {
             date: sessionDate,
             description: sessionDesc,
-            logs: logs.map(l => {
+            logs: logsToProcess.map(l => {
                 const gradeNum = l.grade === '' ? null : Number(l.grade);
                 return {
                     ...l,
@@ -546,7 +555,7 @@ export const ClassDetails = () => {
                 </div>
             )}
 
-            <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4 animate-fade-in">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4 animate-fade-in">
                 <div>
                     <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-text-muted">{classData.name}</h1>
                     <p className="text-primary-light flex items-center gap-2 mt-2 font-medium bg-primary/10 w-fit px-3 py-1 rounded-full text-sm">
@@ -575,8 +584,8 @@ export const ClassDetails = () => {
                         <div className="flex flex-col sm:flex-row justify-between mb-6 gap-4 border-b border-white/5 pb-4">
                             <h2 className="text-xl font-bold flex items-center gap-2"><Users className="text-primary" size={20} /> Alunos Matriculados <span className="bg-bg-dark px-2 py-0.5 rounded-full text-xs text-text-muted">{students.length}</span></h2>
                             <div className="flex flex-col sm:flex-row gap-3">
-                                <button onClick={loadAllStudents} className="btn-outline text-sm px-3 py-1.5"><Users size={16} /> Gerenciar Alunos</button>
-                                <button onClick={() => setShowCreateStudentModal(true)} className="bg-primary hover:bg-primary-hover text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 shadow-lg shadow-primary/20"><Plus size={16} /> Novo Aluno</button>
+                                <button onClick={loadAllStudents} className="btn btn-outline"><Users size={16} /> Gerenciar Alunos</button>
+                                <button onClick={() => setShowCreateStudentModal(true)} className="btn btn-primary shadow-lg shadow-primary/20"><Plus size={16} /> Novo Aluno</button>
                             </div>
                         </div>
                         <div className="table-container bg-transparent border-none">
@@ -633,7 +642,7 @@ export const ClassDetails = () => {
                                 <span className="w-2 h-8 bg-primary rounded-full"></span> Nova Chamada
                             </h2>
                             <div className="flex items-center gap-3">
-                                <button onClick={loadAllStudents} className="btn-outline text-sm px-3 py-1.5 border-white/10 hover:bg-white/5">
+                                <button onClick={loadAllStudents} className="btn btn-outline">
                                     <Users size={16} /> Gerenciar Alunos
                                 </button>
                                 <div className="text-sm text-text-muted bg-bg-dark px-3 py-1 rounded-lg border border-white/5">
@@ -666,7 +675,7 @@ export const ClassDetails = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-white/5">
-                                        {[...students].sort((a, b) => a.name.localeCompare(b.name)).map(s => {
+                                        {[...students].filter(s => s.active !== false).sort((a, b) => a.name.localeCompare(b.name)).map(s => {
                                             const log = attendanceLogs[s.id] || {};
                                             return (
                                                 <tr key={s.id} className="hover:bg-white/5 transition-colors group">
@@ -677,8 +686,8 @@ export const ClassDetails = () => {
                                                             value={log.status}
                                                             onChange={e => updateLog(s.id, 'status', e.target.value)}
                                                         >
-                                                            <option value="present">Presente</option>
-                                                            <option value="absent">Ausente</option>
+                                                            <option value="present" className="bg-bg-card text-white">Presente</option>
+                                                            <option value="absent" className="bg-bg-card text-white">Ausente</option>
                                                         </select>
                                                     </td>
                                                     <td className="p-4 text-center">
@@ -786,12 +795,12 @@ export const ClassDetails = () => {
                         <div className="flex gap-2">
                             <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="bg-bg-dark border border-white/10 rounded-lg px-3 py-1 text-white">
                                 {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                                    <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'long' })}</option>
+                                    <option key={m} value={m} className="bg-bg-dark text-white">{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'long' })}</option>
                                 ))}
                             </select>
                             <select value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="bg-bg-dark border border-white/10 rounded-lg px-3 py-1 text-white">
                                 {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
-                                    <option key={y} value={y}>{y}</option>
+                                    <option key={y} value={y} className="bg-bg-dark text-white">{y}</option>
                                 ))}
                             </select>
                         </div>
@@ -824,8 +833,8 @@ export const ClassDetails = () => {
                                                     value={payment.status}
                                                     onChange={e => updateLocalPayment(s.id, 'status', e.target.value)}
                                                 >
-                                                    <option value="PENDING">Pendente</option>
-                                                    <option value="PAID">Pago</option>
+                                                    <option value="PENDING" className="bg-bg-card text-white">Pendente</option>
+                                                    <option value="PAID" className="bg-bg-card text-white">Pago</option>
                                                 </select>
                                             </td>
                                             <td className="p-4">
