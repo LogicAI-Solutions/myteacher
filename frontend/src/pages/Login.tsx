@@ -56,7 +56,7 @@ export const Login = () => {
                 <div className="relative z-10 w-full max-w-lg">
                     <div className="glass p-8 rounded-3xl border border-white/10 shadow-2xl backdrop-blur-xl animate-slide-up">
                         <img
-                            src="/src/assets/teacher_login_illustration.png"
+                            src="/src/assets/login_hero_female.png"
                             alt="Login Illustration"
                             className="w-full h-auto rounded-2xl mb-8 shadow-lg transform hover:scale-[1.02] transition-transform duration-500"
                         />
