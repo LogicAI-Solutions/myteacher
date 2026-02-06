@@ -8,6 +8,7 @@ import { Students } from './pages/Students';
 import { Payments } from './pages/Payments';
 import Admin from './pages/Admin';
 import { NotFound } from './pages/NotFound';
+import { Landing } from './pages/Landing';
 import { Layout } from './components/Layout';
 
 import type { ReactNode } from 'react';
@@ -24,8 +25,11 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/" element={
+
+      {/* Protected Routes */}
+      <Route path="/dashboard" element={
         <ProtectedRoute>
           <Layout />
         </ProtectedRoute>
@@ -35,8 +39,9 @@ function AppRoutes() {
         <Route path="class/:id" element={<ClassDetails />} />
         <Route path="students" element={<Students />} />
         <Route path="payments" element={<Payments />} />
-        <Route path="admin" element={<Admin />} /> {/* Added Admin route as a nested route */}
+        <Route path="admin" element={<Admin />} />
       </Route>
+
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
