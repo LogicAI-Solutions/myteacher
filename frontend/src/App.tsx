@@ -1,6 +1,11 @@
+import { ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { Login } from './pages/Login';
+import { StudentAuthProvider, useStudentAuth } from './context/StudentAuthContext';
+import { Loading } from './components/Loading';
+// Pages
+import { Landing } from './pages/Landing';
+import Login from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { Classes } from './pages/Classes';
 import { ClassDetails } from './pages/ClassDetails';
@@ -8,19 +13,38 @@ import { Students } from './pages/Students';
 import { Payments } from './pages/Payments';
 import Admin from './pages/Admin';
 import { NotFound } from './pages/NotFound';
-import { Landing } from './pages/Landing';
+import { StudentLogin } from './pages/StudentLogin';
+import { StudentDashboard } from './pages/StudentDashboard';
+
+// Layouts
 import { Layout } from './components/Layout';
-
-import type { ReactNode } from 'react';
-
-import { Loading } from './components/Loading';
+import { StudentLayout } from './components/StudentLayout';
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { user, isLoading } = useAuth();
-  if (isLoading) return <Loading variant="fullscreen" text="Carregando sistema..." />;
+  if (isLoading) return <Loading variant="fullscreen" text="Carregando..." />;
   if (!user) return <Navigate to="/login" />;
   return children;
 };
+
+const ProtectedStudentRoute = ({ children }: { children: ReactNode }) => {
+  const { student, isLoading } = useStudentAuth();
+  if (isLoading) return <Loading variant="fullscreen" text="Carregando portal..." />;
+  if (!student) return <Navigate to="/portal/login" />;
+  return children;
+};
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AuthProvider>
+        <StudentAuthProvider>
+          <AppRoutes />
+        </StudentAuthProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  );
+}
 
 function AppRoutes() {
   return (
@@ -28,7 +52,18 @@ function AppRoutes() {
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
 
-      {/* Protected Routes */}
+      {/* Student Portal Routes */}
+      <Route path="/portal/login" element={<StudentLogin />} />
+      <Route path="/portal" element={
+        <ProtectedStudentRoute>
+          <StudentLayout />
+        </ProtectedStudentRoute>
+      }>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<StudentDashboard />} />
+      </Route>
+
+      {/* Protected Admin Routes */}
       <Route path="/dashboard" element={
         <ProtectedRoute>
           <Layout />
@@ -44,16 +79,6 @@ function AppRoutes() {
 
       <Route path="*" element={<NotFound />} />
     </Routes>
-  );
-}
-
-function App() {
-  return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
   );
 }
 

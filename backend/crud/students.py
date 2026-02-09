@@ -97,8 +97,30 @@ def count_students(db: Session, user_id: int, search: str = None, active_status:
 
     return query.count()
 
+
+# Need to import pwd_context
+from backend.core.security import pwd_context
+
+def get_student_by_username(db: Session, username: str):
+    return db.query(Student).filter(Student.username == username).first()
+
+def authenticate_student(db: Session, username: str, password: str):
+    student = get_student_by_username(db, username)
+    if not student:
+        return False
+    if not student.hashed_password:
+        return False
+    if not pwd_context.verify(password, student.hashed_password):
+        return False
+    return student
+
 def create_student(db: Session, student: StudentCreate, user_id: int):
-    db_student = Student(**student.model_dump(), owner_id=user_id)
+    student_data = student.model_dump()
+    if student_data.get('password'):
+        student_data['hashed_password'] = pwd_context.hash(student_data['password'])
+        del student_data['password']
+    
+    db_student = Student(**student_data, owner_id=user_id)
     db.add(db_student)
     db.commit()
     db.refresh(db_student)
@@ -107,14 +129,14 @@ def create_student(db: Session, student: StudentCreate, user_id: int):
 def update_student(db: Session, student_id: int, student_data: StudentCreate):
     student = db.query(Student).filter(Student.id == student_id).first()
     if student:
-        student.name = student_data.name
-        student.phone = student_data.phone
-        student.parent_name = student_data.parent_name
-        student.parent_phone = student_data.parent_phone
-        student.parent_email = student_data.parent_email
-        student.school_year = student_data.school_year
-        student.class_type = student_data.class_type
-        student.active = student_data.active
+        update_data = student_data.model_dump(exclude_unset=True)
+        if update_data.get('password'):
+            update_data['hashed_password'] = pwd_context.hash(update_data['password'])
+            del update_data['password']
+            
+        for key, value in update_data.items():
+            setattr(student, key, value)
+
         db.commit()
         db.refresh(student)
     return student
