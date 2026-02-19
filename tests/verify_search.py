@@ -2,7 +2,7 @@ import requests
 import sys
 
 # Configuration
-API_URL = "http://localhost:8001"
+API_URL = "http://localhost:8501"
 ADMIN_EMAIL = "admin@system.com"
 ADMIN_PASSWORD = "admin"
 

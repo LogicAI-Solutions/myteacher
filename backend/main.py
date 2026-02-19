@@ -8,6 +8,6 @@ if __name__ == "__main__":
     uvicorn.run(
         "backend.server:app",
         host=os.getenv("HOST_IP", "localhost"),
-        port=int(os.getenv("PORT_BACKEND", 8001)),
+        port=int(os.getenv("PORT_BACKEND", 8501)),
         reload=True
     )
