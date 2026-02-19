@@ -1,7 +1,7 @@
 import requests
 
 # URL
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8500"
 
 # Login
 auth_data = {"username": "teacher1@test.com", "password": "finalpass123"}

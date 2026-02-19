@@ -15,6 +15,6 @@ COPY database/ ./database/
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 
-EXPOSE 8001
+EXPOSE 8501
 
-CMD ["uvicorn", "backend.server:app", "--host", "0.0.0.0", "--port", "8001"]
+CMD ["uvicorn", "backend.server:app", "--host", "0.0.0.0", "--port", "8501"]

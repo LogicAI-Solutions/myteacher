@@ -6,10 +6,11 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
+    port: 5273,
     allowedHosts: ['redacaoyana.com.br'],
     proxy: {
       '/api': {
-        target: 'http://backend:8001',
+        target: 'http://backend:8501',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, ''),
       },
