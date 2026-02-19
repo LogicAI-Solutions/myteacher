@@ -78,7 +78,7 @@ jobs:
             set -e
             echo "🚀 Iniciando deploy..."
             
-            cd /root/TeacherApp || cd ~/TeacherApp
+            cd /root/myteacher || cd ~/myteacher
             
             echo "📥 Atualizando código..."
             git fetch --all
