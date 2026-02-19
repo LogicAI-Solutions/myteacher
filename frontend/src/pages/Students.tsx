@@ -48,11 +48,11 @@ export const Students = () => {
 
     // Modal States
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [newStudentData, setNewStudentData] = useState({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true });
+    const [newStudentData, setNewStudentData] = useState<Partial<Student>>({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, username: '', password: '' });
     const [selectedClassId, setSelectedClassId] = useState<number | ''>(''); // For enrollment
 
     const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-    const [editStudentData, setEditStudentData] = useState({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true });
+    const [editStudentData, setEditStudentData] = useState<Partial<Student>>({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, username: '', password: '' });
     const [editClassId, setEditClassId] = useState<number | ''>(''); // Turma atual do aluno no editar
     const [originalClassId, setOriginalClassId] = useState<number | null>(null); // Para detectar mudança
 
@@ -136,7 +136,7 @@ export const Students = () => {
                 await api.post(`/classes/${selectedClassId}/enroll/${res.data.id}`);
             }
             setShowCreateModal(false);
-            setNewStudentData({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true });
+            setNewStudentData({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, username: '', password: '' });
             setSelectedClassId('');
             fetchData();
         } catch (e) { alert('Erro ao criar aluno'); }
@@ -304,7 +304,7 @@ export const Students = () => {
             </div>
 
             {/* Table */}
-            <div className="glass-card overflow-hidden relative h-[calc(100vh-280px)] min-h-[400px] flex flex-col">
+            <div className="glass-card !p-0 overflow-hidden relative h-[calc(100vh-280px)] min-h-[400px] flex flex-col">
                 {isLoading && (
                     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl">
                         <Loading text="Carregando alunos..." />
@@ -312,7 +312,7 @@ export const Students = () => {
                 )}
                 <div className="overflow-x-auto flex-1 overflow-y-auto">
                     <table className="w-full">
-                        <thead className="bg-white/5 sticky top-0 backdrop-blur-xl z-10">
+                        <thead className="bg-bg-dark sticky top-0 z-10 [&_th:first-child]:rounded-none [&_th:last-child]:rounded-none">
                             <tr>
                                 <th
                                     className="text-left p-3 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider cursor-pointer hover:text-white transition-colors group select-none"
@@ -441,7 +441,9 @@ export const Students = () => {
                                                                 school: student.school || '',
                                                                 intended_profession: student.intended_profession || '',
                                                                 class_type: (student.class_type as any) || '',
-                                                                active: student.active ?? true
+                                                                active: student.active ?? true,
+                                                                username: student.username || '',
+                                                                password: '' // Reset password field
                                                             });
                                                             // Buscar turma atual do aluno
                                                             try {
@@ -512,101 +514,122 @@ export const Students = () => {
                         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0 z-10"></div>
                         <button onClick={() => setShowCreateModal(false)} className="absolute top-4 right-4 text-text-muted hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all z-10"><X size={20} /></button>
                         <div className="p-8 overflow-y-auto flex-1">
-                        <h3 className="text-2xl font-bold text-white mb-6">Novo Aluno</h3>
-                        <form onSubmit={handleCreateStudent} className="space-y-4">
-                            <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome Completo</label>
-                                <input className="glass-input"
-                                    value={newStudentData.name} onChange={e => setNewStudentData({ ...newStudentData, name: e.target.value })} required autoFocus />
-                            </div>
-                            <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Celular</label>
-                                <input className="glass-input"
-                                    value={newStudentData.phone}
-                                    onChange={e => setNewStudentData({ ...newStudentData, phone: formatPhone(e.target.value) })}
-                                    maxLength={15}
-                                    placeholder="(99) 99999-9999" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <h3 className="text-2xl font-bold text-white mb-6">Novo Aluno</h3>
+                            <form onSubmit={handleCreateStudent} className="space-y-4">
                                 <div>
-                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Responsável</label>
+                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome Completo</label>
                                     <input className="glass-input"
-                                        value={newStudentData.parent_name} onChange={e => setNewStudentData({ ...newStudentData, parent_name: e.target.value })} />
+                                        value={newStudentData.name} onChange={e => setNewStudentData({ ...newStudentData, name: e.target.value })} required autoFocus />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Cel. Responsável</label>
+                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Celular</label>
                                     <input className="glass-input"
-                                        value={newStudentData.parent_phone}
-                                        onChange={e => setNewStudentData({ ...newStudentData, parent_phone: formatPhone(e.target.value) })}
+                                        value={newStudentData.phone}
+                                        onChange={e => setNewStudentData({ ...newStudentData, phone: formatPhone(e.target.value) })}
                                         maxLength={15}
                                         placeholder="(99) 99999-9999" />
                                 </div>
-                            </div>
-                            <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Email Responsável</label>
-                                <input type="email" className="glass-input"
-                                    value={newStudentData.parent_email} onChange={e => setNewStudentData({ ...newStudentData, parent_email: e.target.value })} />
-                            </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Responsável</label>
+                                        <input className="glass-input"
+                                            value={newStudentData.parent_name} onChange={e => setNewStudentData({ ...newStudentData, parent_name: e.target.value })} />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Cel. Responsável</label>
+                                        <input className="glass-input"
+                                            value={newStudentData.parent_phone}
+                                            onChange={e => setNewStudentData({ ...newStudentData, parent_phone: formatPhone(e.target.value) })}
+                                            maxLength={15}
+                                            placeholder="(99) 99999-9999" />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Email Responsável</label>
+                                    <input type="email" className="glass-input"
+                                        value={newStudentData.parent_email} onChange={e => setNewStudentData({ ...newStudentData, parent_email: e.target.value })} />
+                                </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Ano Escolar</label>
-                                    <input className="glass-input"
-                                        value={newStudentData.school_year} onChange={e => setNewStudentData({ ...newStudentData, school_year: e.target.value })}
-                                        placeholder="Ex: 5º Ano" />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Ano Escolar</label>
+                                        <input className="glass-input"
+                                            value={newStudentData.school_year} onChange={e => setNewStudentData({ ...newStudentData, school_year: e.target.value })}
+                                            placeholder="Ex: 5º Ano" />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Colégio/Escola</label>
+                                        <input className="glass-input"
+                                            value={newStudentData.school} onChange={e => setNewStudentData({ ...newStudentData, school: e.target.value })}
+                                            placeholder="Nome da escola" />
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Colégio/Escola</label>
-                                    <input className="glass-input"
-                                        value={newStudentData.school} onChange={e => setNewStudentData({ ...newStudentData, school: e.target.value })}
-                                        placeholder="Nome da escola" />
-                                </div>
-                            </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Profissão Pretendida</label>
-                                    <input className="glass-input"
-                                        value={newStudentData.intended_profession} onChange={e => setNewStudentData({ ...newStudentData, intended_profession: e.target.value })}
-                                        placeholder="Ex: Engenheiro" />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Profissão Pretendida</label>
+                                        <input className="glass-input"
+                                            value={newStudentData.intended_profession} onChange={e => setNewStudentData({ ...newStudentData, intended_profession: e.target.value })}
+                                            placeholder="Ex: Engenheiro" />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Tipo de Turma</label>
+                                        <select className="glass-input"
+                                            value={newStudentData.class_type} onChange={e => setNewStudentData({ ...newStudentData, class_type: e.target.value as any })}>
+                                            <option value="" className="bg-bg-dark text-white">-- Selecione --</option>
+                                            <option value="Semanal" className="bg-bg-dark text-white">Semanal</option>
+                                            <option value="Quinzenal" className="bg-bg-dark text-white">Quinzenal</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Tipo de Turma</label>
-                                    <select className="glass-input"
-                                        value={newStudentData.class_type} onChange={e => setNewStudentData({ ...newStudentData, class_type: e.target.value as any })}>
-                                        <option value="" className="bg-bg-dark text-white">-- Selecione --</option>
-                                        <option value="Semanal" className="bg-bg-dark text-white">Semanal</option>
-                                        <option value="Quinzenal" className="bg-bg-dark text-white">Quinzenal</option>
+                                <div
+                                    className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10 cursor-pointer hover:bg-white/10 transition-all backdrop-blur-sm"
+                                    onClick={() => setNewStudentData({ ...newStudentData, active: !newStudentData.active })}
+                                >
+                                    <div className={`w-10 h-5 rounded-full relative transition-colors duration-300 ${newStudentData.active ? 'bg-primary' : 'bg-white/10'}`}>
+                                        <div className={`w-3 h-3 rounded-full bg-white absolute top-1 shadow-sm transition-transform duration-300 ${newStudentData.active ? 'translate-x-[22px]' : 'translate-x-1'}`} />
+                                    </div>
+                                    <span className="text-sm font-medium text-white select-none">Aluno Ativo</span>
+                                </div>
+
+                                <div className="pt-2 border-t border-white/10 mt-2">
+                                    <h4 className="text-sm font-bold text-white mb-2">Acesso do Aluno (Opcional)</h4>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Usuário</label>
+                                            <input className="glass-input"
+                                                value={newStudentData.username || ''}
+                                                onChange={e => setNewStudentData({ ...newStudentData, username: e.target.value })}
+                                                placeholder="Login do aluno" />
+                                        </div>
+                                        <div>
+                                            <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Senha</label>
+                                            <input className="glass-input"
+                                                type="password"
+                                                value={newStudentData.password || ''}
+                                                onChange={e => setNewStudentData({ ...newStudentData, password: e.target.value })}
+                                                placeholder="Senha de acesso" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="pt-2 border-t border-white/10 mt-2">
+                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Matricular na Turma (Opcional)</label>
+                                    <select
+                                        className="glass-input"
+                                        value={selectedClassId}
+                                        onChange={e => setSelectedClassId(Number(e.target.value) || '')}
+                                    >
+                                        <option value="" className="bg-bg-dark text-white">-- Selecione uma turma --</option>
+                                        {classes.map(c => <option key={c.id} value={c.id} className="bg-bg-dark text-white">{c.name}</option>)}
                                     </select>
                                 </div>
-                            </div>
-                            <div
-                                className="flex items-center gap-3 bg-white/5 p-3 rounded-xl border border-white/10 cursor-pointer hover:bg-white/10 transition-all backdrop-blur-sm"
-                                onClick={() => setNewStudentData({ ...newStudentData, active: !newStudentData.active })}
-                            >
-                                <div className={`w-10 h-5 rounded-full relative transition-colors duration-300 ${newStudentData.active ? 'bg-primary' : 'bg-white/10'}`}>
-                                    <div className={`w-3 h-3 rounded-full bg-white absolute top-1 shadow-sm transition-transform duration-300 ${newStudentData.active ? 'translate-x-[22px]' : 'translate-x-1'}`} />
+
+                                <div className="flex justify-end gap-3 mt-6">
+                                    <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-text-muted hover:text-white hover:bg-white/10 rounded-xl transition-all">Cancelar</button>
+                                    <button type="submit" className="glass-button text-white px-6 py-2 rounded-xl font-medium">Salvar</button>
                                 </div>
-                                <span className="text-sm font-medium text-white select-none">Aluno Ativo</span>
-                            </div>
-
-                            <div className="pt-2 border-t border-white/10 mt-2">
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Matricular na Turma (Opcional)</label>
-                                <select
-                                    className="glass-input"
-                                    value={selectedClassId}
-                                    onChange={e => setSelectedClassId(Number(e.target.value) || '')}
-                                >
-                                    <option value="" className="bg-bg-dark text-white">-- Selecione uma turma --</option>
-                                    {classes.map(c => <option key={c.id} value={c.id} className="bg-bg-dark text-white">{c.name}</option>)}
-                                </select>
-                            </div>
-
-                            <div className="flex justify-end gap-3 mt-6">
-                                <button type="button" onClick={() => setShowCreateModal(false)} className="px-4 py-2 text-text-muted hover:text-white hover:bg-white/10 rounded-xl transition-all">Cancelar</button>
-                                <button type="submit" className="glass-button text-white px-6 py-2 rounded-xl font-medium">Salvar</button>
-                            </div>
-                        </form>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -615,7 +638,7 @@ export const Students = () => {
             {/* Edit Modal */}
             {editingStudent && (
                 <div className="modal-overlay animate-fade-in">
-                    <div className="glass-modal w-full max-w-lg p-8 animate-slide-up relative overflow-hidden">
+                    <div className="glass-modal w-full max-w-lg p-8 animate-slide-up relative overflow-y-auto max-h-[90vh]">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0"></div>
                         <button onClick={() => setEditingStudent(null)} className="absolute top-4 right-4 text-text-muted hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all"><X size={20} /></button>
                         <h3 className="text-2xl font-bold text-white mb-6">Editar Aluno</h3>
@@ -688,6 +711,27 @@ export const Students = () => {
                             </div>
 
                             <div className="pt-2 border-t border-white/10 mt-2">
+                                <h4 className="text-sm font-bold text-white mb-2">Acesso do Aluno</h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Usuário</label>
+                                        <input className="glass-input"
+                                            value={editStudentData.username || ''}
+                                            onChange={e => setEditStudentData({ ...editStudentData, username: e.target.value })}
+                                            placeholder="Login do aluno" />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nova Senha</label>
+                                        <input className="glass-input"
+                                            type="password"
+                                            value={editStudentData.password || ''}
+                                            onChange={e => setEditStudentData({ ...editStudentData, password: e.target.value })}
+                                            placeholder="Alterar senha (opcional)" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="pt-2 border-t border-white/10 mt-2">
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Turma Matriculada</label>
                                 <select
                                     className="glass-input"
@@ -720,7 +764,7 @@ export const Students = () => {
             {/* Evolution Modal */}
             {viewingEvolution && (
                 <div className="modal-overlay animate-fade-in">
-                    <div className="glass-modal w-full max-w-4xl p-8 animate-slide-up relative overflow-hidden">
+                    <div className="glass-modal w-full max-w-4xl p-8 animate-slide-up relative overflow-y-auto max-h-[90vh]">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/0 via-purple-500 to-purple-500/0"></div>
                         <button onClick={() => setViewingEvolution(null)} className="absolute top-4 right-4 text-text-muted hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all"><X size={20} /></button>
 
@@ -785,7 +829,7 @@ export const Students = () => {
             {/* Delete Modal */}
             {deletingStudent && (
                 <div className="modal-overlay animate-fade-in">
-                    <div className="glass-modal w-full max-w-sm p-6 relative animate-slide-up overflow-hidden">
+                    <div className="glass-modal w-full max-w-sm p-6 relative animate-slide-up overflow-y-auto max-h-[90vh]">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-danger/0 via-danger to-danger/0"></div>
                         <div className="flex flex-col items-center text-center pt-2">
                             <div className="w-14 h-14 rounded-2xl bg-danger/20 flex items-center justify-center mb-4 text-danger border border-danger/30"><AlertTriangle size={28} /></div>

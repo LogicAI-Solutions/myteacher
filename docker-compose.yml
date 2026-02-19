@@ -1,14 +1,14 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: teacher_app_db
+    container_name: myteacher_db
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - myteacher_data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
@@ -19,7 +19,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    container_name: teacher_app_backend
+    container_name: myteacher_backend
     restart: always
     depends_on:
       db:
@@ -40,7 +40,7 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-    container_name: teacher_app_frontend
+    container_name: myteacher_frontend
     restart: always
     depends_on:
       - backend
@@ -56,7 +56,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: teacher_app_pgadmin
+    container_name: myteacher_pgadmin
     restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
@@ -69,4 +69,4 @@ services:
       - tools
 
 volumes:
-  postgres_data:
+  myteacher_data:
