@@ -1,7 +1,6 @@
-import React from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
-import { LogOut, GraduationCap, LayoutDashboard, LineChart, UserCircle } from 'lucide-react';
+import { LogOut, GraduationCap, LayoutDashboard, UserCircle } from 'lucide-react';
 
 export const StudentLayout = () => {
     const { logout, student } = useStudentAuth();

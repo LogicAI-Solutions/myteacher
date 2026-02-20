@@ -18,6 +18,8 @@ interface Student {
     intended_profession?: string;
     class_type?: string;
     active: boolean;
+    username?: string;
+    password?: string;
 }
 
 interface EvolutionPoint {

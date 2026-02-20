@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, ArrowRight, CheckCircle, BarChart3, Users, DollarSign, CalendarCheck, MessageCircle, Shield, Play } from 'lucide-react';
+import { GraduationCap, ArrowRight, CheckCircle, BarChart3, Users, DollarSign, CalendarCheck, MessageCircle, Shield } from 'lucide-react';
 import teacherIllustration from '../assets/teacher_login_illustration.png';
 
 export const Landing = () => {
@@ -224,7 +224,7 @@ export const Landing = () => {
 const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
     <div className="glass-card p-6 hover:bg-white/5 transition-all group cursor-default hover:-translate-y-1 duration-300 border border-white/5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
         <div className="mb-4 p-3 rounded-xl bg-primary/10 w-fit text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300 shadow-inner">
-            {React.cloneElement(icon as React.ReactElement, { size: 24 })}
+            {React.cloneElement(icon as React.ReactElement<any>, { size: 24 })}
         </div>
         <h3 className="text-lg font-bold mb-2 text-white group-hover:text-primary-light transition-colors">{title}</h3>
         <p className="text-text-muted text-sm leading-relaxed">{description}</p>
