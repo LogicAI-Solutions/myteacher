@@ -3,7 +3,7 @@
 services:
   db:
     image: postgres:15-alpine
-    container_name: teacher_app_db
+    container_name: myteacher_db
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
@@ -23,7 +23,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile.prod
-    container_name: teacher_app_backend
+    container_name: myteacher_backend
     restart: always
     depends_on:
       db:
@@ -48,7 +48,7 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile.prod
-    container_name: teacher_app_frontend
+    container_name: myteacher_frontend
     restart: always
     depends_on:
       backend:
@@ -65,7 +65,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: teacher_app_pgadmin
+    container_name: myteacher_pgadmin
     restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
