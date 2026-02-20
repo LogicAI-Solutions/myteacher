@@ -5,7 +5,7 @@ from backend.models import users as user_models, students, classes, enrollments,
 
 def seed_varied_attendance():
     db = database.SessionLocal()
-    email = "yana@redacao.com"
+    email = "[EMAIL_ADDRESS]"
     
     # 1. Get User
     user = db.query(user_models.User).filter(user_models.User.email == email).first()

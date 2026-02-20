@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5273,
-    allowedHosts: ['redacaoyana.com.br'],
+    allowedHosts: ['myteacherapp.com.br', 'www.myteacherapp.com.br'],
     proxy: {
       '/api': {
         target: 'http://backend:8501',
