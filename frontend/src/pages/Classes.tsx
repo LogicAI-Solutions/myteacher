@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import { Plus, Calendar, Pencil, Trash, X, AlertTriangle, GripVertical, ArrowUpDown } from 'lucide-react';
+import { Plus, Calendar, Pencil, Trash, X, AlertTriangle, GripVertical, ArrowUpDown, BookOpen, Users, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Loading } from '../components/Loading';
 import {
@@ -26,6 +26,8 @@ interface ClassModel {
     name: string;
     schedule: string;
     display_order?: number;
+    student_count?: number;
+    session_count?: number;
 }
 
 interface SortableClassCardProps {
@@ -35,6 +37,16 @@ interface SortableClassCardProps {
     openEditModal: (e: React.MouseEvent, cls: ClassModel) => void;
     openDeleteModal: (e: React.MouseEvent, cls: ClassModel) => void;
 }
+
+// Palette of accent colors for cards
+const cardAccents = [
+    { bg: 'bg-primary/15', border: 'border-primary/20', text: 'text-primary', glow: 'shadow-primary/10' },
+    { bg: 'bg-indigo-500/15', border: 'border-indigo-500/20', text: 'text-indigo-400', glow: 'shadow-indigo-500/10' },
+    { bg: 'bg-violet-500/15', border: 'border-violet-500/20', text: 'text-violet-400', glow: 'shadow-violet-500/10' },
+    { bg: 'bg-cyan-500/15', border: 'border-cyan-500/20', text: 'text-cyan-400', glow: 'shadow-cyan-500/10' },
+    { bg: 'bg-emerald-500/15', border: 'border-emerald-500/20', text: 'text-emerald-400', glow: 'shadow-emerald-500/10' },
+    { bg: 'bg-amber-500/15', border: 'border-amber-500/20', text: 'text-amber-400', glow: 'shadow-amber-500/10' },
+];
 
 const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDeleteModal }: SortableClassCardProps) => {
     const {
@@ -46,48 +58,72 @@ const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDelet
         isDragging,
     } = useSortable({ id: cls.id });
 
+    const accent = cardAccents[index % cardAccents.length];
+
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        animationDelay: `${index * 100}ms`,
+        animationDelay: `${index * 80}ms`,
         zIndex: isDragging ? 50 : 'auto',
-        opacity: isDragging ? 0.8 : 1,
+        opacity: isDragging ? 0.85 : 1,
     };
 
     const cardContent = (
         <>
-            {/* Gradient accent line */}
-            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            {/* Top gradient accent line */}
+            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-            <div className="flex justify-between items-start p-6">
-                <div className="flex items-start gap-3">
-                    {isReorderMode && (
-                        <div
-                            {...attributes}
-                            {...listeners}
-                            style={{ touchAction: 'none' }}
-                            className="cursor-grab active:cursor-grabbing p-1 -ml-1 text-text-muted hover:text-primary transition-colors"
-                        >
-                            <GripVertical size={20} />
+            <div className="p-6">
+                {/* Header: Icon + Actions */}
+                <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-start gap-3">
+                        {isReorderMode && (
+                            <div
+                                {...attributes}
+                                {...listeners}
+                                style={{ touchAction: 'none' }}
+                                className="cursor-grab active:cursor-grabbing p-1 -ml-1 mt-1 text-text-muted hover:text-primary transition-colors"
+                            >
+                                <GripVertical size={20} />
+                            </div>
+                        )}
+                        <div className={`p-2.5 rounded-xl ${accent.bg} ${accent.border} border shadow-lg ${accent.glow}`}>
+                            <BookOpen size={22} className={accent.text} />
+                        </div>
+                    </div>
+                    {!isReorderMode && (
+                        <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
+                            <button onClick={(e) => openEditModal(e, cls)} className="bg-white/5 backdrop-blur-sm p-2 rounded-lg hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-200 border border-white/5 hover:border-primary/30">
+                                <Pencil size={15} />
+                            </button>
+                            <button onClick={(e) => openDeleteModal(e, cls)} className="bg-white/5 backdrop-blur-sm p-2 rounded-lg hover:bg-danger/20 text-text-muted hover:text-danger transition-all duration-200 border border-white/5 hover:border-danger/30">
+                                <Trash size={15} />
+                            </button>
                         </div>
                     )}
-                    <div>
-                        <h3 className="text-xl font-bold mb-2 text-text-main group-hover:text-gradient transition-all duration-300">{cls.name}</h3>
-                        <p className="text-text-muted text-sm flex items-center gap-2">
-                            <Calendar size={14} className="text-primary" /> {cls.schedule}
-                        </p>
+                </div>
+
+                {/* Title */}
+                <h3 className="text-lg font-bold text-text-main group-hover:text-white transition-colors duration-300 mb-1 leading-tight">
+                    {cls.name}
+                </h3>
+
+                {/* Schedule */}
+                <p className="text-text-muted text-sm flex items-center gap-1.5 mb-4">
+                    <Clock size={13} className="text-text-muted/60" /> {cls.schedule}
+                </p>
+
+                {/* Bottom stats bar */}
+                <div className="flex items-center gap-4 pt-3 border-t border-white/5">
+                    <div className="flex items-center gap-1.5 text-xs text-text-muted">
+                        <Users size={13} className={accent.text} />
+                        <span>{cls.student_count ?? '—'} alunos</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-text-muted">
+                        <Calendar size={13} className={accent.text} />
+                        <span>{cls.session_count ?? '—'} aulas</span>
                     </div>
                 </div>
-                {!isReorderMode && (
-                    <div className="flex gap-2">
-                        <button onClick={(e) => openEditModal(e, cls)} className="bg-white/5 backdrop-blur-sm p-2 rounded-xl hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-300 border border-white/5 hover:border-primary/30">
-                            <Pencil size={18} />
-                        </button>
-                        <button onClick={(e) => openDeleteModal(e, cls)} className="bg-white/5 backdrop-blur-sm p-2 rounded-xl hover:bg-danger/20 text-text-muted hover:text-danger transition-all duration-300 border border-white/5 hover:border-danger/30">
-                            <Trash size={18} />
-                        </button>
-                    </div>
-                )}
             </div>
         </>
     );
@@ -97,7 +133,7 @@ const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDelet
             <div
                 ref={setNodeRef}
                 style={style}
-                className={`glass-card group transition-all duration-300 relative overflow-hidden ${isDragging ? 'ring-2 ring-primary shadow-lg shadow-primary/20' : 'hover:translate-y-[-5px]'}`}
+                className={`glass-card group transition-all duration-300 relative overflow-hidden ${isDragging ? 'ring-2 ring-primary shadow-xl shadow-primary/20 scale-[1.02]' : 'hover:translate-y-[-4px]'}`}
             >
                 {cardContent}
             </div>
@@ -109,7 +145,7 @@ const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDelet
             ref={setNodeRef}
             style={style}
             to={`/dashboard/class/${cls.id}`}
-            className={`glass-card group hover:translate-y-[-5px] transition-all duration-300 block no-underline text-inherit relative overflow-hidden ${isReorderMode ? 'animate-jiggle cursor-grab active:cursor-grabbing pointer-events-none' : ''}`}
+            className={`glass-card group hover:translate-y-[-4px] hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 block no-underline text-inherit relative overflow-hidden animate-slide-up ${isReorderMode ? 'animate-jiggle cursor-grab active:cursor-grabbing pointer-events-none' : ''}`}
         >
             {cardContent}
         </Link>
@@ -146,7 +182,25 @@ export const Classes = () => {
         setIsLoading(true);
         try {
             const res = await api.get('/classes/');
-            setClasses(res.data);
+            // Fetch student and session counts per class
+            const classesWithCounts = await Promise.all(
+                res.data.map(async (cls: ClassModel) => {
+                    try {
+                        const [studentsRes, sessionsRes] = await Promise.all([
+                            api.get(`/classes/${cls.id}/students`),
+                            api.get(`/classes/${cls.id}/attendance`)
+                        ]);
+                        return {
+                            ...cls,
+                            student_count: studentsRes.data?.length ?? 0,
+                            session_count: sessionsRes.data?.length ?? 0
+                        };
+                    } catch {
+                        return { ...cls, student_count: 0, session_count: 0 };
+                    }
+                })
+            );
+            setClasses(classesWithCounts);
         } catch (error) {
             console.error(error);
         } finally {
@@ -249,10 +303,18 @@ export const Classes = () => {
 
     return (
         <div>
+            {/* Header */}
             <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
-                    Minhas Turmas
-                </h2>
+                <div>
+                    <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
+                        Minhas Turmas
+                    </h2>
+                    {!isLoading && classes.length > 0 && (
+                        <p className="text-text-muted text-sm mt-1">
+                            {classes.length} {classes.length === 1 ? 'turma cadastrada' : 'turmas cadastradas'}
+                        </p>
+                    )}
+                </div>
                 {classes.length > 1 && (
                     <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                         {!isReorderMode ? (
@@ -295,7 +357,7 @@ export const Classes = () => {
                     <Loading text="Carregando turmas..." />
                 </div>
             ) : (
-                <div className="animate-slide-up space-y-8">
+                <div className="animate-fade-in space-y-8">
                     {isReorderMode && (
                         <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center">
                             <p className="text-primary text-sm">
@@ -310,7 +372,7 @@ export const Classes = () => {
                         onDragEnd={handleDragEnd}
                     >
                         <SortableContext items={classes.map(c => c.id)} strategy={rectSortingStrategy}>
-                            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
                                 {classes.map((cls, index) => (
                                     <SortableClassCard
                                         key={cls.id}
@@ -326,12 +388,13 @@ export const Classes = () => {
                                 {!isReorderMode && (
                                     <button
                                         onClick={() => setShowModal(true)}
-                                        className="glass-card flex flex-col items-center justify-center gap-4 group hover:bg-white/10 transition-all border-dashed border-2 border-white/10 hover:border-primary/50 cursor-pointer min-h-[150px]"
+                                        className="glass-card flex flex-col items-center justify-center gap-4 group hover:bg-white/5 transition-all duration-300 border-dashed border-2 border-white/10 hover:border-primary/40 cursor-pointer min-h-[200px] animate-slide-up"
+                                        style={{ animationDelay: `${classes.length * 80}ms` }}
                                     >
-                                        <div className="bg-primary/10 p-4 rounded-full group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300 border border-primary/20">
-                                            <Plus size={32} className="text-primary" />
+                                        <div className="bg-primary/10 p-4 rounded-2xl group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300 border border-primary/20 shadow-lg shadow-primary/5">
+                                            <Plus size={28} className="text-primary" />
                                         </div>
-                                        <span className="font-medium text-text-muted group-hover:text-white transition-colors">Criar Nova Turma</span>
+                                        <span className="font-medium text-text-muted group-hover:text-white transition-colors text-sm">Criar Nova Turma</span>
                                     </button>
                                 )}
                             </div>
@@ -346,12 +409,20 @@ export const Classes = () => {
                 </div>
             )}
 
-            {/* Modern Modal */}
+            {/* Create Class Modal */}
             {showModal && (
                 <div className="modal-overlay animate-fade-in">
                     <div className="glass-modal w-full max-w-md p-8 animate-slide-up relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0"></div>
-                        <h3 className="text-2xl mb-6 font-bold text-white">Nova Turma</h3>
+                        <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 text-text-muted hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all">
+                            <X size={20} />
+                        </button>
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/20">
+                                <Plus size={20} className="text-primary" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-white">Nova Turma</h3>
+                        </div>
                         <form onSubmit={handleCreateClass} className="flex flex-col gap-5">
                             <div className="space-y-1">
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome da Turma</label>
@@ -361,24 +432,29 @@ export const Classes = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Horário</label>
                                 <input className="glass-input" value={newClass.schedule} onChange={e => setNewClass({ ...newClass, schedule: e.target.value })} required placeholder="Ex: Segundas e Quartas, 19h" />
                             </div>
-                            <div className="flex justify-end gap-3 mt-4">
-                                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 text-text-muted hover:text-white hover:bg-white/10 rounded-xl transition-all">Cancelar</button>
-                                <button type="submit" className="glass-button px-6 py-2 text-white rounded-xl font-medium">Criar Turma</button>
+                            <div className="flex justify-end gap-3 mt-2">
+                                <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 text-text-muted hover:text-white hover:bg-white/10 rounded-xl transition-all font-medium">Cancelar</button>
+                                <button type="submit" className="btn-primary-gradient px-6 py-2.5 text-white rounded-xl font-medium shadow-lg shadow-primary/20">Criar Turma</button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
+
             {/* Edit Class Modal */}
             {editingClass && (
                 <div className="modal-overlay animate-fade-in">
                     <div className="glass-modal w-full max-w-md p-8 animate-slide-up relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0"></div>
                         <button onClick={() => setEditingClass(null)} className="absolute top-4 right-4 text-text-muted hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all">
                             <X size={20} />
                         </button>
-                        <h3 className="text-2xl mb-6 font-bold text-white flex items-center gap-2">
-                            <Pencil size={24} className="text-primary" /> Editar Turma
-                        </h3>
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/20">
+                                <Pencil size={20} className="text-primary" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-white">Editar Turma</h3>
+                        </div>
                         <form onSubmit={handleUpdateClass} className="flex flex-col gap-5">
                             <div className="space-y-1">
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome da Turma</label>
@@ -388,9 +464,9 @@ export const Classes = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Horário</label>
                                 <input className="glass-input" value={editClassSchedule} onChange={e => setEditClassSchedule(e.target.value)} required />
                             </div>
-                            <div className="flex justify-end gap-3 mt-4">
-                                <button type="button" onClick={() => setEditingClass(null)} className="px-4 py-2 text-text-muted hover:text-white hover:bg-white/10 rounded-xl transition-all">Cancelar</button>
-                                <button type="submit" className="glass-button px-6 py-2 text-white rounded-xl font-medium">Salvar</button>
+                            <div className="flex justify-end gap-3 mt-2">
+                                <button type="button" onClick={() => setEditingClass(null)} className="px-5 py-2.5 text-text-muted hover:text-white hover:bg-white/10 rounded-xl transition-all font-medium">Cancelar</button>
+                                <button type="submit" className="btn-primary-gradient px-6 py-2.5 text-white rounded-xl font-medium shadow-lg shadow-primary/20">Salvar</button>
                             </div>
                         </form>
                     </div>
@@ -403,7 +479,7 @@ export const Classes = () => {
                     <div className="glass-modal w-full max-w-sm p-6 relative animate-slide-up overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-danger/0 via-danger to-danger/0"></div>
                         <div className="flex flex-col items-center text-center pt-2">
-                            <div className="w-14 h-14 rounded-2xl bg-danger/20 flex items-center justify-center mb-4 text-danger border border-danger/30">
+                            <div className="w-14 h-14 rounded-2xl bg-danger/20 flex items-center justify-center mb-4 text-danger border border-danger/30 shadow-lg shadow-danger/10">
                                 <AlertTriangle size={28} />
                             </div>
                             <h3 className="text-xl font-bold text-white mb-2">Excluir Turma?</h3>
@@ -411,8 +487,8 @@ export const Classes = () => {
                                 Tem certeza que deseja excluir <strong className="text-white">{deletingClass.name}</strong>? Esta ação removerá todos os alunos e chamadas associados.
                             </p>
                             <div className="flex gap-3 w-full">
-                                <button onClick={() => setDeletingClass(null)} className="flex-1 py-2 text-text-muted hover:bg-white/10 transition-all rounded-xl">Cancelar</button>
-                                <button onClick={handleDeleteClass} className="flex-1 py-2 bg-danger/90 hover:bg-danger text-white rounded-xl shadow-lg shadow-danger/30 transition-all font-medium">Excluir</button>
+                                <button onClick={() => setDeletingClass(null)} className="flex-1 py-2.5 text-text-muted hover:bg-white/10 transition-all rounded-xl font-medium">Cancelar</button>
+                                <button onClick={handleDeleteClass} className="flex-1 py-2.5 bg-danger/90 hover:bg-danger text-white rounded-xl shadow-lg shadow-danger/30 transition-all font-medium">Excluir</button>
                             </div>
                         </div>
                     </div>

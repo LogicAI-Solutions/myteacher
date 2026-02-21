@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
-import { Plus, Save, Calendar, Users, X, FileText, Pencil, Trash2, AlertTriangle, Eye, Download } from 'lucide-react';
+import { Plus, Save, Calendar, Users, X, FileText, Pencil, Trash2, AlertTriangle, Eye, Download, BookOpen, ClipboardList, History, ArrowLeft, DollarSign, GraduationCap } from 'lucide-react';
 import { formatPhone, unmaskPhone, formatCurrency, parseCurrency } from '../utils/masks';
 import { Loading } from '../components/Loading';
 import { ManageStudentsModal } from '../components/ManageStudentsModal';
@@ -540,6 +540,8 @@ export const ClassDetails = () => {
         </div>
     );
 
+    const activeStudents = students.filter((s: Student) => s.active !== false);
+
     return (
         <div>
             {/* Toast Notification */}
@@ -561,24 +563,59 @@ export const ClassDetails = () => {
                 </div>
             )}
 
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4 animate-fade-in">
-                <div>
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-text-muted">{classData.name}</h1>
-                    <p className="text-primary-light flex items-center gap-2 mt-2 font-medium bg-primary/10 w-fit px-3 py-1 rounded-full text-sm">
-                        <Calendar size={14} /> {classData.schedule}
-                    </p>
+            {/* Header */}
+            <div className="mb-8 animate-fade-in">
+                <button onClick={() => navigate('/dashboard/classes')} className="text-text-muted hover:text-white flex items-center gap-1.5 text-sm mb-4 transition-colors group">
+                    <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Voltar para Turmas
+                </button>
+
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
+                    <div>
+                        <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">{classData.name}</h1>
+                        <p className="text-primary-light flex items-center gap-2 mt-2 font-medium bg-primary/10 w-fit px-3 py-1.5 rounded-full text-sm border border-primary/20">
+                            <Calendar size={14} /> {classData.schedule}
+                        </p>
+                    </div>
+
+                    {/* Stats Cards */}
+                    <div className="flex gap-3 w-full lg:w-auto">
+                        <div className="glass-card p-3 px-4 flex items-center gap-3 flex-1 lg:flex-none border border-white/5">
+                            <div className="bg-primary/15 p-2 rounded-lg border border-primary/20">
+                                <Users size={18} className="text-primary" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] text-text-muted uppercase tracking-wider">Alunos</p>
+                                <p className="text-lg font-bold text-white">{activeStudents.length}</p>
+                            </div>
+                        </div>
+                        <div className="glass-card p-3 px-4 flex items-center gap-3 flex-1 lg:flex-none border border-white/5">
+                            <div className="bg-indigo-500/15 p-2 rounded-lg border border-indigo-500/20">
+                                <BookOpen size={18} className="text-indigo-400" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] text-text-muted uppercase tracking-wider">Aulas</p>
+                                <p className="text-lg font-bold text-white">{sessions.length}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div className="bg-bg-card/50 p-1 rounded-lg flex gap-1 w-full md:w-auto overflow-x-auto">
-                    {['attendance', 'history'].map((tab) => (
+
+                {/* Tabs */}
+                <div className="mt-6 bg-bg-card/50 p-1 rounded-xl flex gap-1 w-full md:w-fit overflow-x-auto border border-white/5">
+                    {[
+                        { key: 'attendance', label: 'Chamada', icon: <ClipboardList size={16} /> },
+                        { key: 'history', label: 'Histórico', icon: <History size={16} /> },
+                    ].map(({ key, label, icon }) => (
                         <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab as any)}
-                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 capitalize flex-1 md:flex-none text-center ${activeTab === tab
+                            key={key}
+                            onClick={() => setActiveTab(key as any)}
+                            className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 flex-1 md:flex-none justify-center ${activeTab === key
                                 ? 'bg-primary text-white shadow-lg shadow-primary/25'
                                 : 'text-text-muted hover:text-white hover:bg-white/5'
                                 }`}
                         >
-                            {tab === 'attendance' ? 'Chamada' : 'Histórico'}
+                            {icon}
+                            {label}
                         </button>
                     ))}
                 </div>
@@ -586,66 +623,82 @@ export const ClassDetails = () => {
 
             <div className="animate-slide-up">
                 {activeTab === 'students' && (
-                    <div className="glass-card">
-                        <div className="flex flex-col sm:flex-row justify-between mb-6 gap-4 border-b border-white/5 pb-4">
-                            <h2 className="text-xl font-bold flex items-center gap-2"><Users className="text-primary" size={20} /> Alunos Matriculados <span className="bg-bg-dark px-2 py-0.5 rounded-full text-xs text-text-muted">{students.length}</span></h2>
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                <button onClick={loadAllStudents} className="btn btn-outline"><Users size={16} /> Gerenciar Alunos</button>
-                                <button onClick={() => setShowCreateStudentModal(true)} className="btn btn-primary shadow-lg shadow-primary/20"><Plus size={16} /> Novo Aluno</button>
+                    <div className="glass-card p-5 sm:p-6 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-indigo-500 to-transparent"></div>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-white/5 pb-4 gap-3">
+                            <h2 className="text-xl font-bold flex items-center gap-3 text-white">
+                                <div className="bg-indigo-500/15 p-2 rounded-lg border border-indigo-500/20">
+                                    <GraduationCap size={20} className="text-indigo-400" />
+                                </div>
+                                Alunos Matriculados
+                                <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-full border border-primary/20">{students.length}</span>
+                            </h2>
+                            <div className="flex items-center gap-3">
+                                <button onClick={loadAllStudents} className="btn btn-outline"><Users size={16} /> Gerenciar</button>
+                                <button onClick={() => setShowCreateStudentModal(true)} className="btn btn-primary-gradient flex items-center gap-2"><Plus size={16} /> Novo Aluno</button>
                             </div>
                         </div>
-                        <div className="table-container bg-transparent border-none">
-                            <table className="w-full">
-                                <thead>
-                                    <tr className="border-b border-white/10">
-                                        <th className="text-left p-4 text-text-muted font-semibold uppercase text-xs tracking-wider">Nome do Aluno</th>
-                                        <th className="text-left p-4 text-text-muted font-semibold uppercase text-xs tracking-wider">Matrícula</th>
-                                        <th className="text-right p-4 text-text-muted font-semibold uppercase text-xs tracking-wider">Ações</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {students.map(s => (
-                                        <tr key={s.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                            <td className="p-4 font-medium text-text-main">{s.name}</td>
-                                            <td className="p-4 text-text-muted text-sm">#{s.id.toString().padStart(4, '0')}</td>
-                                            <td className="p-4 flex gap-2 justify-end">
-                                                <button onClick={() => handleGenerateReport(s.id)} className="p-2 hover:bg-primary/20 text-text-muted hover:text-primary rounded-lg transition-colors" title="Gerar Relatório Individual">
-                                                    <FileText size={16} />
-                                                </button>
-                                                <button onClick={() => {
-                                                    setEditingStudent(s);
-                                                    setEditStudentData({
-                                                        name: s.name,
-                                                        phone: s.phone || '',
-                                                        parent_name: s.parent_name || '',
-                                                        parent_phone: s.parent_phone || '',
-                                                        parent_email: s.parent_email || ''
-                                                    });
-                                                }} className="p-2 hover:bg-white/10 text-text-muted hover:text-white rounded-lg transition-colors" title="Editar">
-                                                    <Pencil size={16} />
-                                                </button>
-                                                <button onClick={() => setDeletingStudent(s)} className="p-2 hover:bg-danger/20 text-text-muted hover:text-danger rounded-lg transition-colors" title="Excluir">
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {students.length === 0 && (
-                                        <tr>
-                                            <td colSpan={3} className="p-8 text-center text-text-muted italic">Nenhum aluno matriculado nesta turma.</td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                        <div className="space-y-2">
+                            {students.map((s: Student) => (
+                                <div key={s.id} className="flex items-center justify-between p-3.5 rounded-xl bg-bg-dark/30 border border-white/5 hover:border-primary/20 transition-all group hover:bg-bg-dark/50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-indigo-500/20 flex items-center justify-center border border-white/10 shrink-0">
+                                            <span className="text-sm font-bold text-primary-light">{s.name.charAt(0).toUpperCase()}</span>
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-white text-sm group-hover:text-primary-light transition-colors">{s.name}</p>
+                                            <p className="text-xs text-text-muted flex items-center gap-1">
+                                                <span className={`w-1.5 h-1.5 rounded-full ${s.active !== false ? 'bg-success' : 'bg-text-muted/50'}`}></span>
+                                                {s.active !== false ? 'Ativo' : 'Inativo'}
+                                                <span className="mx-1 opacity-30">•</span>
+                                                #{s.id.toString().padStart(4, '0')}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
+                                        <button onClick={() => handleGenerateReport(s.id)} className="p-2 hover:bg-primary/20 text-text-muted hover:text-primary rounded-lg transition-colors" title="Relatório">
+                                            <FileText size={15} />
+                                        </button>
+                                        <button onClick={() => {
+                                            setEditingStudent(s);
+                                            setEditStudentData({
+                                                name: s.name,
+                                                phone: s.phone || '',
+                                                parent_name: s.parent_name || '',
+                                                parent_phone: s.parent_phone || '',
+                                                parent_email: s.parent_email || ''
+                                            });
+                                        }} className="p-2 hover:bg-white/10 text-text-muted hover:text-white rounded-lg transition-colors" title="Editar">
+                                            <Pencil size={15} />
+                                        </button>
+                                        <button onClick={() => setDeletingStudent(s)} className="p-2 hover:bg-danger/20 text-text-muted hover:text-danger rounded-lg transition-colors" title="Excluir">
+                                            <Trash2 size={15} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                            {students.length === 0 && (
+                                <div className="p-12 text-center">
+                                    <div className="bg-white/5 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10">
+                                        <GraduationCap size={28} className="text-text-muted/50" />
+                                    </div>
+                                    <p className="text-text-muted text-lg font-medium">Nenhum aluno matriculado</p>
+                                    <p className="text-text-muted/60 text-sm mt-1">Clique em "Novo Aluno" para começar.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 )}
 
                 {activeTab === 'attendance' && (
-                    <div className="glass-card p-4">
-                        <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
-                            <h2 className="text-xl font-bold flex items-center gap-2 text-white">
-                                <span className="w-2 h-8 bg-primary rounded-full"></span> Nova Chamada
+                    <div className="glass-card p-5 sm:p-6 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent"></div>
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-white/5 pb-4 gap-3">
+                            <h2 className="text-xl font-bold flex items-center gap-3 text-white">
+                                <div className="bg-primary/15 p-2 rounded-lg border border-primary/20">
+                                    <ClipboardList size={20} className="text-primary" />
+                                </div>
+                                {editingSessionId ? 'Editando Chamada' : 'Nova Chamada'}
                             </h2>
                             <div className="flex items-center gap-3">
                                 <button onClick={loadAllStudents} className="btn btn-outline">
@@ -764,20 +817,33 @@ export const ClassDetails = () => {
             </div>
 
             {activeTab === 'history' && (
-                <div className="grid gap-4">
+                <div className="space-y-3 animate-fade-in">
+                    {sessions.length > 0 && (
+                        <div className="flex items-center gap-2 mb-2">
+                            <History size={16} className="text-text-muted" />
+                            <span className="text-sm text-text-muted">{sessions.length} {sessions.length === 1 ? 'chamada registrada' : 'chamadas registradas'}</span>
+                        </div>
+                    )}
                     {sessions
                         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
                         .map((sess, index) => {
                             const dynamicLabel = `Aula ${String(index + 1).padStart(2, '0')}`;
                             const displayTitle = sess.description?.match(/^Aula \d+$/) ? dynamicLabel : sess.description;
                             return (
-                                <div key={sess.id} className="glass-card p-4 hover:border-primary/30 transition-colors">
+                                <div key={sess.id} className="glass-card p-4 hover:border-primary/30 transition-all duration-300 group hover:translate-y-[-2px] hover:shadow-lg hover:shadow-primary/5">
                                     <div className="flex justify-between items-center">
-                                        <div>
-                                            <h3 className="font-bold text-white text-lg">{displayTitle}</h3>
-                                            <p className="text-text-muted text-sm">{sess.date}</p>
+                                        <div className="flex items-center gap-4">
+                                            <div className="bg-primary/10 w-12 h-12 rounded-xl flex items-center justify-center border border-primary/20 shrink-0">
+                                                <span className="text-primary font-bold text-sm">{String(index + 1).padStart(2, '0')}</span>
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-white text-base group-hover:text-primary-light transition-colors">{displayTitle}</h3>
+                                                <p className="text-text-muted text-sm flex items-center gap-1.5">
+                                                    <Calendar size={12} /> {new Date(sess.date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <button onClick={() => handleViewSession(sess.id)} disabled={loadingSession} className="text-primary hover:text-white cursor-pointer transition-colors px-3 py-1 bg-white/5 rounded-lg text-sm flex items-center gap-2">
+                                        <button onClick={() => handleViewSession(sess.id)} disabled={loadingSession} className="text-primary hover:text-white cursor-pointer transition-all px-4 py-2 bg-white/5 hover:bg-primary/20 rounded-xl text-sm flex items-center gap-2 border border-white/5 hover:border-primary/30 font-medium">
                                             <Eye size={16} /> Ver Detalhes
                                         </button>
                                     </div>
@@ -785,26 +851,34 @@ export const ClassDetails = () => {
                             );
                         })}
                     {sessions.length === 0 && (
-                        <div className="glass-card p-8 text-center text-text-muted italic">
-                            Nenhuma chamada registrada até o momento.
+                        <div className="glass-card p-12 text-center">
+                            <div className="bg-white/5 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10">
+                                <ClipboardList size={28} className="text-text-muted/50" />
+                            </div>
+                            <p className="text-text-muted text-lg font-medium">Nenhuma chamada registrada</p>
+                            <p className="text-text-muted/60 text-sm mt-1">Crie uma chamada na aba "Chamada" para começar.</p>
                         </div>
                     )}
                 </div>
             )}
 
             {activeTab === 'payments' && (
-                <div className="glass-card">
-                    <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4">
-                        <h2 className="text-xl font-bold flex items-center gap-2 text-white">
-                            <span className="w-2 h-8 bg-success rounded-full"></span> Mensalidades
+                <div className="glass-card p-5 sm:p-6 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent"></div>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-white/5 pb-4 gap-3">
+                        <h2 className="text-xl font-bold flex items-center gap-3 text-white">
+                            <div className="bg-emerald-500/15 p-2 rounded-lg border border-emerald-500/20">
+                                <DollarSign size={20} className="text-emerald-400" />
+                            </div>
+                            Mensalidades
                         </h2>
                         <div className="flex gap-2">
-                            <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="bg-bg-dark border border-white/10 rounded-lg px-3 py-1 text-white">
+                            <select value={selectedMonth} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedMonth(Number(e.target.value))} className="bg-bg-dark/50 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer">
                                 {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
                                     <option key={m} value={m} className="bg-bg-dark text-white">{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'long' })}</option>
                                 ))}
                             </select>
-                            <select value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="bg-bg-dark border border-white/10 rounded-lg px-3 py-1 text-white">
+                            <select value={selectedYear} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedYear(Number(e.target.value))} className="bg-bg-dark/50 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer">
                                 {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
                                     <option key={y} value={y} className="bg-bg-dark text-white">{y}</option>
                                 ))}
@@ -812,80 +886,79 @@ export const ClassDetails = () => {
                         </div>
                     </div>
 
-                    <div className="table-container bg-transparent border-none">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="border-b border-white/10">
-                                    <th className="text-left p-4 text-xs font-bold text-text-muted uppercase tracking-wider w-[200px]">Status</th>
-                                    <th className="text-left p-4 text-xs font-bold text-text-muted uppercase tracking-wider w-[200px]">Valor Pago</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {students.map(s => {
-                                    const payment = localPayments[s.id] || { status: 'PENDING', amount: 0, student_id: s.id };
-                                    const isPaid = payment.status === 'PAID';
-                                    return (
-                                        <tr key={s.id} className="hover:bg-white/5 transition-colors group">
-                                            <td className="p-4 font-medium text-white">{s.name}</td>
-                                            <td className="p-4 text-text-muted text-sm">
-                                                <div className="flex flex-col">
-                                                    <span>{s.parent_name || '-'}</span>
-                                                    <span className="text-xs opacity-50">{s.parent_phone}</span>
-                                                </div>
-                                            </td>
-                                            <td className="p-4">
-                                                <select
-                                                    className={`w-full p-2 rounded-lg text-sm border-none focus:ring-2 focus:ring-primary outline-none transition-colors cursor-pointer ${isPaid ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'}`}
-                                                    value={payment.status}
-                                                    onChange={e => updateLocalPayment(s.id, 'status', e.target.value)}
-                                                >
-                                                    <option value="PENDING" className="bg-bg-card text-white">Pendente</option>
-                                                    <option value="PAID" className="bg-bg-card text-white">Pago</option>
-                                                </select>
-                                            </td>
-                                            <td className="p-4">
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        className={`w-full bg-transparent border-b outline-none py-1 text-sm font-mono transition-colors text-right ${isPaid
-                                                            ? 'border-white/10 focus:border-primary text-white'
-                                                            : 'border-transparent text-text-muted cursor-not-allowed'
-                                                            }`}
-                                                        value={formatCurrency(payment.amount)}
-                                                        onChange={e => updateLocalPayment(s.id, 'amount', parseCurrency(e.target.value))}
-                                                        disabled={!isPaid}
-                                                        placeholder="R$ 0,00"
-                                                    />
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
+                    <div className="space-y-2">
+                        {students.map((s: Student) => {
+                            const payment = localPayments[s.id] || { status: 'PENDING', amount: 0, student_id: s.id };
+                            const isPaid = payment.status === 'PAID';
+                            return (
+                                <div key={s.id} className="flex items-center justify-between p-3.5 rounded-xl bg-bg-dark/30 border border-white/5 hover:border-primary/20 transition-all group hover:bg-bg-dark/50">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-primary/20 flex items-center justify-center border border-white/10 shrink-0">
+                                            <span className="text-sm font-bold text-emerald-300">{s.name.charAt(0).toUpperCase()}</span>
+                                        </div>
+                                        <div>
+                                            <p className="font-semibold text-white text-sm">{s.name}</p>
+                                            <p className="text-xs text-text-muted">{s.parent_name || 'Sem responsável'}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <select
+                                            className={`p-2 px-3 rounded-lg text-xs font-bold border-none focus:ring-2 focus:ring-primary outline-none transition-colors cursor-pointer ${isPaid ? 'bg-success/20 text-success' : 'bg-yellow-500/20 text-yellow-400'}`}
+                                            value={payment.status}
+                                            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateLocalPayment(s.id, 'status', e.target.value)}
+                                        >
+                                            <option value="PENDING" className="bg-bg-card text-white">Pendente</option>
+                                            <option value="PAID" className="bg-bg-card text-white">Pago</option>
+                                        </select>
+                                        <input
+                                            type="text"
+                                            className={`w-28 bg-bg-dark/50 border rounded-lg px-3 py-2 text-sm font-mono text-right transition-colors ${isPaid
+                                                ? 'border-white/10 focus:border-emerald-500 text-white focus:ring-2 focus:ring-emerald-500/20'
+                                                : 'border-transparent text-text-muted/30 cursor-not-allowed'
+                                                }`}
+                                            value={formatCurrency(payment.amount)}
+                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateLocalPayment(s.id, 'amount', parseCurrency(e.target.value))}
+                                            disabled={!isPaid}
+                                            placeholder="R$ 0,00"
+                                        />
+                                    </div>
+                                </div>
+                            );
+                        })}
+                        {students.length === 0 && (
+                            <div className="p-12 text-center">
+                                <div className="bg-white/5 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10">
+                                    <DollarSign size={28} className="text-text-muted/50" />
+                                </div>
+                                <p className="text-text-muted text-lg font-medium">Nenhum aluno para gerenciar pagamentos</p>
+                                <p className="text-text-muted/60 text-sm mt-1">Matricule alunos primeiro na aba "Alunos".</p>
+                            </div>
+                        )}
                     </div>
-                    <div className="mt-8 flex justify-end">
-                        <button
-                            onClick={handleSavePayments}
-                            disabled={savingPayments}
-                            className={`
-                                bg-gradient-to-r from-success to-success-hover text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-success/25 
-                                transition-all flex items-center gap-2
-                                ${savingPayments ? 'opacity-70 cursor-wait' : 'hover:shadow-success/40 hover:-translate-y-1 active:translate-y-0'}
-                            `}
-                        >
-                            {savingPayments ? (
-                                <>
-                                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Salvando...
-                                </>
-                            ) : (
-                                <>
-                                    <Save size={20} /> Salvar Pagamentos
-                                </>
-                            )}
-                        </button>
-                    </div>
+                    {students.length > 0 && (
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                onClick={handleSavePayments}
+                                disabled={savingPayments}
+                                className={`
+                                    bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-emerald-500/25 
+                                    transition-all flex items-center gap-2
+                                    ${savingPayments ? 'opacity-70 cursor-wait' : 'hover:shadow-emerald-500/40 hover:-translate-y-1 active:translate-y-0'}
+                                `}
+                            >
+                                {savingPayments ? (
+                                    <>
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        Salvando...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Save size={20} /> Salvar Pagamentos
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
 
