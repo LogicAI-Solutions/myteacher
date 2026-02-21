@@ -108,7 +108,7 @@ const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDelet
         <Link
             ref={setNodeRef}
             style={style}
-            to={`/class/${cls.id}`}
+            to={`/dashboard/class/${cls.id}`}
             className={`glass-card group hover:translate-y-[-5px] transition-all duration-300 block no-underline text-inherit relative overflow-hidden ${isReorderMode ? 'animate-jiggle cursor-grab active:cursor-grabbing pointer-events-none' : ''}`}
         >
             {cardContent}
