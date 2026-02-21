@@ -368,7 +368,7 @@ export const Students = () => {
                     </div>
                 )}
                 <div className="overflow-x-auto flex-1 overflow-y-auto">
-                    <table className="w-full">
+                    <table className="w-full min-w-[800px]">
                         <thead className="bg-bg-dark sticky top-0 z-10 [&_th:first-child]:rounded-none [&_th:last-child]:rounded-none">
                             <tr>
                                 <th
