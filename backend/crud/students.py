@@ -116,8 +116,16 @@ def authenticate_student(db: Session, username: str, password: str):
 
 def create_student(db: Session, student: StudentCreate, user_id: int):
     student_data = student.model_dump()
+    # Convert empty strings to None for unique fields
+    if not student_data.get('username'):
+        student_data['username'] = None
+    
     if student_data.get('password'):
         student_data['hashed_password'] = pwd_context.hash(student_data['password'])
+    else:
+        student_data['hashed_password'] = None
+    
+    if 'password' in student_data:
         del student_data['password']
     
     db_student = Student(**student_data, owner_id=user_id)
@@ -130,8 +138,16 @@ def update_student(db: Session, student_id: int, student_data: StudentCreate):
     student = db.query(Student).filter(Student.id == student_id).first()
     if student:
         update_data = student_data.model_dump(exclude_unset=True)
+        # Handle username: if empty string, set to None
+        if 'username' in update_data and not update_data['username']:
+            update_data['username'] = None
+            
         if update_data.get('password'):
             update_data['hashed_password'] = pwd_context.hash(update_data['password'])
+            del update_data['password']
+        elif 'password' in update_data:
+            # If password was provided as empty string/None in update, we might want to skip it 
+            # or explicitly clear it. Usually we just skip.
             del update_data['password']
             
         for key, value in update_data.items():

@@ -5,6 +5,7 @@ import html2canvas from 'html2canvas';
 import { formatPhone, unmaskPhone } from '../utils/masks';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Loading } from '../components/Loading';
+import { Toast, ToastType } from '../components/Toast';
 
 interface Student {
     id: number;
@@ -69,6 +70,14 @@ export const Students = () => {
     // Dropdown Menu State
     const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
+    // Toast State
+    const [toast, setToast] = useState<{ message: string, type: ToastType } | null>(null);
+
+    const showToast = (message: string, type: ToastType) => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+    };
+
     // Close menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -127,11 +136,27 @@ export const Students = () => {
 
     const handleCreateStudent = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        const name = newStudentData.name?.trim();
+        if (!name) {
+            showToast('O nome do aluno é obrigatório.', 'warning');
+            return;
+        }
+
+        if (newStudentData.username && !newStudentData.password) {
+            showToast('Se você definir um usuário, a senha também é obrigatória.', 'warning');
+            return;
+        }
+
         try {
             const payload = {
                 ...newStudentData,
+                name,
                 phone: unmaskPhone(newStudentData.phone),
-                parent_phone: unmaskPhone(newStudentData.parent_phone)
+                parent_phone: unmaskPhone(newStudentData.parent_phone),
+                // Ensure empty strings are not sent as usernames/passwords
+                username: newStudentData.username?.trim() || null,
+                password: newStudentData.password || null
             };
             const res = await api.post('/students/', payload);
             if (selectedClassId) {
@@ -140,18 +165,33 @@ export const Students = () => {
             setShowCreateModal(false);
             setNewStudentData({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, username: '', password: '' });
             setSelectedClassId('');
+            showToast('Aluno criado com sucesso!', 'success');
             fetchData();
-        } catch (e) { alert('Erro ao criar aluno'); }
+        } catch (e: any) {
+            console.error(e);
+            const msg = e.response?.data?.detail || 'Erro ao criar aluno';
+            showToast(msg, 'error');
+        }
     };
 
     const handleUpdateStudent = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!editingStudent) return;
+
+        const name = editStudentData.name?.trim();
+        if (!name) {
+            showToast('O nome do aluno é obrigatório.', 'warning');
+            return;
+        }
+
         try {
             const payload = {
                 ...editStudentData,
+                name,
                 phone: unmaskPhone(editStudentData.phone),
-                parent_phone: unmaskPhone(editStudentData.parent_phone)
+                parent_phone: unmaskPhone(editStudentData.parent_phone),
+                username: editStudentData.username?.trim() || null,
+                password: editStudentData.password || null
             };
             await api.put(`/students/${editingStudent.id}`, payload);
 
@@ -167,8 +207,13 @@ export const Students = () => {
             setEditingStudent(null);
             setEditClassId('');
             setOriginalClassId(null);
+            showToast('Aluno atualizado com sucesso!', 'success');
             fetchData();
-        } catch (e) { alert('Erro ao atualizar aluno'); }
+        } catch (e: any) {
+            console.error(e);
+            const msg = e.response?.data?.detail || 'Erro ao atualizar aluno';
+            showToast(msg, 'error');
+        }
     };
 
     const handleDeleteStudent = async () => {
@@ -176,8 +221,13 @@ export const Students = () => {
         try {
             await api.delete(`/students/${deletingStudent.id}`);
             setDeletingStudent(null);
+            showToast('Aluno excluído com sucesso!', 'success');
             fetchData();
-        } catch (e) { alert('Erro ao excluir aluno'); }
+        } catch (e: any) {
+            console.error(e);
+            const msg = e.response?.data?.detail || 'Erro ao excluir aluno';
+            showToast(msg, 'error');
+        }
     };
 
     const handleDownloadReport = async () => {
@@ -229,9 +279,10 @@ export const Students = () => {
             document.body.appendChild(link);
             link.click();
             link.remove();
+            showToast('Relatório gerado com sucesso!', 'success');
         } catch (error) {
             console.error(error);
-            alert('Erro ao gerar relatório');
+            showToast('Erro ao gerar relatório', 'error');
         }
     };
 
@@ -244,7 +295,10 @@ export const Students = () => {
             const res = await api.get(`/students/${student.id}/evolution`);
             // Parse dates if necessary, recharts handles strings usually but better ensure
             setEvolutionData(res.data);
-        } catch (e) { console.error(e); alert('Erro ao buscar evolução'); }
+        } catch (e) {
+            console.error(e);
+            showToast('Erro ao buscar evolução', 'error');
+        }
     };
 
     // Filter data for chart
@@ -262,6 +316,7 @@ export const Students = () => {
 
     return (
         <div className="animate-fade-in">
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-2 sm:gap-4">
                 <div>
                     <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-white flex items-center gap-1.5 sm:gap-2">
@@ -398,9 +453,9 @@ export const Students = () => {
                                                     try {
                                                         await api.put(`/students/${student.id}`, { ...student, active: newActive });
                                                         fetchData();
-                                                    } catch (err) {
+                                                    } catch (err: any) {
                                                         console.error(err);
-                                                        alert('Erro ao atualizar status');
+                                                        showToast('Erro ao atualizar status', 'error');
                                                     }
                                                 }}
                                             >

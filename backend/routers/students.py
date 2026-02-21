@@ -54,7 +54,12 @@ def read_students(
 
 @router.post("/students/", response_model=student_schemas.Student)
 def create_student(student: student_schemas.StudentCreate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
-    return student_crud.create_student(db=db, student=student, user_id=current_user.id)
+    try:
+        return student_crud.create_student(db=db, student=student, user_id=current_user.id)
+    except Exception as e:
+        if "UNIQUE constraint failed" in str(e) or "duplicate key" in str(e).lower():
+            raise HTTPException(status_code=409, detail="Este nome de usuário já está sendo utilizado por outro aluno.")
+        raise e
 
 @router.put("/students/{student_id}", response_model=student_schemas.Student)
 def update_student(student_id: int, student_data: student_schemas.StudentCreate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
