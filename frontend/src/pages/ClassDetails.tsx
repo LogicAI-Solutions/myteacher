@@ -978,8 +978,8 @@ export const ClassDetails = () => {
 
             {/* Create Student Modal */}
             {showCreateStudentModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-                    <div className="glass-card w-full max-w-md animate-slide-up relative">
+                <div className="modal-overlay">
+                    <div className="glass-modal w-full max-w-md relative p-8">
                         <button onClick={() => setShowCreateStudentModal(false)} className="absolute top-4 right-4 text-text-muted hover:text-white">
                             <X size={20} />
                         </button>
@@ -1050,8 +1050,8 @@ export const ClassDetails = () => {
 
             {/* Edit Student Modal */}
             {editingStudent && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-                    <div className="glass-card w-full max-w-md animate-slide-up relative">
+                <div className="modal-overlay">
+                    <div className="glass-modal w-full max-w-md relative p-8">
                         <button onClick={() => setEditingStudent(null)} className="absolute top-4 right-4 text-text-muted hover:text-white">
                             <X size={20} />
                         </button>
@@ -1121,8 +1121,8 @@ export const ClassDetails = () => {
 
             {/* Delete Student Modal */}
             {deletingStudent && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                    <div className="glass-card w-full max-w-sm p-6 relative animate-slide-up border-danger/30">
+                <div className="modal-overlay">
+                    <div className="glass-modal w-full max-w-sm p-8 relative border-danger/20">
                         <div className="flex flex-col items-center text-center">
                             <div className="w-12 h-12 rounded-full bg-danger/20 flex items-center justify-center mb-4 text-danger">
                                 <AlertTriangle size={24} />
@@ -1152,11 +1152,11 @@ export const ClassDetails = () => {
 
             {/* Session Details Modal */}
             {viewingSession && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-                    <div className="bg-bg-card border border-white/5 w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl shadow-2xl relative animate-slide-up flex flex-col">
+                <div className="modal-overlay">
+                    <div className="glass-modal w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col relative">
 
                         {/* Header */}
-                        <div className="p-6 border-b border-white/5 flex justify-between items-start sticky top-0 bg-bg-card z-10">
+                        <div className="p-6 border-b border-white/5 flex justify-between items-start sticky top-0 backdrop-blur-md bg-white/2 z-10">
                             <div>
                                 <h3 className="text-xl font-bold text-white mb-1">{viewingSession.description}</h3>
                                 <p className="text-text-muted text-sm flex items-center gap-2">
@@ -1169,7 +1169,7 @@ export const ClassDetails = () => {
                         </div>
 
                         {/* Content */}
-                        <div className="p-6 overflow-x-auto">
+                        <div className="p-6 overflow-y-auto overflow-x-auto flex-1">
                             <table className="w-full text-sm text-left">
                                 <thead>
                                     <tr className="border-b border-white/5">
@@ -1204,7 +1204,7 @@ export const ClassDetails = () => {
                         </div>
 
                         {/* Footer */}
-                        <div className="p-6 border-t border-white/5 flex flex-col-reverse sm:flex-row justify-end gap-3 bg-bg-card rounded-b-2xl">
+                        <div className="p-6 border-t border-white/5 flex flex-col-reverse sm:flex-row justify-end gap-3 backdrop-blur-md bg-white/2">
                             <button
                                 onClick={() => {
                                     requestConfirmation(
@@ -1234,8 +1234,8 @@ export const ClassDetails = () => {
 
             {/* Confirmation Modal */}
             {confirmation && confirmation.isOpen && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                    <div className={`glass-card w-full max-w-sm p-6 relative animate-slide-up ${confirmation.type === 'danger' ? 'border-danger/30' : 'border-white/10'}`}>
+                <div className="modal-overlay z-[100]">
+                    <div className={`glass-modal w-full max-w-sm p-8 relative ${confirmation.type === 'danger' ? 'border-danger/20' : 'border-white/10'}`}>
                         <div className="flex flex-col items-center text-center">
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${confirmation.type === 'danger' ? 'bg-danger/20 text-danger' :
                                 confirmation.type === 'warning' ? 'bg-yellow-500/20 text-yellow-500' :
