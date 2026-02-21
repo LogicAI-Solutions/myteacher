@@ -5,7 +5,7 @@ import html2canvas from 'html2canvas';
 import { formatPhone, unmaskPhone } from '../utils/masks';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Loading } from '../components/Loading';
-import { Toast, ToastType } from '../components/Toast';
+import { Toast, type ToastType } from '../components/Toast';
 
 interface Student {
     id: number;
