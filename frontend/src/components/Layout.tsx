@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
+import { LogOut, LayoutDashboard, Users, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, Key, DollarSign, Palette } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, LayoutDashboard, Users, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, Key, DollarSign } from 'lucide-react';
 import api from '../api';
 
 export const Layout = () => {
@@ -10,6 +11,8 @@ export const Layout = () => {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+    const { theme, setTheme } = useTheme();
+    const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
 
     // Profile Modal State
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -61,7 +64,7 @@ export const Layout = () => {
                 <h1 className="flex items-center gap-2 font-bold text-lg text-gradient">
                     <GraduationCap size={22} className="text-primary" /> MyTeacherApp
                 </h1>
-                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-text-muted hover:text-white rounded-xl hover:bg-white/10 transition-all duration-300">
+                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-text-muted hover:text-text-main rounded-xl hover:bg-white/5 transition-all duration-300">
                     {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
             </header>
@@ -94,7 +97,7 @@ export const Layout = () => {
 
                     <button
                         onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full p-1.5 hidden md:flex text-text-muted hover:text-white hover:border-primary/50 transition-all shadow-lg z-10 hover:bg-white/15"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-white/10 backdrop-blur-xl border border-white/10 rounded-full p-1.5 hidden md:flex text-text-muted hover:text-text-main hover:border-primary/50 transition-all shadow-md z-10 hover:bg-white/20"
                     >
                         {isSidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                     </button>
@@ -106,7 +109,7 @@ export const Layout = () => {
                     <Link
                         to="/dashboard"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`nav-link-glass ${location.pathname === '/dashboard' ? 'active text-white shadow-lg shadow-primary/25' : 'text-text-muted hover:text-white'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
+                        className={`nav-link-glass ${location.pathname === '/dashboard' ? 'active text-white shadow-lg' : 'text-text-muted hover:text-text-main'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                         title="Dashboard"
                     >
                         <LayoutDashboard size={20} className={`shrink-0 ${location.pathname === '/dashboard' ? '' : ''}`} />
@@ -116,7 +119,7 @@ export const Layout = () => {
                     <Link
                         to="/dashboard/classes"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`nav-link-glass ${location.pathname.includes('/classes') ? 'active text-white shadow-lg shadow-primary/25' : 'text-text-muted hover:text-white'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
+                        className={`nav-link-glass ${location.pathname.includes('/classes') ? 'active text-white shadow-lg' : 'text-text-muted hover:text-text-main'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                         title="Turmas"
                     >
                         <GraduationCap size={20} className={`shrink-0 ${location.pathname.includes('/classes') ? '' : ''}`} />
@@ -126,7 +129,7 @@ export const Layout = () => {
                     <Link
                         to="/dashboard/students"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`nav-link-glass ${location.pathname.includes('/students') ? 'active text-white shadow-lg shadow-primary/25' : 'text-text-muted hover:text-white'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
+                        className={`nav-link-glass ${location.pathname.includes('/students') ? 'active text-white shadow-lg' : 'text-text-muted hover:text-text-main'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                         title="Alunos"
                     >
                         <Users size={20} className={`shrink-0 ${location.pathname.includes('/students') ? '' : ''}`} />
@@ -136,7 +139,7 @@ export const Layout = () => {
                     <Link
                         to="/dashboard/payments"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`nav-link-glass ${location.pathname.includes('/payments') ? 'active text-white shadow-lg shadow-primary/25' : 'text-text-muted hover:text-white'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
+                        className={`nav-link-glass ${location.pathname.includes('/payments') ? 'active text-white shadow-lg' : 'text-text-muted hover:text-text-main'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                         title="Financeiro"
                     >
                         <DollarSign size={20} className={`shrink-0 ${location.pathname.includes('/payments') ? '' : ''}`} />
@@ -147,7 +150,7 @@ export const Layout = () => {
                         <Link
                             to="/dashboard/admin"
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className={`nav-link-glass ${location.pathname.includes('/admin') ? 'active text-white shadow-lg shadow-primary/25' : 'text-text-muted hover:text-white'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
+                            className={`nav-link-glass ${location.pathname.includes('/admin') ? 'active text-white shadow-lg' : 'text-text-muted hover:text-text-main'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                             title="Administração"
                         >
                             <Settings size={20} className={`shrink-0 ${location.pathname.includes('/admin') ? 'animate-spin-slow' : ''}`} />
@@ -157,12 +160,47 @@ export const Layout = () => {
 
                     <button
                         onClick={() => { setIsProfileModalOpen(true); setIsMobileMenuOpen(false); }}
-                        className={`nav-link-glass text-text-muted hover:text-white w-full text-left ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
+                        className={`nav-link-glass text-text-muted hover:text-text-main w-full text-left ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                         title="Meus Dados"
                     >
                         <UserCircle size={20} className="shrink-0" />
                         <span className={`whitespace-nowrap transition-all duration-300 ${isSidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'}`}>Meus Dados</span>
                     </button>
+
+                    {/* Theme Selector */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
+                            className={`nav-link-glass text-text-muted hover:text-text-main w-full text-left ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
+                            title="Personalizar Tema"
+                        >
+                            <Palette size={20} className="shrink-0" />
+                            <span className={`whitespace-nowrap transition-all duration-300 ${isSidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'}`}>Temas</span>
+                        </button>
+
+                        {isThemeMenuOpen && (
+                            <div className={`absolute bottom-full left-0 mb-2 w-full glass-modal p-2 flex flex-col gap-1 z-50 animate-slide-up`}>
+                                <button
+                                    onClick={() => { setTheme('sereno'); setIsThemeMenuOpen(false); }}
+                                    className={`p-2 rounded-lg text-xs flex items-center gap-2 hover:bg-white/10 transition-colors ${theme === 'sereno' ? 'bg-primary/20 text-primary font-bold' : 'text-text-muted'}`}
+                                >
+                                    <div className="w-3 h-3 rounded-full bg-[#2d5a6e]"></div> Azul Sereno
+                                </button>
+                                <button
+                                    onClick={() => { setTheme('acolhedor'); setIsThemeMenuOpen(false); }}
+                                    className={`p-2 rounded-lg text-xs flex items-center gap-2 hover:bg-white/10 transition-colors ${theme === 'acolhedor' ? 'bg-primary/20 text-primary font-bold' : 'text-text-muted'}`}
+                                >
+                                    <div className="w-3 h-3 rounded-full bg-[#7d8c7b]"></div> Acolhedor
+                                </button>
+                                <button
+                                    onClick={() => { setTheme('dark'); setIsThemeMenuOpen(false); }}
+                                    className={`p-2 rounded-lg text-xs flex items-center gap-2 hover:bg-white/10 transition-colors ${theme === 'dark' ? 'bg-primary/20 text-primary font-bold' : 'text-text-muted'}`}
+                                >
+                                    <div className="w-3 h-3 rounded-full bg-[#0f172a]"></div> Dark Profissional
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </nav>
 
                 <div className="p-4 border-t border-white/5">
@@ -192,20 +230,20 @@ export const Layout = () => {
                 isProfileModalOpen && (
                     <div className="modal-overlay animate-fade-in">
                         <div className="glass-modal w-full max-w-md p-8 relative animate-slide-up">
-                            <button onClick={() => setIsProfileModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all">
+                            <button onClick={() => setIsProfileModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-xl hover:bg-white/5 transition-all">
                                 <X size={20} />
                             </button>
-                            <h2 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
+                            <h2 className="text-xl font-bold mb-6 text-text-main flex items-center gap-2">
                                 <UserCircle size={22} className="text-primary" /> Meus Dados
                             </h2>
 
-                            <div className="mb-6 p-4 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
+                            <div className="mb-6 p-4 bg-white/5 rounded-xl border border-white/5 backdrop-blur-sm">
                                 <p className="text-xs text-text-muted uppercase tracking-wider">Email</p>
-                                <p className="text-white font-medium mt-1">{user?.email}</p>
+                                <p className="text-text-main font-medium mt-1">{user?.email}</p>
                             </div>
 
                             <form onSubmit={handleUpdatePassword} className="space-y-4">
-                                <h3 className="text-lg font-semibold text-white flex items-center gap-2 border-t border-white/10 pt-4">
+                                <h3 className="text-lg font-semibold text-text-main flex items-center gap-2 border-t border-white/5 pt-4">
                                     <Key size={16} className="text-primary" /> Alterar Senha
                                 </h3>
 
@@ -238,7 +276,7 @@ export const Layout = () => {
                                     <button
                                         type="button"
                                         onClick={() => setIsProfileModalOpen(false)}
-                                        className="px-4 py-2 rounded-xl text-text-muted hover:bg-white/10 transition-colors"
+                                        className="px-4 py-2 rounded-xl text-text-muted hover:bg-white/5 transition-colors"
                                     >
                                         Cancelar
                                     </button>

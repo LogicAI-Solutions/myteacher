@@ -8,23 +8,23 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#6366f1', // Indigo 500
-          hover: '#4f46e5',   // Indigo 600
-          light: '#818cf8',   // Indigo 400
+          DEFAULT: '#3b82f6', // Blue 500
+          hover: '#2563eb',   // Blue 600
+          light: '#60a5fa',   // Blue 400
         },
         bg: {
-          dark: '#0a0f1a',    // Darker for glass effect
-          card: 'rgba(30, 41, 59, 0.5)', // Semi-transparent
-          darker: '#020617',  // Slate 950
+          dark: '#f1f5f9',    // Slate 100
+          card: 'rgba(255, 255, 255, 0.7)', // Translucidez para Glassmorphism claro
+          darker: '#f8fafc',  // Slate 50
         },
         text: {
-          main: '#f8fafc',    // Slate 50
-          muted: '#94a3b8',   // Slate 400
+          main: '#1e293b',    // Slate 800
+          muted: '#64748b',   // Slate 500
         },
         danger: '#ef4444',
-        success: '#22c55e',
-        warning: '#eab308',   // Yellow 500
-        border: 'rgba(255, 255, 255, 0.08)',
+        success: '#10b981',   // Emerald 500
+        warning: '#f59e0b',   // Amber 500
+        border: 'rgba(0, 0, 0, 0.05)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

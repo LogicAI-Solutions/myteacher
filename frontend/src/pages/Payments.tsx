@@ -227,18 +227,18 @@ export const Payments = () => {
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-2 sm:gap-4">
                 <div>
-                    <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-white flex items-center gap-1.5 sm:gap-2">
+                    <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-text-main flex items-center gap-1.5 sm:gap-2">
                         <DollarSign className="text-success" size={20} /> Financeiro
                     </h1>
                     <p className="text-text-muted mt-0.5 text-xs sm:text-sm">Controle de mensalidades.</p>
                 </div>
 
                 {/* Filters */}
-                <div className="flex items-center gap-2 glass p-2 rounded-2xl">
+                <div className="flex items-center gap-2 bg-white/50 backdrop-blur-md p-2 rounded-2xl border border-black/5 shadow-sm">
                     <select
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value as 'all' | 'PAID' | 'PENDING')}
-                        className="bg-white/5 border border-white/10 rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-primary/40 [&>option]:bg-bg-dark"
+                        className="bg-black/5 border border-black/5 rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-primary/40 [&>option]:bg-white"
                     >
                         <option value="all">Todos os Status</option>
                         <option value="PAID">Pagos</option>
@@ -247,19 +247,19 @@ export const Payments = () => {
 
                     <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
 
-                    <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="bg-white/5 border border-white/10 rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-primary/40">
+                    <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="bg-black/5 border border-black/5 rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-primary/40">
                         {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                            <option key={m} value={m} className="bg-bg-dark text-white">{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'short' })}</option>
+                            <option key={m} value={m} className="bg-white text-text-main">{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'short' })}</option>
                         ))}
                     </select>
-                    <select value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="bg-white/5 border border-white/10 rounded-lg py-1.5 px-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-primary/40">
+                    <select value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="bg-black/5 border border-black/5 rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-primary/40">
                         {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
-                            <option key={y} value={y} className="bg-bg-dark text-white">{y}</option>
+                            <option key={y} value={y} className="bg-white text-text-main">{y}</option>
                         ))}
                     </select>
                     <button
                         onClick={handleExportReport}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 text-success hover:bg-success/20 rounded-lg transition-all text-xs border border-white/10"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-black/5 text-success hover:bg-success/10 rounded-lg transition-all text-xs border border-black/5"
                         title="Exportar Relatório"
                     >
                         <DollarSign size={14} />
@@ -279,7 +279,7 @@ export const Payments = () => {
                         </div>
                         <span className="text-text-muted text-xs sm:text-sm font-medium hidden sm:inline">Total Alunos</span>
                     </div>
-                    <p className="text-xl sm:text-2xl md:text-3xl font-bold text-white">{totalStudentsCount}</p>
+                    <p className="text-xl sm:text-2xl md:text-3xl font-bold text-text-main">{totalStudentsCount}</p>
                     <p className="text-xs text-indigo-400 mt-0.5 sm:mt-1 font-medium truncate">Alunos</p>
                 </div>
 
@@ -292,7 +292,7 @@ export const Payments = () => {
                         </div>
                         <span className="text-text-muted text-xs sm:text-sm font-medium hidden sm:inline">Pagos</span>
                     </div>
-                    <p className="text-xl sm:text-2xl md:text-3xl font-bold text-white">{actualPaidCount}</p>
+                    <p className="text-xl sm:text-2xl md:text-3xl font-bold text-text-main">{actualPaidCount}</p>
                     <p className="text-xs text-emerald-400 mt-0.5 sm:mt-1 font-medium truncate">Pagos</p>
                 </div>
 
@@ -305,7 +305,7 @@ export const Payments = () => {
                         </div>
                         <span className="text-text-muted text-xs sm:text-sm font-medium hidden sm:inline">Pendentes</span>
                     </div>
-                    <p className="text-xl sm:text-2xl md:text-3xl font-bold text-white">{pendingCount}</p>
+                    <p className="text-xl sm:text-2xl md:text-3xl font-bold text-text-main">{pendingCount}</p>
                     <p className="text-xs text-amber-400 mt-0.5 sm:mt-1 font-medium truncate">Pendentes</p>
                 </div>
 
@@ -318,7 +318,7 @@ export const Payments = () => {
                         </div>
                         <span className="text-text-muted text-xs sm:text-sm font-medium hidden sm:inline">Total Recebido</span>
                     </div>
-                    <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">{formatCurrency(totalReceived)}</p>
+                    <p className="text-lg sm:text-xl md:text-2xl font-bold text-text-main">{formatCurrency(totalReceived)}</p>
                     <p className="text-xs text-green-400 mt-0.5 sm:mt-1 font-medium truncate">Recebido</p>
                 </div>
             </div>
@@ -327,14 +327,14 @@ export const Payments = () => {
             <div className={`transition-all duration-500 mb-6 sticky top-0 z-10 ${search.length > 0 ? '-translate-y-2 opacity-95' : ''}`}>
                 <div className="relative group max-w-2xl mx-auto">
                     <div className="absolute inset-0 bg-primary/10 rounded-2xl blur-xl group-hover:bg-primary/20 transition-all duration-500"></div>
-                    <div className="relative glass border border-white/10 rounded-2xl flex items-center p-1">
+                    <div className="relative bg-white/80 backdrop-blur-xl border border-black/5 shadow-xl rounded-2xl flex items-center p-1">
                         <div className="pl-4 pr-3 text-text-muted group-focus-within:text-primary transition-colors">
                             <Search size={24} />
                         </div>
                         <input
                             type="text"
                             placeholder="Buscar aluno por nome..."
-                            className="w-full bg-transparent border-none text-white text-lg placeholder-text-muted/50 focus:ring-0 focus:outline-none py-3"
+                            className="w-full bg-transparent border-none text-text-main text-lg placeholder-text-muted/50 focus:ring-0 focus:outline-none py-3"
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                         />
@@ -349,8 +349,8 @@ export const Payments = () => {
                         <Loading text={saving ? "Salvando alterações..." : "Carregando financeiro..."} />
                     </div>
                 )}
-                <div className="p-4 border-b border-white/5 bg-white/5 backdrop-blur-sm flex items-center justify-between shrink-0">
-                    <h3 className="font-bold text-white">Relatório de {selectedMonth}/{selectedYear}</h3>
+                <div className="p-4 border-b border-black/5 bg-black/5 backdrop-blur-sm flex items-center justify-between shrink-0">
+                    <h3 className="font-bold text-text-main">Relatório de {selectedMonth}/{selectedYear}</h3>
                     <button
                         onClick={handleSavePayments}
                         disabled={saving}
@@ -367,7 +367,7 @@ export const Payments = () => {
                         <thead className="bg-bg-dark sticky top-0 z-10 [&_th:first-child]:rounded-none [&_th:last-child]:rounded-none">
                             <tr>
                                 <th
-                                    className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider cursor-pointer hover:text-white transition-colors group select-none flex items-center gap-1"
+                                    className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-main transition-colors group select-none flex items-center gap-1"
                                     onClick={() => setSortDesc(!sortDesc)}
                                 >
                                     Aluno
@@ -400,14 +400,14 @@ export const Payments = () => {
                                                 value={payment.status}
                                                 onChange={e => updateLocalPayment(student.id, 'status', e.target.value)}
                                             >
-                                                <option value="PENDING" className="bg-bg-dark text-white">Pendente</option>
-                                                <option value="PAID" className="bg-bg-dark text-white">Pago</option>
+                                                <option value="PENDING" className="bg-white text-text-main">Pendente</option>
+                                                <option value="PAID" className="bg-white text-text-main">Pago</option>
                                             </select>
                                         </td>
                                         <td className="p-2 sm:p-4">
                                             <input
                                                 type="text"
-                                                className="w-full bg-transparent border-b border-white/10 outline-none py-1 text-xs sm:text-sm font-mono transition-all text-right focus:border-primary text-white"
+                                                className="w-full bg-transparent border-b border-black/10 outline-none py-1 text-xs sm:text-sm font-mono transition-all text-right focus:border-primary text-text-main"
                                                 value={formatCurrency(payment.amount)}
                                                 onChange={e => updateLocalPayment(student.id, 'amount', parseCurrency(e.target.value))}
                                                 placeholder="R$ 0"
@@ -428,7 +428,7 @@ export const Payments = () => {
                     <button
                         onClick={() => setPage(p => Math.max(0, p - 1))}
                         disabled={page === 0}
-                        className="px-4 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm text-white transition-all border border-white/10"
+                        className="px-4 py-2 bg-black/5 hover:bg-black/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm text-text-main transition-all border border-black/5"
                     >
                         Anterior
                     </button>
@@ -438,7 +438,7 @@ export const Payments = () => {
                     <button
                         onClick={() => setPage(p => p + 1)}
                         disabled={(page + 1) * limit >= totalStudents}
-                        className="px-4 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm text-white transition-all border border-white/10"
+                        className="px-4 py-2 bg-black/5 hover:bg-black/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm text-text-main transition-all border border-black/5"
                     >
                         Próxima
                     </button>

@@ -3,6 +3,7 @@ import api from '../api';
 import { Loading } from '../components/Loading';
 import { PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from 'recharts';
 import { Users, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 interface DashboardStats {
     students: {
@@ -19,10 +20,11 @@ interface DashboardStats {
     };
 }
 
-const COLORS = ['#8b5cf6', '#e9ef44ff']; // Primary (Purple) & Danger (Red) for Active/Inactive
+const COLORS = ['var(--color-primary)', 'var(--color-text-muted)'];
 
 
 export const Dashboard = () => {
+    const { theme } = useTheme();
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -88,14 +90,14 @@ export const Dashboard = () => {
     ];
 
     const paymentData = [
-        { name: 'Pagos', value: stats.payments.paid, fill: '#10b981' },
-        { name: 'Pendentes', value: stats.payments.pending, fill: '#fbbf24' }, // Usando o calculado no backend ou deduzindo
+        { name: 'Pagos', value: stats.payments.paid, fill: 'var(--color-success)' },
+        { name: 'Pendentes', value: stats.payments.pending, fill: 'var(--color-warning)' },
     ];
 
     return (
         <div className="animate-slide-up space-y-8">
             <div className="mb-8">
-                <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
+                <h2 className="text-3xl font-bold text-text-main">
                     Visão Geral
                 </h2>
                 <p className="text-text-muted mt-2">Acompanhe o desempenho da sua escola em tempo real.</p>
@@ -109,7 +111,7 @@ export const Dashboard = () => {
                     </div>
                     <div>
                         <p className="text-text-muted text-sm">Total de Alunos</p>
-                        <h3 className="text-2xl font-bold text-white">{stats.students.total}</h3>
+                        <h3 className="text-2xl font-bold text-text-main">{stats.students.total}</h3>
                     </div>
                 </div>
 
@@ -119,7 +121,7 @@ export const Dashboard = () => {
                     </div>
                     <div>
                         <p className="text-text-muted text-sm">Alunos Ativos</p>
-                        <h3 className="text-2xl font-bold text-white">{stats.students.active}</h3>
+                        <h3 className="text-2xl font-bold text-text-main">{stats.students.active}</h3>
                     </div>
                 </div>
 
@@ -129,7 +131,7 @@ export const Dashboard = () => {
                     </div>
                     <div>
                         <p className="text-text-muted text-sm">Pagamentos (Mês)</p>
-                        <h3 className="text-2xl font-bold text-white">{stats.payments.paid}</h3>
+                        <h3 className="text-2xl font-bold text-text-main">{stats.payments.paid}</h3>
                     </div>
                 </div>
 
@@ -139,7 +141,7 @@ export const Dashboard = () => {
                     </div>
                     <div>
                         <p className="text-text-muted text-sm">Pendentes (Mês)</p>
-                        <h3 className="text-2xl font-bold text-white">{stats.payments.pending}</h3>
+                        <h3 className="text-2xl font-bold text-text-main">{stats.payments.pending}</h3>
                     </div>
                 </div>
             </div>
@@ -148,7 +150,7 @@ export const Dashboard = () => {
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-8" ref={containerRef}>
                 {/* Students Chart */}
                 <div className="glass-card p-6 min-h-[350px] sm:min-h-[400px] flex flex-col items-center w-full">
-                    <h3 className="text-xl font-bold text-white mb-6 pl-2 border-l-4 border-primary w-full">Alunos: Ativos vs Inativos</h3>
+                    <h3 className="text-xl font-bold text-text-main mb-6 pl-2 border-l-4 border-primary w-full">Alunos: Ativos vs Inativos</h3>
                     <div className="flex-1 w-full h-full min-h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -173,8 +175,8 @@ export const Dashboard = () => {
                                     content={({ active, payload }: any) => {
                                         if (active && payload && payload.length) {
                                             return (
-                                                <div style={{ backgroundColor: 'rgba(23, 23, 23, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px' }}>
-                                                    <p style={{ color: '#fff', margin: 0 }}>
+                                                <div style={{ backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: '12px', padding: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)' }}>
+                                                    <p className="text-text-main" style={{ margin: 0 }}>
                                                         Quantidade: <span style={{ fontWeight: 'bold' }}>{payload[0].value}</span>
                                                     </p>
                                                 </div>
@@ -191,7 +193,7 @@ export const Dashboard = () => {
 
                 {/* Payments Chart */}
                 <div className="glass-card p-6 min-h-[350px] sm:min-h-[400px] flex flex-col items-center w-full">
-                    <h3 className="text-xl font-bold text-white mb-6 pl-2 border-l-4 border-success w-full">Pagamentos do Mês Atual</h3>
+                    <h3 className="text-xl font-bold text-text-main mb-6 pl-2 border-l-4 border-success w-full">Pagamentos do Mês Atual</h3>
                     <div className="flex-1 w-full h-full min-h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart
@@ -203,17 +205,17 @@ export const Dashboard = () => {
                                     bottom: 5,
                                 }}
                             >
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                                <XAxis dataKey="name" stroke="#9ca3af" tick={{ fill: '#9ca3af' }} axisLine={{ stroke: 'rgba(255,255,255,0.1)' }} />
-                                <YAxis stroke="#9ca3af" tick={{ fill: '#9ca3af' }} axisLine={{ stroke: 'rgba(255,255,255,0.1)' }} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
+                                <XAxis dataKey="name" stroke="#9ca3af" tick={{ fill: '#9ca3af' }} axisLine={{ stroke: 'rgba(0,0,0,0.1)' }} />
+                                <YAxis stroke="#9ca3af" tick={{ fill: '#9ca3af' }} axisLine={{ stroke: 'rgba(0,0,0,0.1)' }} />
                                 <Tooltip
                                     isAnimationActive={false}
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                                     content={({ active, payload }: any) => {
                                         if (active && payload && payload.length) {
                                             return (
-                                                <div style={{ backgroundColor: 'rgba(23, 23, 23, 0.9)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px' }}>
-                                                    <p style={{ color: '#fff', margin: 0 }}>
+                                                <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '12px', padding: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                                                    <p className="text-text-main" style={{ margin: 0 }}>
                                                         Quantidade: <span style={{ fontWeight: 'bold' }}>{payload[0].value}</span>
                                                     </p>
                                                 </div>

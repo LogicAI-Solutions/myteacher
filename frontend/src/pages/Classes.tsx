@@ -41,11 +41,11 @@ interface SortableClassCardProps {
 // Palette of accent colors for cards
 const cardAccents = [
     { bg: 'bg-primary/15', border: 'border-primary/20', text: 'text-primary', glow: 'shadow-primary/10' },
-    { bg: 'bg-indigo-500/15', border: 'border-indigo-500/20', text: 'text-indigo-400', glow: 'shadow-indigo-500/10' },
-    { bg: 'bg-violet-500/15', border: 'border-violet-500/20', text: 'text-violet-400', glow: 'shadow-violet-500/10' },
-    { bg: 'bg-cyan-500/15', border: 'border-cyan-500/20', text: 'text-cyan-400', glow: 'shadow-cyan-500/10' },
-    { bg: 'bg-emerald-500/15', border: 'border-emerald-500/20', text: 'text-emerald-400', glow: 'shadow-emerald-500/10' },
-    { bg: 'bg-amber-500/15', border: 'border-amber-500/20', text: 'text-amber-400', glow: 'shadow-amber-500/10' },
+    { bg: 'bg-indigo-500/15', border: 'border-indigo-500/20', text: 'text-indigo-600', glow: 'shadow-indigo-500/10' },
+    { bg: 'bg-violet-500/15', border: 'border-violet-500/20', text: 'text-violet-600', glow: 'shadow-violet-500/10' },
+    { bg: 'bg-cyan-500/15', border: 'border-cyan-500/20', text: 'text-cyan-600', glow: 'shadow-cyan-500/10' },
+    { bg: 'bg-emerald-500/15', border: 'border-emerald-500/20', text: 'text-emerald-600', glow: 'shadow-emerald-500/10' },
+    { bg: 'bg-amber-500/15', border: 'border-amber-500/20', text: 'text-amber-600', glow: 'shadow-amber-500/10' },
 ];
 
 const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDeleteModal }: SortableClassCardProps) => {
@@ -93,10 +93,10 @@ const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDelet
                     </div>
                     {!isReorderMode && (
                         <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
-                            <button onClick={(e) => openEditModal(e, cls)} className="bg-white/5 backdrop-blur-sm p-2 rounded-lg hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-200 border border-white/5 hover:border-primary/30">
+                            <button onClick={(e) => openEditModal(e, cls)} className="bg-black/5 backdrop-blur-sm p-2 rounded-lg hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-200 border border-black/5 hover:border-primary/30">
                                 <Pencil size={15} />
                             </button>
-                            <button onClick={(e) => openDeleteModal(e, cls)} className="bg-white/5 backdrop-blur-sm p-2 rounded-lg hover:bg-danger/20 text-text-muted hover:text-danger transition-all duration-200 border border-white/5 hover:border-danger/30">
+                            <button onClick={(e) => openDeleteModal(e, cls)} className="bg-black/5 backdrop-blur-sm p-2 rounded-lg hover:bg-danger/20 text-text-muted hover:text-danger transition-all duration-200 border border-black/5 hover:border-danger/30">
                                 <Trash size={15} />
                             </button>
                         </div>
@@ -104,7 +104,7 @@ const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDelet
                 </div>
 
                 {/* Title */}
-                <h3 className="text-lg font-bold text-text-main group-hover:text-white transition-colors duration-300 mb-1 leading-tight">
+                <h3 className="text-lg font-bold text-text-main group-hover:text-primary transition-colors duration-300 mb-1 leading-tight">
                     {cls.name}
                 </h3>
 
@@ -114,7 +114,7 @@ const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDelet
                 </p>
 
                 {/* Bottom stats bar */}
-                <div className="flex items-center gap-4 pt-3 border-t border-white/5">
+                <div className="flex items-center gap-4 pt-3 border-t border-black/5">
                     <div className="flex items-center gap-1.5 text-xs text-text-muted">
                         <Users size={13} className={accent.text} />
                         <span>{cls.student_count ?? '—'} alunos</span>
@@ -201,7 +201,7 @@ export const Classes = () => {
                 })
             );
             setClasses(classesWithCounts);
-        } catch (error) {
+        } catch (error: unknown) {
             console.error(error);
         } finally {
             setIsLoading(false);
@@ -219,7 +219,7 @@ export const Classes = () => {
             setShowModal(false);
             setNewClass({ name: '', schedule: '' });
             fetchClasses();
-        } catch (error) {
+        } catch (error: unknown) {
             alert('Error creating class');
         }
     };
@@ -231,7 +231,7 @@ export const Classes = () => {
             await api.put(`/classes/${editingClass.id}`, { name: editClassName, schedule: editClassSchedule });
             setEditingClass(null);
             fetchClasses();
-        } catch (error) {
+        } catch (error: unknown) {
             alert('Erro ao atualizar turma');
         }
     };
@@ -242,7 +242,7 @@ export const Classes = () => {
             await api.delete(`/classes/${deletingClass.id}`);
             setDeletingClass(null);
             fetchClasses();
-        } catch (error) {
+        } catch (error: unknown) {
             alert('Erro ao excluir turma');
         }
     };
@@ -263,8 +263,8 @@ export const Classes = () => {
         const { active, over } = event;
 
         if (over && active.id !== over.id) {
-            const oldIndex = classes.findIndex((cls) => cls.id === active.id);
-            const newIndex = classes.findIndex((cls) => cls.id === over.id);
+            const oldIndex = classes.findIndex((cls: ClassModel) => cls.id === active.id);
+            const newIndex = classes.findIndex((cls: ClassModel) => cls.id === over.id);
 
             const newOrder = arrayMove(classes, oldIndex, newIndex);
             setClasses(newOrder);
@@ -273,14 +273,14 @@ export const Classes = () => {
 
     const handleSaveOrder = async () => {
         try {
-            const orderData = classes.map((cls, index) => ({
+            const orderData = classes.map((cls: ClassModel, index: number) => ({
                 id: cls.id,
                 display_order: index
             }));
             await api.put('/classes/reorder', orderData);
             setOriginalClasses(classes);
             setIsReorderMode(false);
-        } catch (error) {
+        } catch (error: unknown) {
             console.error('Error saving order:', error);
             alert('Erro ao salvar a nova ordem');
         }
@@ -306,7 +306,7 @@ export const Classes = () => {
             {/* Header */}
             <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/70">
+                    <h2 className="text-3xl font-bold text-text-main">
                         Minhas Turmas
                     </h2>
                     {!isLoading && classes.length > 0 && (
@@ -320,7 +320,7 @@ export const Classes = () => {
                         {!isReorderMode ? (
                             <button
                                 onClick={startReorderMode}
-                                className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 bg-white/5 text-text-muted hover:bg-white/10 hover:text-white border border-white/10 w-full sm:w-auto justify-center"
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 bg-black/5 text-text-muted hover:bg-black/10 hover:text-text-main border border-black/5 w-full sm:w-auto justify-center"
                             >
                                 <ArrowUpDown size={18} />
                                 Reorganizar
@@ -329,14 +329,14 @@ export const Classes = () => {
                             <>
                                 <button
                                     onClick={handleSortAlphabetically}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 bg-white/5 text-text-muted hover:bg-white/10 hover:text-white border border-white/10 flex-1 sm:flex-none justify-center"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 bg-black/5 text-text-muted hover:bg-black/10 hover:text-text-main border border-black/10 flex-1 sm:flex-none justify-center"
                                 >
                                     <ArrowUpDown size={18} />
                                     Ordenar (A-Z)
                                 </button>
                                 <button
                                     onClick={handleCancelReorder}
-                                    className="px-4 py-2 rounded-xl font-medium transition-all duration-300 bg-white/5 text-text-muted hover:bg-white/10 hover:text-danger border border-white/10 flex-1 sm:flex-none justify-center"
+                                    className="px-4 py-2 rounded-xl font-medium transition-all duration-300 bg-black/5 text-text-muted hover:bg-black/10 hover:text-danger border border-black/10 flex-1 sm:flex-none justify-center"
                                 >
                                     Cancelar
                                 </button>
@@ -388,13 +388,13 @@ export const Classes = () => {
                                 {!isReorderMode && (
                                     <button
                                         onClick={() => setShowModal(true)}
-                                        className="glass-card flex flex-col items-center justify-center gap-4 group hover:bg-white/5 transition-all duration-300 border-dashed border-2 border-white/10 hover:border-primary/40 cursor-pointer min-h-[200px] animate-slide-up"
+                                        className="glass-card flex flex-col items-center justify-center gap-4 group hover:bg-black/5 transition-all duration-300 border-dashed border-2 border-black/10 hover:border-primary/40 cursor-pointer min-h-[200px] animate-slide-up"
                                         style={{ animationDelay: `${classes.length * 80}ms` }}
                                     >
                                         <div className="bg-primary/10 p-4 rounded-2xl group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300 border border-primary/20 shadow-lg shadow-primary/5">
                                             <Plus size={28} className="text-primary" />
                                         </div>
-                                        <span className="font-medium text-text-muted group-hover:text-white transition-colors text-sm">Criar Nova Turma</span>
+                                        <span className="font-medium text-text-muted group-hover:text-text-main transition-colors text-sm">Criar Nova Turma</span>
                                     </button>
                                 )}
                             </div>
@@ -414,14 +414,14 @@ export const Classes = () => {
                 <div className="modal-overlay animate-fade-in">
                     <div className="glass-modal w-full max-w-md p-8 animate-slide-up relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0"></div>
-                        <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 text-text-muted hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all">
+                        <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-xl hover:bg-black/5 transition-all">
                             <X size={20} />
                         </button>
                         <div className="flex items-center gap-3 mb-6">
                             <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/20">
                                 <Plus size={20} className="text-primary" />
                             </div>
-                            <h3 className="text-2xl font-bold text-white">Nova Turma</h3>
+                            <h3 className="text-2xl font-bold text-text-main">Nova Turma</h3>
                         </div>
                         <form onSubmit={handleCreateClass} className="flex flex-col gap-5">
                             <div className="space-y-1">
@@ -433,7 +433,7 @@ export const Classes = () => {
                                 <input className="glass-input" value={newClass.schedule} onChange={e => setNewClass({ ...newClass, schedule: e.target.value })} required placeholder="Ex: Segundas e Quartas, 19h" />
                             </div>
                             <div className="flex justify-end gap-3 mt-2">
-                                <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 text-text-muted hover:text-white hover:bg-white/10 rounded-xl transition-all font-medium">Cancelar</button>
+                                <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 text-text-muted hover:text-text-main hover:bg-black/5 rounded-xl transition-all font-medium">Cancelar</button>
                                 <button type="submit" className="btn-primary-gradient px-6 py-2.5 text-white rounded-xl font-medium shadow-lg shadow-primary/20">Criar Turma</button>
                             </div>
                         </form>
@@ -446,14 +446,14 @@ export const Classes = () => {
                 <div className="modal-overlay animate-fade-in">
                     <div className="glass-modal w-full max-w-md p-8 animate-slide-up relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0"></div>
-                        <button onClick={() => setEditingClass(null)} className="absolute top-4 right-4 text-text-muted hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all">
+                        <button onClick={() => setEditingClass(null)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-xl hover:bg-black/5 transition-all">
                             <X size={20} />
                         </button>
                         <div className="flex items-center gap-3 mb-6">
                             <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/20">
                                 <Pencil size={20} className="text-primary" />
                             </div>
-                            <h3 className="text-2xl font-bold text-white">Editar Turma</h3>
+                            <h3 className="text-2xl font-bold text-text-main">Editar Turma</h3>
                         </div>
                         <form onSubmit={handleUpdateClass} className="flex flex-col gap-5">
                             <div className="space-y-1">
@@ -465,7 +465,7 @@ export const Classes = () => {
                                 <input className="glass-input" value={editClassSchedule} onChange={e => setEditClassSchedule(e.target.value)} required />
                             </div>
                             <div className="flex justify-end gap-3 mt-2">
-                                <button type="button" onClick={() => setEditingClass(null)} className="px-5 py-2.5 text-text-muted hover:text-white hover:bg-white/10 rounded-xl transition-all font-medium">Cancelar</button>
+                                <button type="button" onClick={() => setEditingClass(null)} className="px-5 py-2.5 text-text-muted hover:text-text-main hover:bg-black/5 rounded-xl transition-all font-medium">Cancelar</button>
                                 <button type="submit" className="btn-primary-gradient px-6 py-2.5 text-white rounded-xl font-medium shadow-lg shadow-primary/20">Salvar</button>
                             </div>
                         </form>
@@ -482,12 +482,12 @@ export const Classes = () => {
                             <div className="w-14 h-14 rounded-2xl bg-danger/20 flex items-center justify-center mb-4 text-danger border border-danger/30 shadow-lg shadow-danger/10">
                                 <AlertTriangle size={28} />
                             </div>
-                            <h3 className="text-xl font-bold text-white mb-2">Excluir Turma?</h3>
+                            <h3 className="text-xl font-bold text-text-main mb-2">Excluir Turma?</h3>
                             <p className="text-text-muted mb-6">
-                                Tem certeza que deseja excluir <strong className="text-white">{deletingClass.name}</strong>? Esta ação removerá todos os alunos e chamadas associados.
+                                Tem certeza que deseja excluir <strong className="text-text-main">{deletingClass.name}</strong>? Esta ação removerá todos os alunos e chamadas associados.
                             </p>
                             <div className="flex gap-3 w-full">
-                                <button onClick={() => setDeletingClass(null)} className="flex-1 py-2.5 text-text-muted hover:bg-white/10 transition-all rounded-xl font-medium">Cancelar</button>
+                                <button onClick={() => setDeletingClass(null)} className="flex-1 py-2.5 text-text-muted hover:bg-black/5 hover:text-text-main transition-all rounded-xl font-medium border border-transparent hover:border-black/10">Cancelar</button>
                                 <button onClick={handleDeleteClass} className="flex-1 py-2.5 bg-danger/90 hover:bg-danger text-white rounded-xl shadow-lg shadow-danger/30 transition-all font-medium">Excluir</button>
                             </div>
                         </div>

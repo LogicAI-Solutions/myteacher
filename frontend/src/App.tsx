@@ -34,14 +34,18 @@ const ProtectedStudentRoute = ({ children }: { children: ReactNode }) => {
   return children;
 };
 
+import { ThemeProvider } from './context/ThemeContext';
+
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <StudentAuthProvider>
-          <AppRoutes />
-        </StudentAuthProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <StudentAuthProvider>
+            <AppRoutes />
+          </StudentAuthProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }
