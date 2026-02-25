@@ -3,10 +3,9 @@ import api from '../api';
 import { Plus, Search, Pencil, Trash, X, AlertTriangle, UserCircle, LineChart as LineChartIcon, Download, MoreVertical, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { formatPhone, unmaskPhone } from '../utils/masks';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
+import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
 import { Loading } from '../components/Loading';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+
 import { Toast, type ToastType } from '../components/Toast';
 
 interface Student {
@@ -46,8 +45,7 @@ export const Students = () => {
     const [totalStudents, setTotalStudents] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
-    const { user } = useAuth();
-    const { theme } = useTheme();
+
 
     // Filter & Sort States
     const [sortBy, setSortBy] = useState('name');

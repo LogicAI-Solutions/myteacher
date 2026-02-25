@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { LogOut, LayoutDashboard, Users, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, Key, DollarSign, Palette } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { LogOut, LayoutDashboard, Users, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, DollarSign } from 'lucide-react';
+
 import { useAuth } from '../context/AuthContext';
-import api from '../api';
+
 
 export const Layout = () => {
     const { logout, user } = useAuth();
@@ -11,10 +11,7 @@ export const Layout = () => {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-    const { theme, setTheme } = useTheme();
-    // Messaging State
-    const [message, setMessage] = useState('');
-    const [error, setError] = useState('');
+
 
     const handleLogout = () => {
         logout();
