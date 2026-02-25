@@ -123,7 +123,7 @@ export const Students = () => {
         setIsLoading(true);
         try {
             const skip = page * limit;
-            let url = `/ students /? skip = ${skip}& limit=${limit}& search=${search}& sort_by=${sortBy}& sort_desc=${sortDesc} `;
+            let url = `/students/?skip=${skip}&limit=${limit}&search=${search}&sort_by=${sortBy}&sort_desc=${sortDesc}`;
 
             const res = await api.get(url);
             setStudents(res.data.items);
@@ -165,7 +165,7 @@ export const Students = () => {
             };
             const res = await api.post('/students/', payload);
             if (selectedClassId) {
-                await api.post(`/ classes / ${selectedClassId} /enroll/${res.data.id} `);
+                await api.post(`/classes/${selectedClassId}/enroll/${res.data.id}`);
             }
             setShowCreateModal(false);
             setNewStudentData({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, username: '', password: '' });
@@ -198,13 +198,13 @@ export const Students = () => {
                 username: editStudentData.username?.trim() || null,
                 password: editStudentData.password || null
             };
-            await api.put(`/ students / ${editingStudent.id} `, payload);
+            await api.put(`/students/${editingStudent.id}`, payload);
 
             // Atualizar turma se mudou
             const newClassId = editClassId === '' ? null : editClassId;
             if (newClassId !== originalClassId) {
                 const enrollmentUrl = newClassId
-                    ? `/ students / ${editingStudent.id}/enrollment?class_id=${newClassId}`
+                    ? `/students/${editingStudent.id}/enrollment?class_id=${newClassId}`
                     : `/students/${editingStudent.id}/enrollment`;
                 await api.put(enrollmentUrl);
             }

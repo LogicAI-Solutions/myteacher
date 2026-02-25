@@ -28,6 +28,11 @@ def read_users(skip: int = 0, limit: int = 100, search: str = None, db: Session 
 async def read_users_me(current_user: user_schemas.User = Depends(security.get_current_user)):
     return current_user
 
+@router.put("/users/me", response_model=user_schemas.User)
+def update_own_profile(user_update: user_schemas.UserUpdate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
+    updated_user = user_crud.update_user(db, user_id=current_user.id, user_update=user_update)
+    return updated_user
+
 @router.delete("/users/{user_id}")
 def delete_user(user_id: int, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
     if not current_user.is_admin:
