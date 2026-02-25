@@ -5,15 +5,27 @@ from backend.core import database
 from backend.models import users, classes, students, enrollments, attendance, payments
 from backend.core.router_loader import include_routers
 
-database.Base.metadata.create_all(bind=database.engine)
-
+from contextlib import asynccontextmanager
 from backend.core.init_db import init_db
-init_db()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Inicialização do banco de dados na inicialização do app
+    database.Base.metadata.create_all(bind=database.engine)
+    
+    db = next(database.get_db())
+    try:
+        init_db(db)
+    finally:
+        db.close()
+    yield
+
 
 app = FastAPI(
     title="TeacherApp API",
     description="API para gerenciamento de alunos e turmas",
-    version="1.0.1"
+    version="1.0.1",
+    lifespan=lifespan
 )
 
 cors_origins_env = os.getenv("CORS_ORIGINS", "")
