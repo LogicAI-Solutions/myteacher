@@ -11,14 +11,28 @@ from backend.core.init_db import init_db
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Inicialização do banco de dados na inicialização do app
-    database.Base.metadata.create_all(bind=database.engine)
-    
-    db = next(database.get_db())
+    print("🚀 API starting up...")
     try:
-        init_db(db)
-    finally:
-        db.close()
+        print("🗄️ Creating database tables...")
+        database.Base.metadata.create_all(bind=database.engine)
+        print("✅ Tables created/verified.")
+        
+        print("👤 Initializing admin user...")
+        db = next(database.get_db())
+        try:
+            init_db(db)
+            print("✅ Admin user initialization finished.")
+        except Exception as e:
+            print(f"⚠️ Error during init_db (non-critical): {e}")
+        finally:
+            db.close()
+    except Exception as e:
+        print(f"❌ CRITICAL ERROR during startup: {e}")
+        # Not crashing the app here might allow it to report health as unhealthy via another way,
+        # but for now we want to know what failed.
+    
     yield
+    print("🛑 API shutting down...")
 
 
 app = FastAPI(
