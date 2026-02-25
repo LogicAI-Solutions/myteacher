@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { UserCircle, Key, Palette, Camera, Check, AlertCircle, Save } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { UserCircle, Key, Palette, Camera, Check, AlertCircle, Save, X } from 'lucide-react';
+import ReactCrop, { centerCrop, makeAspectCrop, type Crop, type PixelCrop } from 'react-image-crop';
+import 'react-image-crop/dist/ReactCrop.css';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import api from '../api';
@@ -13,6 +15,14 @@ export const Profile = () => {
     const [avatar, setAvatar] = useState(user?.avatar || '');
     const [profileLoading, setProfileLoading] = useState(false);
     const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
+
+    // Image Cropping State
+    const [imgSrc, setImgSrc] = useState('');
+    const [crop, setCrop] = useState<Crop>();
+    const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+    const [aspect] = useState<number | undefined>(1);
+    const [showCropModal, setShowCropModal] = useState(false);
+    const imgRef = useRef<HTMLImageElement>(null);
 
     // Password State
     const [newPassword, setNewPassword] = useState('');
@@ -31,11 +41,60 @@ export const Profile = () => {
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setAvatar(reader.result as string);
-            };
+            reader.addEventListener('load', () => {
+                setImgSrc(reader.result?.toString() || '');
+                setShowCropModal(true);
+            });
             reader.readAsDataURL(file);
         }
+    };
+
+    function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+        if (aspect) {
+            const { width, height } = e.currentTarget;
+            setCrop(centerCrop(
+                makeAspectCrop(
+                    {
+                        unit: '%',
+                        width: 90,
+                    },
+                    aspect,
+                    width,
+                    height,
+                ),
+                width,
+                height,
+            ));
+        }
+    }
+
+    const getCroppedImg = () => {
+        if (!completedCrop || !imgRef.current) return;
+
+        const canvas = document.createElement('canvas');
+        const scaleX = imgRef.current.naturalWidth / imgRef.current.width;
+        const scaleY = imgRef.current.naturalHeight / imgRef.current.height;
+        canvas.width = completedCrop.width;
+        canvas.height = completedCrop.height;
+        const ctx = canvas.getContext('2d');
+
+        if (ctx) {
+            ctx.drawImage(
+                imgRef.current,
+                completedCrop.x * scaleX,
+                completedCrop.y * scaleY,
+                completedCrop.width * scaleX,
+                completedCrop.height * scaleY,
+                0,
+                0,
+                completedCrop.width,
+                completedCrop.height,
+            );
+        }
+
+        const base64Image = canvas.toDataURL('image/jpeg', 0.8);
+        setAvatar(base64Image);
+        setShowCropModal(false);
     };
 
     const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -79,6 +138,55 @@ export const Profile = () => {
 
     return (
         <div className="space-y-8 animate-fade-in pb-10">
+            {/* Cropping Modal */}
+            {showCropModal && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+                    <div className="glass-card w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden animate-spring-up">
+                        <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                            <h3 className="text-xl font-bold text-text-main">Recortar Foto</h3>
+                            <button onClick={() => setShowCropModal(false)} className="p-2 text-text-muted hover:text-text-main rounded-xl hover:bg-white/5 transition-all">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-auto p-6 flex items-center justify-center bg-black/20">
+                            {!!imgSrc && (
+                                <ReactCrop
+                                    crop={crop}
+                                    onChange={(_, percentCrop) => setCrop(percentCrop)}
+                                    onComplete={(c) => setCompletedCrop(c)}
+                                    aspect={aspect}
+                                    circularCrop
+                                >
+                                    <img
+                                        ref={imgRef}
+                                        alt="Crop me"
+                                        src={imgSrc}
+                                        onLoad={onImageLoad}
+                                        className="max-w-full max-h-[60vh] object-contain"
+                                    />
+                                </ReactCrop>
+                            )}
+                        </div>
+
+                        <div className="p-6 border-t border-white/5 flex gap-4">
+                            <button
+                                onClick={() => setShowCropModal(false)}
+                                className="flex-1 px-6 py-3 rounded-xl border border-white/10 text-text-muted font-bold hover:bg-white/5 transition-all"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={getCroppedImg}
+                                className="flex-1 glass-button px-6 py-3 rounded-xl text-white font-bold flex items-center justify-center gap-2"
+                            >
+                                <Check size={18} /> Confirmar Recorte
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <header className="flex flex-col gap-2">
                 <h1 className="text-3xl font-bold text-text-main flex items-center gap-3">
                     <UserCircle size={32} className="text-primary" /> Perfil e Configurações
