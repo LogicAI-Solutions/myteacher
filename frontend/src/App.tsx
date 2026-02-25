@@ -15,6 +15,7 @@ import Admin from './pages/Admin';
 import { NotFound } from './pages/NotFound';
 import { StudentLogin } from './pages/StudentLogin';
 import { StudentDashboard } from './pages/StudentDashboard';
+import { Profile } from './pages/Profile';
 
 // Layouts
 import { Layout } from './components/Layout';
@@ -34,14 +35,18 @@ const ProtectedStudentRoute = ({ children }: { children: ReactNode }) => {
   return children;
 };
 
+import { ThemeProvider } from './context/ThemeContext';
+
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <StudentAuthProvider>
-          <AppRoutes />
-        </StudentAuthProvider>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <StudentAuthProvider>
+            <AppRoutes />
+          </StudentAuthProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }
@@ -75,6 +80,7 @@ function AppRoutes() {
         <Route path="students" element={<Students />} />
         <Route path="payments" element={<Payments />} />
         <Route path="admin" element={<Admin />} />
+        <Route path="profile" element={<Profile />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

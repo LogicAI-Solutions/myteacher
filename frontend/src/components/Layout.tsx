@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
+import { LogOut, LayoutDashboard, Users, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, Key, DollarSign, Palette } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
-import { LogOut, LayoutDashboard, Users, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, Key, DollarSign } from 'lucide-react';
 import api from '../api';
 
 export const Layout = () => {
@@ -10,12 +11,8 @@ export const Layout = () => {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-    // Profile Modal State
-    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [loading, setLoading] = useState(false);
+    const { theme, setTheme } = useTheme();
+    // Messaging State
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
 
@@ -24,31 +21,7 @@ export const Layout = () => {
         navigate('/login');
     };
 
-    const handleUpdatePassword = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (newPassword !== confirmPassword) {
-            setError('As senhas não coincidem.');
-            return;
-        }
-        setLoading(true);
-        setError('');
-        setMessage('');
-
-        try {
-            await api.put('/users/me/password', { password: newPassword });
-            setMessage('Senha alterada com sucesso!');
-            setNewPassword('');
-            setConfirmPassword('');
-            setTimeout(() => {
-                setIsProfileModalOpen(false);
-                setMessage('');
-            }, 2000);
-        } catch (err: any) {
-            setError('Erro ao atualizar senha.');
-        } finally {
-            setLoading(false);
-        }
-    };
+    // Removed handleUpdatePassword since it's now in Profile.tsx
 
     return (
         <div className="flex h-screen bg-bg-dark overflow-hidden relative">
@@ -61,7 +34,7 @@ export const Layout = () => {
                 <h1 className="flex items-center gap-2 font-bold text-lg text-gradient">
                     <GraduationCap size={22} className="text-primary" /> MyTeacherApp
                 </h1>
-                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-text-muted hover:text-white rounded-xl hover:bg-white/10 transition-all duration-300">
+                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-text-muted hover:text-text-main rounded-xl hover:bg-white/5 transition-all duration-300">
                     {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
             </header>
@@ -94,7 +67,7 @@ export const Layout = () => {
 
                     <button
                         onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full p-1.5 hidden md:flex text-text-muted hover:text-white hover:border-primary/50 transition-all shadow-lg z-10 hover:bg-white/15"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-white/10 backdrop-blur-xl border border-white/10 rounded-full p-1.5 hidden md:flex text-text-muted hover:text-text-main hover:border-primary/50 transition-all shadow-md z-10 hover:bg-white/20"
                     >
                         {isSidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                     </button>
@@ -106,7 +79,7 @@ export const Layout = () => {
                     <Link
                         to="/dashboard"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`nav-link-glass ${location.pathname === '/dashboard' ? 'active text-white shadow-lg shadow-primary/25' : 'text-text-muted hover:text-white'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
+                        className={`nav-link-glass ${location.pathname === '/dashboard' ? 'active text-white shadow-lg' : 'text-text-muted hover:text-text-main'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                         title="Dashboard"
                     >
                         <LayoutDashboard size={20} className={`shrink-0 ${location.pathname === '/dashboard' ? '' : ''}`} />
@@ -116,7 +89,7 @@ export const Layout = () => {
                     <Link
                         to="/dashboard/classes"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`nav-link-glass ${location.pathname.includes('/classes') ? 'active text-white shadow-lg shadow-primary/25' : 'text-text-muted hover:text-white'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
+                        className={`nav-link-glass ${location.pathname.includes('/classes') ? 'active text-white shadow-lg' : 'text-text-muted hover:text-text-main'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                         title="Turmas"
                     >
                         <GraduationCap size={20} className={`shrink-0 ${location.pathname.includes('/classes') ? '' : ''}`} />
@@ -126,7 +99,7 @@ export const Layout = () => {
                     <Link
                         to="/dashboard/students"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`nav-link-glass ${location.pathname.includes('/students') ? 'active text-white shadow-lg shadow-primary/25' : 'text-text-muted hover:text-white'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
+                        className={`nav-link-glass ${location.pathname.includes('/students') ? 'active text-white shadow-lg' : 'text-text-muted hover:text-text-main'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                         title="Alunos"
                     >
                         <Users size={20} className={`shrink-0 ${location.pathname.includes('/students') ? '' : ''}`} />
@@ -136,7 +109,7 @@ export const Layout = () => {
                     <Link
                         to="/dashboard/payments"
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`nav-link-glass ${location.pathname.includes('/payments') ? 'active text-white shadow-lg shadow-primary/25' : 'text-text-muted hover:text-white'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
+                        className={`nav-link-glass ${location.pathname.includes('/payments') ? 'active text-white shadow-lg' : 'text-text-muted hover:text-text-main'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                         title="Financeiro"
                     >
                         <DollarSign size={20} className={`shrink-0 ${location.pathname.includes('/payments') ? '' : ''}`} />
@@ -147,7 +120,7 @@ export const Layout = () => {
                         <Link
                             to="/dashboard/admin"
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className={`nav-link-glass ${location.pathname.includes('/admin') ? 'active text-white shadow-lg shadow-primary/25' : 'text-text-muted hover:text-white'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
+                            className={`nav-link-glass ${location.pathname.includes('/admin') ? 'active text-white shadow-lg' : 'text-text-muted hover:text-text-main'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                             title="Administração"
                         >
                             <Settings size={20} className={`shrink-0 ${location.pathname.includes('/admin') ? 'animate-spin-slow' : ''}`} />
@@ -155,20 +128,35 @@ export const Layout = () => {
                         </Link>
                     )}
 
-                    <button
-                        onClick={() => { setIsProfileModalOpen(true); setIsMobileMenuOpen(false); }}
-                        className={`nav-link-glass text-text-muted hover:text-white w-full text-left ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
-                        title="Meus Dados"
-                    >
-                        <UserCircle size={20} className="shrink-0" />
-                        <span className={`whitespace-nowrap transition-all duration-300 ${isSidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'}`}>Meus Dados</span>
-                    </button>
+                    {/* Profile link moved to footer next to logout */}
+
+                    {/* Theme selector moved to Profile page */}
                 </nav>
 
-                <div className="p-4 border-t border-white/5">
-                    {!isSidebarCollapsed && (
-                        <div className="text-sm text-text-muted mb-3 px-2 truncate">{user?.email}</div>
-                    )}
+                <div className="p-4 border-t border-white/5 space-y-2">
+                    <Link
+                        to="/dashboard/profile"
+                        className={`flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/5 transition-all duration-300 group ${location.pathname === '/dashboard/profile' ? 'bg-white/5' : ''}`}
+                        title="Meu Perfil"
+                    >
+                        <div className="shrink-0 relative">
+                            {user?.avatar ? (
+                                <img src={user.avatar} alt="Avatar" className="w-9 h-9 rounded-full border border-white/10 object-cover group-hover:border-primary/50 transition-colors" />
+                            ) : (
+                                <UserCircle size={36} className="text-text-muted group-hover:text-primary transition-colors" />
+                            )}
+                        </div>
+                        {!isSidebarCollapsed && (
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-sm font-semibold text-text-main truncate group-hover:text-primary transition-colors">
+                                    {user?.full_name || 'Usuário'}
+                                </span>
+                                <span className="text-xs text-text-muted truncate">
+                                    {user?.email}
+                                </span>
+                            </div>
+                        )}
+                    </Link>
                     <button
                         onClick={handleLogout}
                         className={`btn w-full text-danger border-danger/30 bg-danger/10 hover:bg-danger/20 backdrop-blur-sm ${isSidebarCollapsed ? 'justify-center px-2' : 'justify-start'}`}
@@ -187,74 +175,7 @@ export const Layout = () => {
                 </div>
             </main>
 
-            {/* Profile/Password Modal */}
-            {
-                isProfileModalOpen && (
-                    <div className="modal-overlay animate-fade-in">
-                        <div className="glass-modal w-full max-w-md p-8 relative animate-slide-up">
-                            <button onClick={() => setIsProfileModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-white p-2 rounded-xl hover:bg-white/10 transition-all">
-                                <X size={20} />
-                            </button>
-                            <h2 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
-                                <UserCircle size={22} className="text-primary" /> Meus Dados
-                            </h2>
-
-                            <div className="mb-6 p-4 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm">
-                                <p className="text-xs text-text-muted uppercase tracking-wider">Email</p>
-                                <p className="text-white font-medium mt-1">{user?.email}</p>
-                            </div>
-
-                            <form onSubmit={handleUpdatePassword} className="space-y-4">
-                                <h3 className="text-lg font-semibold text-white flex items-center gap-2 border-t border-white/10 pt-4">
-                                    <Key size={16} className="text-primary" /> Alterar Senha
-                                </h3>
-
-                                {error && <div className="text-danger text-sm bg-danger/10 p-3 rounded-xl border border-danger/20 backdrop-blur-sm">{error}</div>}
-                                {message && <div className="text-success text-sm bg-success/10 p-3 rounded-xl border border-success/20 backdrop-blur-sm">{message}</div>}
-
-                                <div>
-                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nova Senha</label>
-                                    <input
-                                        type="password"
-                                        className="glass-input mt-2"
-                                        value={newPassword}
-                                        onChange={e => setNewPassword(e.target.value)}
-                                        required
-                                        placeholder="********"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Confirmar Senha</label>
-                                    <input
-                                        type="password"
-                                        className="glass-input mt-2"
-                                        value={confirmPassword}
-                                        onChange={e => setConfirmPassword(e.target.value)}
-                                        required
-                                        placeholder="********"
-                                    />
-                                </div>
-                                <div className="flex justify-end gap-3 mt-6">
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsProfileModalOpen(false)}
-                                        className="px-4 py-2 rounded-xl text-text-muted hover:bg-white/10 transition-colors"
-                                    >
-                                        Cancelar
-                                    </button>
-                                    <button
-                                        type="submit"
-                                        disabled={loading}
-                                        className="glass-button text-white font-bold py-2 px-6 rounded-xl cursor-pointer disabled:opacity-50"
-                                    >
-                                        {loading ? 'Salvando...' : 'Salvar Senha'}
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                )
-            }
+            {/* Removed Profile Modal */}
         </div >
     );
 };
