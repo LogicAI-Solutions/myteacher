@@ -342,7 +342,7 @@ export const Students = () => {
                 <div className="flex gap-4 max-w-4xl mx-auto">
                     <div className="relative group flex-1">
                         <div className="absolute inset-0 bg-primary/10 rounded-2xl blur-xl group-hover:bg-primary/20 transition-all duration-500"></div>
-                        <div className="relative glass border border-black/5 rounded-2xl flex items-center p-1">
+                        <div className="relative glass rounded-2xl flex items-center p-1">
                             <div className="pl-4 pr-3 text-text-muted group-focus-within:text-primary transition-colors">
                                 <Search size={24} />
                             </div>
@@ -374,7 +374,7 @@ export const Students = () => {
                 )}
                 <div className="overflow-x-auto flex-1 overflow-y-auto">
                     <table className="w-full min-w-[800px]">
-                        <thead className="bg-white/50 backdrop-blur-md border-b border-black/5 sticky top-0 z-10 [&_th:first-child]:rounded-none [&_th:last-child]:rounded-none">
+                        <thead className="glass-header sticky top-0 z-10 [&_th:first-child]:rounded-none [&_th:last-child]:rounded-none">
                             <tr>
                                 <th
                                     className="text-left p-3 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-main transition-colors group select-none"
@@ -548,11 +548,11 @@ export const Students = () => {
                 </div>
 
                 {/* Pagination Controls */}
-                <div className="flex justify-between items-center p-4 border-t border-black/5 bg-white/50 backdrop-blur-sm mt-auto">
+                <div className="flex justify-between items-center p-4 glass-header border-b-0 border-t mt-auto">
                     <button
                         onClick={() => setPage(p => Math.max(0, Number(p) - 1))}
                         disabled={page === 0}
-                        className="px-4 py-2 bg-black/5 hover:bg-black/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm text-text-main transition-all border border-black/5"
+                        className="px-4 py-2 btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm"
                     >
                         Anterior
                     </button>
@@ -562,7 +562,7 @@ export const Students = () => {
                     <button
                         onClick={() => setPage(p => Number(p) + 1)}
                         disabled={(page + 1) * limit >= totalStudents}
-                        className="px-4 py-2 bg-black/5 hover:bg-black/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm text-text-main transition-all border border-black/5"
+                        className="px-4 py-2 btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm"
                     >
                         Próxima
                     </button>

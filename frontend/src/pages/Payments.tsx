@@ -234,11 +234,12 @@ export const Payments = () => {
                 </div>
 
                 {/* Filters */}
-                <div className="flex items-center gap-2 bg-white/50 backdrop-blur-md p-2 rounded-2xl border border-black/5 shadow-sm">
+                <div className="flex items-center gap-2 glass p-2 rounded-2xl">
                     <select
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value as 'all' | 'PAID' | 'PENDING')}
-                        className="bg-black/5 border border-black/5 rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-primary/40 [&>option]:bg-white"
+                        style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
+                        className="rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none border [&>option]:bg-bg-dark"
                     >
                         <option value="all">Todos os Status</option>
                         <option value="PAID">Pagos</option>
@@ -247,19 +248,19 @@ export const Payments = () => {
 
                     <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
 
-                    <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="bg-black/5 border border-black/5 rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-primary/40">
+                    <select style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }} value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="border rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none">
                         {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                            <option key={m} value={m} className="bg-white text-text-main">{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'short' })}</option>
+                            <option key={m} value={m} className="bg-bg-dark text-text-main">{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'short' })}</option>
                         ))}
                     </select>
-                    <select value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="bg-black/5 border border-black/5 rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-primary/40">
+                    <select style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }} value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="border rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none">
                         {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
-                            <option key={y} value={y} className="bg-white text-text-main">{y}</option>
+                            <option key={y} value={y} className="bg-bg-dark text-text-main">{y}</option>
                         ))}
                     </select>
                     <button
                         onClick={handleExportReport}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-black/5 text-success hover:bg-success/10 rounded-lg transition-all text-xs border border-black/5"
+                        className="flex items-center gap-1.5 px-3 py-1.5 btn-outline text-success rounded-lg transition-all text-xs"
                         title="Exportar Relatório"
                     >
                         <DollarSign size={14} />
@@ -327,7 +328,7 @@ export const Payments = () => {
             <div className={`transition-all duration-500 mb-6 sticky top-0 z-10 ${search.length > 0 ? '-translate-y-2 opacity-95' : ''}`}>
                 <div className="relative group max-w-2xl mx-auto">
                     <div className="absolute inset-0 bg-primary/10 rounded-2xl blur-xl group-hover:bg-primary/20 transition-all duration-500"></div>
-                    <div className="relative bg-white/80 backdrop-blur-xl border border-black/5 shadow-xl rounded-2xl flex items-center p-1">
+                    <div className="relative glass rounded-2xl flex items-center p-1">
                         <div className="pl-4 pr-3 text-text-muted group-focus-within:text-primary transition-colors">
                             <Search size={24} />
                         </div>
@@ -349,7 +350,7 @@ export const Payments = () => {
                         <Loading text={saving ? "Salvando alterações..." : "Carregando financeiro..."} />
                     </div>
                 )}
-                <div className="p-4 border-b border-black/5 bg-black/5 backdrop-blur-sm flex items-center justify-between shrink-0">
+                <div className="p-4 glass-header border-b-0 flex items-center justify-between shrink-0">
                     <h3 className="font-bold text-text-main">Relatório de {selectedMonth}/{selectedYear}</h3>
                     <button
                         onClick={handleSavePayments}
@@ -364,7 +365,7 @@ export const Payments = () => {
                 </div>
                 <div className="overflow-x-auto flex-1 overflow-y-auto">
                     <table className="w-full">
-                        <thead className="bg-bg-dark sticky top-0 z-10 [&_th:first-child]:rounded-none [&_th:last-child]:rounded-none">
+                        <thead className="glass-header sticky top-0 z-10 [&_th:first-child]:rounded-none [&_th:last-child]:rounded-none">
                             <tr>
                                 <th
                                     className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-main transition-colors group select-none flex items-center gap-1"
@@ -424,11 +425,11 @@ export const Payments = () => {
                 </div>
 
                 {/* Pagination Controls */}
-                <div className="flex justify-between items-center p-4 border-t border-white/5 bg-white/3 backdrop-blur-sm mt-auto shrink-0">
+                <div className="flex justify-between items-center p-4 glass-header border-b-0 border-t mt-auto shrink-0">
                     <button
                         onClick={() => setPage(p => Math.max(0, p - 1))}
                         disabled={page === 0}
-                        className="px-4 py-2 bg-black/5 hover:bg-black/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm text-text-main transition-all border border-black/5"
+                        className="px-4 py-2 btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm"
                     >
                         Anterior
                     </button>
@@ -438,7 +439,7 @@ export const Payments = () => {
                     <button
                         onClick={() => setPage(p => p + 1)}
                         disabled={(page + 1) * limit >= totalStudents}
-                        className="px-4 py-2 bg-black/5 hover:bg-black/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm text-text-main transition-all border border-black/5"
+                        className="px-4 py-2 btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm"
                     >
                         Próxima
                     </button>

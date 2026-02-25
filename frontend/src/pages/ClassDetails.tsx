@@ -593,7 +593,7 @@ export const ClassDetails = () => {
                 </div>
 
                 {/* Tabs */}
-                <div className="mt-6 bg-white/50 p-1 rounded-xl flex gap-1 w-full md:w-fit overflow-x-auto border border-black/5">
+                <div className="mt-6 glass p-1 rounded-xl flex gap-1 w-full md:w-fit overflow-x-auto border border-black/5">
                     {[
                         { key: 'attendance', label: 'Chamada', icon: <ClipboardList size={16} /> },
                         { key: 'history', label: 'Histórico', icon: <History size={16} /> },
@@ -685,7 +685,7 @@ export const ClassDetails = () => {
                 {activeTab === 'attendance' && (
                     <div className="glass-card p-5 sm:p-6 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-white/5 pb-4 gap-3">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 glass-header border-b-0 pb-4 gap-3">
                             <h2 className="text-xl font-bold flex items-center gap-3 text-text-main">
                                 <div className="bg-primary/15 p-2 rounded-lg border border-primary/20">
                                     <ClipboardList size={20} className="text-primary" />
@@ -705,19 +705,19 @@ export const ClassDetails = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                             <div className="md:col-span-2 space-y-1">
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Descrição</label>
-                                <input className="w-full p-3 bg-white border border-black/10 rounded-lg text-text-main focus:ring-2 focus:ring-primary focus:border-transparent transition-all" value={sessionDesc} onChange={e => setSessionDesc(e.target.value)} placeholder="Ex: Introdução à Álgebra (Aula 01)" />
+                                <input className="glass-input" value={sessionDesc} onChange={e => setSessionDesc(e.target.value)} placeholder="Ex: Introdução à Álgebra (Aula 01)" />
                             </div>
                             <div className="space-y-1">
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Data</label>
-                                <input type="date" className="w-full p-3 bg-white border border-black/10 rounded-lg text-text-main focus:ring-2 focus:ring-primary focus:border-transparent transition-all" value={sessionDate} onChange={e => setSessionDate(e.target.value)} />
+                                <input type="date" className="glass-input" value={sessionDate} onChange={e => setSessionDate(e.target.value)} />
                             </div>
                         </div>
 
                         <div className="overflow-hidden rounded-xl border border-black/5 bg-black/5">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
-                                    <thead>
-                                        <tr className="bg-black/5 border-b border-black/5">
+                                    <thead className="glass-header">
+                                        <tr>
                                             <th className="text-left p-4 text-xs font-bold text-text-muted uppercase tracking-wider min-w-[200px]">Aluno</th>
                                             <th className="text-left p-4 text-xs font-bold text-text-muted uppercase tracking-wider w-[150px]">Status</th>
                                             <th className="text-center p-4 text-xs font-bold text-text-muted uppercase tracking-wider w-[150px]">Trabalho Entregue?</th>
@@ -737,8 +737,8 @@ export const ClassDetails = () => {
                                                             value={log.status}
                                                             onChange={e => updateLog(s.id, 'status', e.target.value)}
                                                         >
-                                                            <option value="present" className="bg-white text-text-main">Presente</option>
-                                                            <option value="absent" className="bg-white text-text-main">Ausente</option>
+                                                            <option value="present" className="bg-bg-dark text-text-main">Presente</option>
+                                                            <option value="absent" className="bg-bg-dark text-text-main">Ausente</option>
                                                         </select>
                                                     </td>
                                                     <td className="p-4 text-center">
