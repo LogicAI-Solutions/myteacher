@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
-import { Plus, Save, Calendar, Users, X, FileText, Pencil, Trash2, AlertTriangle, Eye, Download, BookOpen, ClipboardList, History, ArrowLeft, DollarSign, GraduationCap } from 'lucide-react';
+import { Plus, Save, Calendar, Users, X, FileText, Pencil, Trash2, AlertTriangle, Eye, Download, BookOpen, ClipboardList, History, ArrowLeft, DollarSign, GraduationCap, ArrowRight } from 'lucide-react';
 import { formatPhone, unmaskPhone, formatCurrency, parseCurrency } from '../utils/masks';
 import { Loading } from '../components/Loading';
 import { ManageStudentsModal } from '../components/ManageStudentsModal';
@@ -713,9 +713,14 @@ export const ClassDetails = () => {
                             </div>
                         </div>
 
+                        <div className="md:hidden flex justify-end mb-2">
+                            <span className="text-xs font-medium text-text-muted flex items-center gap-1 bg-black/5 px-3 py-1.5 rounded-full border border-black/5">
+                                Deslize para ver mais <ArrowRight size={14} />
+                            </span>
+                        </div>
                         <div className="overflow-hidden rounded-xl border border-black/5 bg-black/5">
                             <div className="overflow-x-auto">
-                                <table className="w-full">
+                                <table className="w-full min-w-[900px]">
                                     <thead className="glass-header">
                                         <tr>
                                             <th className="text-left p-4 text-xs font-bold text-text-muted uppercase tracking-wider min-w-[200px]">Aluno</th>
