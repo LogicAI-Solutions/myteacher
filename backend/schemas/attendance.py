@@ -8,6 +8,8 @@ class AttendanceLogBase(BaseModel):
     essay_delivered: bool = False
     grade: Optional[float] = None
     observation: Optional[str] = None
+    essay_image: Optional[str] = None
+
 
 class AttendanceLogCreate(AttendanceLogBase):
     pass

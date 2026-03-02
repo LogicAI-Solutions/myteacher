@@ -12,7 +12,12 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
-class UserUpdate(UserBase):
+class UserUpdate(BaseModel):
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    birth_date: Optional[date] = None
+    nickname: Optional[str] = None
+    avatar: Optional[str] = None
     password: Optional[str] = None
     is_active: Optional[bool] = None
 

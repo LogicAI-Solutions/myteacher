@@ -24,6 +24,7 @@ class AttendanceLog(Base):
     essay_delivered = Column(Boolean, default=False)
     grade = Column(Float, nullable=True) # 960
     observation = Column(Text, nullable=True)
+    essay_image = Column(String, nullable=True)
 
     session = relationship("AttendanceSession", back_populates="logs")
     student = relationship("Student")

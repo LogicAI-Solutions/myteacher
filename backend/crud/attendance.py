@@ -43,7 +43,8 @@ def create_attendance_session(db: Session, session: AttendanceSessionCreate, cla
             status=log.status,
             essay_delivered=log.essay_delivered,
             grade=log.grade,
-            observation=log.observation
+            observation=log.observation,
+            essay_image=log.essay_image
         )
         db.add(db_log)
     
@@ -74,7 +75,8 @@ def update_attendance_session(db: Session, session_id: int, session_data: Attend
             status=log.status,
             essay_delivered=log.essay_delivered,
             grade=log.grade,
-            observation=log.observation
+            observation=log.observation,
+            essay_image=log.essay_image
         )
         db.add(db_log)
         

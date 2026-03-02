@@ -7,7 +7,7 @@ import { useTheme } from '../context/ThemeContext';
 import api from '../api';
 
 export const Profile = () => {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const { theme, setTheme } = useTheme();
 
     // Profile Info State
@@ -107,6 +107,7 @@ export const Profile = () => {
                 full_name: fullName,
                 avatar: avatar
             });
+            updateUser({ full_name: fullName, avatar: avatar });
             setProfileMessage({ type: 'success', text: 'Perfil atualizado com sucesso!' });
         } catch (err: any) {
             setProfileMessage({ type: 'error', text: 'Erro ao atualizar perfil.' });
