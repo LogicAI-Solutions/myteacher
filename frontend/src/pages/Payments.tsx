@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
-import { DollarSign, CheckCircle, AlertCircle, Search, ArrowUp, ArrowDown } from 'lucide-react';
+import { DollarSign, CheckCircle, AlertCircle, Search, ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
 import { formatCurrency, parseCurrency } from '../utils/masks';
 import { Loading } from '../components/Loading';
 
@@ -344,6 +344,11 @@ export const Payments = () => {
             </div>
 
             {/* Table */}
+            <div className="md:hidden flex justify-end mb-2">
+                <span className="text-xs font-medium text-text-muted flex items-center gap-1 bg-black/5 px-3 py-1.5 rounded-full border border-black/5">
+                    Deslize para ver mais <ArrowRight size={14} />
+                </span>
+            </div>
             <div className="glass-card overflow-hidden relative h-[500px] flex flex-col">
                 {(loading || saving) && (
                     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl z-[60]">
@@ -364,7 +369,7 @@ export const Payments = () => {
                     </button>
                 </div>
                 <div className="overflow-x-auto flex-1 overflow-y-auto">
-                    <table className="w-full">
+                    <table className="w-full min-w-[900px]">
                         <thead className="glass-header sticky top-0 z-10 [&_th:first-child]:rounded-none [&_th:last-child]:rounded-none">
                             <tr>
                                 <th
@@ -374,9 +379,9 @@ export const Payments = () => {
                                     Aluno
                                     {sortDesc ? <ArrowDown size={14} className="text-primary" /> : <ArrowUp size={14} className="text-primary" />}
                                 </th>
-                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider hidden md:table-cell">Responsável</th>
-                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider hidden xl:table-cell">Ano</th>
-                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider hidden xl:table-cell">Tipo</th>
+                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider whitespace-nowrap min-w-[150px]">Responsável</th>
+                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider whitespace-nowrap min-w-[120px]">Ano</th>
+                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider whitespace-nowrap min-w-[120px]">Tipo</th>
                                 <th className="text-center p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider w-[90px] sm:w-[140px]">Status</th>
                                 <th className="text-right p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider w-[80px] sm:w-[140px]">Valor</th>
                             </tr>
@@ -390,11 +395,11 @@ export const Payments = () => {
                                         <td className="p-2 sm:p-4">
                                             <div className="font-medium text-white text-xs sm:text-sm truncate max-w-[100px] sm:max-w-none">{student.name}</div>
                                         </td>
-                                        <td className="p-2 sm:p-4 hidden md:table-cell">
-                                            <div className="text-sm text-text-muted truncate max-w-[120px]">{student.parent_name || '-'}</div>
+                                        <td className="p-2 sm:p-4 whitespace-nowrap">
+                                            <div className="text-sm text-text-muted truncate max-w-[150px]">{student.parent_name || '-'}</div>
                                         </td>
-                                        <td className="p-2 sm:p-4 text-left text-sm text-text-muted hidden xl:table-cell">{student.school_year || '-'}</td>
-                                        <td className="p-2 sm:p-4 text-left text-sm text-text-muted hidden xl:table-cell">{student.class_type || '-'}</td>
+                                        <td className="p-2 sm:p-4 text-left text-sm text-text-muted whitespace-nowrap">{student.school_year || '-'}</td>
+                                        <td className="p-2 sm:p-4 text-left text-sm text-text-muted whitespace-nowrap">{student.class_type || '-'}</td>
                                         <td className="p-2 sm:p-4">
                                             <select
                                                 className={`w-full px-2 py-1 sm:p-2 rounded-xl text-xs sm:text-sm border focus:ring-2 focus:ring-primary/40 outline-none transition-all cursor-pointer backdrop-blur-sm ${isPaid ? 'bg-success/10 text-success border-success/30' : 'bg-warning/10 text-warning border-warning/30'}`}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import { User, Plus, Trash2, Key, X, AlertTriangle, Edit, Search } from 'lucide-react';
+import { User, Plus, Trash2, Key, X, AlertTriangle, Edit, Search, ArrowRight } from 'lucide-react';
 
 interface UserData {
     id: number;
@@ -257,8 +257,13 @@ const Admin = () => {
                         </div>
                     </div>
 
+                    <div className="md:hidden flex justify-end mb-2 mt-4">
+                        <span className="text-xs font-medium text-text-muted flex items-center gap-1 bg-black/5 px-3 py-1.5 rounded-full border border-white/5">
+                            Deslize para ver mais <ArrowRight size={14} />
+                        </span>
+                    </div>
                     <div className="overflow-x-auto custom-scrollbar rounded-lg border border-white/5">
-                        <table className="w-full text-left border-collapse">
+                        <table className="w-full min-w-[800px] text-left border-collapse">
                             <thead>
                                 <tr className="bg-white/5 border-b border-white/10 text-text-muted text-sm uppercase tracking-wider">
                                     <th className="p-4 font-medium sticky top-0 bg-bg-card z-10 w-[25%]">
