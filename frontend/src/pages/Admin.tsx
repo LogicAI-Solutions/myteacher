@@ -233,7 +233,7 @@ const Admin = () => {
                 {/* Users List with Search and Sort */}
                 <div className="glass-card p-6">
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                        <h2 className="text-xl font-bold flex items-center gap-2 text-white">
+                        <h2 className="text-xl font-bold flex items-center gap-2 text-text-main">
                             <User size={20} className="text-primary" /> Usuários Cadastrados
                         </h2>
 
@@ -243,7 +243,7 @@ const Admin = () => {
                                 <input
                                     type="text"
                                     placeholder="Buscar por nome, email..."
-                                    className="w-full pl-10 pr-4 py-2 bg-bg-dark/50 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-text-muted/50"
+                                    className="w-full pl-10 pr-4 py-2 bg-bg-dark/50 border border-white/10 rounded-lg text-text-main focus:outline-none focus:border-primary/50 transition-all placeholder:text-text-muted/50"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
@@ -263,7 +263,7 @@ const Admin = () => {
                         </span>
                     </div>
                     <div className="overflow-x-auto custom-scrollbar rounded-lg border border-white/5">
-                        <table className="w-full min-w-[800px] text-left border-collapse">
+                        <table className="w-full text-left border-collapse" style={{ minWidth: '800px' }}>
                             <thead>
                                 <tr className="bg-white/5 border-b border-white/10 text-text-muted text-sm uppercase tracking-wider">
                                     <th className="p-4 font-medium sticky top-0 bg-bg-card z-10 w-[25%]">
@@ -282,7 +282,7 @@ const Admin = () => {
                             <tbody className="text-sm">
                                 {users.map(user => (
                                     <tr key={user.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                        <td className="p-4 font-medium text-white">{user.full_name || '-'}</td>
+                                        <td className="p-4 font-medium text-text-main">{user.full_name || '-'}</td>
                                         <td className="p-4 text-text-muted">{user.nickname || '-'}</td>
                                         <td className="p-4 text-text-muted">{user.email}</td>
                                         <td className="p-4 text-center">
@@ -359,10 +359,10 @@ const Admin = () => {
             {isCreateModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
                     <div className="glass-card w-full max-w-md p-6 relative animate-slide-up">
-                        <button onClick={() => setIsCreateModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-white">
+                        <button onClick={() => setIsCreateModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-text-main">
                             <X size={20} />
                         </button>
-                        <h2 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
+                        <h2 className="text-xl font-bold mb-6 text-text-main flex items-center gap-2">
                             <Plus size={20} className="text-primary" /> Novo Professor
                         </h2>
                         <form onSubmit={handleCreateUser} className="space-y-4">
@@ -370,7 +370,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome Completo</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserName}
                                     onChange={e => setNewUserName(e.target.value)}
                                     placeholder="João da Silva"
@@ -380,7 +380,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Data de Nascimento</label>
                                 <input
                                     type="date"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserBirthDate}
                                     onChange={e => setNewUserBirthDate(e.target.value)}
                                 />
@@ -389,7 +389,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nickname (Apelido)</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserNickname}
                                     onChange={e => setNewUserNickname(e.target.value)}
                                     placeholder="Prof. João"
@@ -399,7 +399,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Email</label>
                                 <input
                                     type="email"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserEmail}
                                     onChange={e => setNewUserEmail(e.target.value)}
                                     required
@@ -410,7 +410,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Senha Inicial</label>
                                 <input
                                     type="password"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserPassword}
                                     onChange={e => setNewUserPassword(e.target.value)}
                                     required
@@ -446,7 +446,7 @@ const Admin = () => {
                             <div className="w-12 h-12 rounded-full bg-danger/20 flex items-center justify-center mb-4 text-danger">
                                 <AlertTriangle size={24} />
                             </div>
-                            <h3 className="text-xl font-bold text-white mb-2">Excluir Usuário?</h3>
+                            <h3 className="text-xl font-bold text-text-main mb-2">Excluir Usuário?</h3>
                             <p className="text-text-muted mb-6">
                                 Tem certeza que deseja remover <strong>{selectedUser.email}</strong>? Esta ação não pode ser desfeita.
                             </p>
@@ -474,10 +474,10 @@ const Admin = () => {
             {isResetModalOpen && selectedUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
                     <div className="glass-card w-full max-w-md p-6 relative animate-slide-up">
-                        <button onClick={() => setIsResetModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-white">
+                        <button onClick={() => setIsResetModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-text-main">
                             <X size={20} />
                         </button>
-                        <h2 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
+                        <h2 className="text-xl font-bold mb-6 text-text-main flex items-center gap-2">
                             <Key size={20} className="text-primary" /> Nova Senha
                         </h2>
                         <p className="text-sm text-text-muted mb-4">
@@ -488,7 +488,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nova Senha</label>
                                 <input
                                     type="password"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newPassword}
                                     onChange={e => setNewPassword(e.target.value)}
                                     required
@@ -524,7 +524,7 @@ const Admin = () => {
                         <button onClick={() => setIsEditModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-white">
                             <X size={20} />
                         </button>
-                        <h2 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
+                        <h2 className="text-xl font-bold mb-6 text-text-main flex items-center gap-2">
                             <Edit size={20} className="text-primary" /> Editar Professor
                         </h2>
                         <form onSubmit={handleEditUser} className="space-y-4">
@@ -532,7 +532,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome Completo</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editUserName}
                                     onChange={e => setEditUserName(e.target.value)}
                                     placeholder="João da Silva"
@@ -542,7 +542,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Data de Nascimento</label>
                                 <input
                                     type="date"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editUserBirthDate}
                                     onChange={e => setEditUserBirthDate(e.target.value)}
                                 />
@@ -551,7 +551,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nickname (Apelido)</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editUserNickname}
                                     onChange={e => setEditUserNickname(e.target.value)}
                                     placeholder="Prof. João"
@@ -561,7 +561,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Email</label>
                                 <input
                                     type="email"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editUserEmail}
                                     onChange={e => setEditUserEmail(e.target.value)}
                                     required

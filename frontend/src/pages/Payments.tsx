@@ -368,8 +368,8 @@ export const Payments = () => {
                         {saving ? 'Salvando...' : <><DollarSign size={16} /> Salvar Alterações</>}
                     </button>
                 </div>
-                <div className="overflow-x-auto flex-1 overflow-y-auto">
-                    <table className="w-full min-w-[900px]">
+                <div className="overflow-x-auto flex-1 overflow-y-auto custom-scrollbar">
+                    <table className="w-full border-collapse" style={{ minWidth: '900px' }}>
                         <thead className="glass-header sticky top-0 z-10 [&_th:first-child]:rounded-none [&_th:last-child]:rounded-none">
                             <tr>
                                 <th
@@ -393,7 +393,7 @@ export const Payments = () => {
                                 return (
                                     <tr key={student.id} className="hover:bg-white/5 transition-colors group">
                                         <td className="p-2 sm:p-4">
-                                            <div className="font-medium text-white text-xs sm:text-sm truncate max-w-[100px] sm:max-w-none">{student.name}</div>
+                                            <div className="font-medium text-text-main text-xs sm:text-sm truncate max-w-[100px] sm:max-w-none">{student.name}</div>
                                         </td>
                                         <td className="p-2 sm:p-4 whitespace-nowrap">
                                             <div className="text-sm text-text-muted truncate max-w-[150px]">{student.parent_name || '-'}</div>

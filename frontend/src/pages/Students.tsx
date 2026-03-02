@@ -375,8 +375,8 @@ export const Students = () => {
                         <Loading text="Carregando alunos..." />
                     </div>
                 )}
-                <div className="overflow-x-auto flex-1 overflow-y-auto">
-                    <table className="w-full min-w-[1000px]">
+                <div className="overflow-x-auto flex-1 overflow-y-auto custom-scrollbar">
+                    <table className="w-full border-collapse" style={{ minWidth: '1000px' }}>
                         <thead className="glass-header sticky top-0 z-10 [&_th:first-child]:rounded-none [&_th:last-child]:rounded-none">
                             <tr>
                                 <th
@@ -452,7 +452,7 @@ export const Students = () => {
                                             <select
                                                 className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-medium border focus:ring-2 focus:ring-primary/40 outline-none transition-all cursor-pointer backdrop-blur-sm ${student.active
                                                     ? 'bg-success/10 text-success border-success/20'
-                                                    : 'bg-black/5 text-text-muted border-black/5'}`}
+                                                    : 'bg-black/5 text-text-muted border-black/10'}`}
                                                 value={student.active ? 'true' : 'false'}
                                                 onClick={(e) => e.stopPropagation()}
                                                 onChange={async (e) => {
