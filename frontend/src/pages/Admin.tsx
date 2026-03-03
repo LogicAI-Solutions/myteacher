@@ -293,8 +293,8 @@ const Admin = () => {
                                                 value={user.is_active ? 'true' : 'false'}
                                                 onChange={(e) => handleUpdateStatus(user, e.target.value === 'true')}
                                             >
-                                                <option value="true" className="bg-bg-card text-white">Ativo</option>
-                                                <option value="false" className="bg-bg-card text-white">Inativo</option>
+                                                <option value="true">Ativo</option>
+                                                <option value="false">Inativo</option>
                                             </select>
                                         </td>
                                         <td className="p-4 text-right">

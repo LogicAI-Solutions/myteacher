@@ -239,7 +239,7 @@ export const Payments = () => {
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value as 'all' | 'PAID' | 'PENDING')}
                         style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
-                        className="rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none border [&>option]:bg-bg-dark"
+                        className="rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none border"
                     >
                         <option value="all">Todos os Status</option>
                         <option value="PAID">Pagos</option>
@@ -250,12 +250,12 @@ export const Payments = () => {
 
                     <select style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }} value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="border rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none">
                         {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                            <option key={m} value={m} className="bg-bg-dark text-text-main">{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'short' })}</option>
+                            <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'short' })}</option>
                         ))}
                     </select>
                     <select style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }} value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="border rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none">
                         {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
-                            <option key={y} value={y} className="bg-bg-dark text-text-main">{y}</option>
+                            <option key={y} value={y}>{y}</option>
                         ))}
                     </select>
                     <button
@@ -406,8 +406,8 @@ export const Payments = () => {
                                                 value={payment.status}
                                                 onChange={e => updateLocalPayment(student.id, 'status', e.target.value)}
                                             >
-                                                <option value="PENDING" className="bg-white text-text-main">Pendente</option>
-                                                <option value="PAID" className="bg-white text-text-main">Pago</option>
+                                                <option value="PENDING">Pendente</option>
+                                                <option value="PAID">Pago</option>
                                             </select>
                                         </td>
                                         <td className="p-2 sm:p-4">
