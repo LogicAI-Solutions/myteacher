@@ -351,7 +351,7 @@ export const Payments = () => {
             </div>
             <div className="glass-card overflow-hidden relative h-[500px] flex flex-col">
                 {(loading || saving) && (
-                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl z-[60]">
+                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-dark/50 backdrop-blur-sm">
                         <Loading text={saving ? "Salvando alterações..." : "Carregando financeiro..."} />
                     </div>
                 )}

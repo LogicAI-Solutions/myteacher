@@ -371,7 +371,7 @@ export const Students = () => {
             </div>
             <div className="glass-card !p-0 overflow-hidden relative h-[calc(100vh-280px)] min-h-[400px] flex flex-col">
                 {isLoading && (
-                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl">
+                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-dark/50 backdrop-blur-sm rounded-2xl">
                         <Loading text="Carregando alunos..." />
                     </div>
                 )}
