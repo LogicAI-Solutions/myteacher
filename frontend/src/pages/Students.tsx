@@ -482,13 +482,13 @@ export const Students = () => {
                                             </button>
 
                                             {openMenuId === student.id && (
-                                                <div className={`absolute right-4 z-50 w-48 bg-white/95 backdrop-blur-xl border border-black/5 rounded-2xl shadow-2xl overflow-hidden animate-fade-in ${isLastItems ? 'bottom-12 origin-bottom-right' : 'top-12 origin-top-right'}`}>
+                                                <div className={`absolute right-4 z-50 w-48 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden animate-fade-in ${isLastItems ? 'bottom-12 origin-bottom-right' : 'top-12 origin-top-right'}`} style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)' }}>
                                                     <button
                                                         onClick={() => {
                                                             handleViewEvolution(student);
                                                             setOpenMenuId(null);
                                                         }}
-                                                        className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-black/5 flex items-center gap-2 transition-colors"
+                                                        className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-primary/10 flex items-center gap-2 transition-colors"
                                                     >
                                                         <LineChartIcon size={16} /> Ver Evolução
                                                     </button>
@@ -520,11 +520,11 @@ export const Students = () => {
                                                             }
                                                             setOpenMenuId(null);
                                                         }}
-                                                        className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-black/5 flex items-center gap-2 transition-colors"
+                                                        className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-primary/10 flex items-center gap-2 transition-colors"
                                                     >
                                                         <Pencil size={16} /> Editar
                                                     </button>
-                                                    <div className="h-[1px] bg-black/5 mx-2 my-1"></div>
+                                                    <div className="h-[1px] mx-2 my-1" style={{ background: 'var(--color-border)' }}></div>
                                                     <button
                                                         onClick={() => {
                                                             setDeletingStudent(student);
