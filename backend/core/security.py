@@ -52,4 +52,14 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     user = users_crud.get_user_by_email(db, email=token_data.email)
     if user is None:
         raise credentials_exception
+    
+    # Verificar trial expirado
+    if user.is_trial and user.trial_started_at:
+        elapsed_days = (datetime.utcnow() - user.trial_started_at).days
+        if elapsed_days >= 7:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="TRIAL_EXPIRED",
+            )
+    
     return user

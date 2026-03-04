@@ -6,6 +6,10 @@ interface UserData {
     id: number;
     email: string;
     is_active: boolean;
+    is_trial: boolean;
+    trial_started_at?: string;
+    trial_days_remaining?: number | null;
+    trial_expired?: boolean;
     full_name?: string;
     birth_date?: string;
     nickname?: string;
@@ -30,6 +34,7 @@ const Admin = () => {
     const [newUserName, setNewUserName] = useState('');
     const [newUserBirthDate, setNewUserBirthDate] = useState('');
     const [newUserNickname, setNewUserNickname] = useState('');
+    const [newUserIsTrial, setNewUserIsTrial] = useState(false);
     const [newPassword, setNewPassword] = useState('');
 
     // Edit form states
@@ -38,6 +43,7 @@ const Admin = () => {
     const [editUserBirthDate, setEditUserBirthDate] = useState('');
     const [editUserNickname, setEditUserNickname] = useState('');
     const [editUserIsActive, setEditUserIsActive] = useState(true);
+    const [editUserIsTrial, setEditUserIsTrial] = useState(false);
 
     // Search state
     const [searchTerm, setSearchTerm] = useState('');
@@ -84,7 +90,8 @@ const Admin = () => {
                 password: newUserPassword,
                 full_name: newUserName,
                 birth_date: newUserBirthDate || null,
-                nickname: newUserNickname
+                nickname: newUserNickname,
+                is_trial: newUserIsTrial
             });
             setSuccess('Usuário criado com sucesso!');
             setNewUserEmail('');
@@ -92,6 +99,7 @@ const Admin = () => {
             setNewUserName('');
             setNewUserBirthDate('');
             setNewUserNickname('');
+            setNewUserIsTrial(false);
             setIsCreateModalOpen(false);
             loadUsers();
         } catch (err: any) {
@@ -115,7 +123,8 @@ const Admin = () => {
                 full_name: editUserName,
                 birth_date: editUserBirthDate || null,
                 nickname: editUserNickname,
-                is_active: editUserIsActive
+                is_active: editUserIsActive,
+                is_trial: editUserIsTrial
             });
             setSuccess('Usuário atualizado com sucesso!');
             setIsEditModalOpen(false);
@@ -192,6 +201,7 @@ const Admin = () => {
         setNewUserName('');
         setNewUserBirthDate('');
         setNewUserNickname('');
+        setNewUserIsTrial(false);
         setError('');
         setSuccess('');
     };
@@ -203,6 +213,7 @@ const Admin = () => {
         setEditUserBirthDate(user.birth_date || '');
         setEditUserNickname(user.nickname || '');
         setEditUserIsActive(user.is_active);
+        setEditUserIsTrial(user.is_trial || false);
         setIsEditModalOpen(true);
         setError('');
         setSuccess('');
@@ -275,6 +286,7 @@ const Admin = () => {
                                     <th className="p-4 font-medium sticky top-0 bg-bg-card z-10 w-[25%]">
                                         <div className="flex items-center gap-2">Email</div>
                                     </th>
+                                    <th className="p-4 font-medium text-center">Trial</th>
                                     <th className="p-4 font-medium text-center">Status</th>
                                     <th className="p-4 font-medium text-right">Ações</th>
                                 </tr>
@@ -285,6 +297,19 @@ const Admin = () => {
                                         <td className="p-4 font-medium text-text-main">{user.full_name || '-'}</td>
                                         <td className="p-4 text-text-muted">{user.nickname || '-'}</td>
                                         <td className="p-4 text-text-muted">{user.email}</td>
+                                        <td className="p-4 text-center">
+                                            {user.is_trial && (
+                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold mr-2 ${user.trial_expired
+                                                    ? 'bg-danger/20 text-danger'
+                                                    : 'bg-warning/20 text-warning'
+                                                    }`}>
+                                                    {user.trial_expired
+                                                        ? '⏰ Expirado'
+                                                        : `🧪 Trial (${user.trial_days_remaining}d)`
+                                                    }
+                                                </span>
+                                            )}
+                                        </td>
                                         <td className="p-4 text-center">
                                             <select
                                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium border-none focus:ring-2 focus:ring-primary outline-none transition-colors cursor-pointer ${user.is_active
@@ -326,7 +351,7 @@ const Admin = () => {
                                 ))}
                                 {users.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className="p-8 text-center text-text-muted">
+                                        <td colSpan={6} className="p-8 text-center text-text-muted">
                                             Nenhum usuário encontrado.
                                         </td>
                                     </tr>
@@ -416,6 +441,18 @@ const Admin = () => {
                                     required
                                     placeholder="********"
                                 />
+                            </div>
+                            <div className="flex items-center gap-2 pt-2">
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
+                                        checked={newUserIsTrial}
+                                        onChange={e => setNewUserIsTrial(e.target.checked)}
+                                    />
+                                    <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-warning peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-warning"></div>
+                                    <span className="ml-3 text-sm font-medium text-white">🧪 Usuário de Teste (7 dias grátis)</span>
+                                </label>
                             </div>
                             <div className="flex justify-end gap-3 mt-6">
                                 <button
@@ -579,6 +616,19 @@ const Admin = () => {
                                     />
                                     <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-primary peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                     <span className="ml-3 text-sm font-medium text-white">Usuário Ativo</span>
+                                </label>
+                            </div>
+
+                            <div className="flex items-center gap-2 pt-2">
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
+                                        checked={editUserIsTrial}
+                                        onChange={e => setEditUserIsTrial(e.target.checked)}
+                                    />
+                                    <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-warning peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-warning"></div>
+                                    <span className="ml-3 text-sm font-medium text-white">🧪 Usuário de Teste (7 dias grátis)</span>
                                 </label>
                             </div>
 

@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, Date
+from sqlalchemy import Boolean, Column, Integer, String, Date, DateTime
 from sqlalchemy.orm import relationship
 from backend.core.database import Base
 
@@ -10,6 +10,8 @@ class User(Base):
     hashed_password = Column(String)
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
+    is_trial = Column(Boolean, default=False)
+    trial_started_at = Column(DateTime, nullable=True)
     
     full_name = Column(String, nullable=True)
     birth_date = Column(Date, nullable=True)

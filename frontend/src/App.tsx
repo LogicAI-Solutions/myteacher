@@ -16,14 +16,16 @@ import { NotFound } from './pages/NotFound';
 import { StudentLogin } from './pages/StudentLogin';
 import { StudentDashboard } from './pages/StudentDashboard';
 import { Profile } from './pages/Profile';
+import { TrialExpired } from './pages/TrialExpired';
 
 // Layouts
 import { Layout } from './components/Layout';
 import { StudentLayout } from './components/StudentLayout';
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isTrialExpired } = useAuth();
   if (isLoading) return <Loading variant="fullscreen" text="Carregando..." />;
+  if (isTrialExpired) return <Navigate to="/trial-expired" />;
   if (!user) return <Navigate to="/login" />;
   return children;
 };
@@ -56,6 +58,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/trial-expired" element={<TrialExpired />} />
 
       {/* Student Portal Routes */}
       <Route path="/portal/login" element={<StudentLogin />} />
