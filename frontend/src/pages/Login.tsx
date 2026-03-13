@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, GraduationCap, ArrowLeft, Lock, User, ArrowRight } from 'lucide-react';
 import loginHeroImage from '../assets/login_hero_female.png';
+import { openSupportWhatsApp } from '../utils/support';
 
 export const Login = () => {
     const [nickname, setNickname] = useState('');
@@ -153,7 +154,7 @@ export const Login = () => {
                                 <button
                                     type="button"
                                     className="text-xs text-primary-light hover:text-white transition-colors"
-                                    onClick={() => window.open('https://wa.me/5521974546156', '_blank')}
+                                    onClick={() => openSupportWhatsApp()}
                                 >
                                     Esqueceu a senha?
                                 </button>

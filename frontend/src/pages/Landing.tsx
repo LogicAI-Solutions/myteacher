@@ -2,14 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, ArrowRight, CheckCircle, BarChart3, Users, DollarSign, CalendarCheck, MessageCircle, Shield } from 'lucide-react';
 import teacherIllustration from '../assets/teacher_login_illustration.png';
+import { openSupportWhatsApp } from '../utils/support';
 
 export const Landing = () => {
     const navigate = useNavigate();
 
     const handleWhatsAppClick = () => {
-        // Mensagem contextualizada para identificar a origem do contato
-        const message = encodeURIComponent("Olá! Vim pelo site do MyTeacherApp e gostaria de saber mais sobre a plataforma");
-        window.open(`https://wa.me/5521974546156?text=${message}`, '_blank');
+        openSupportWhatsApp('Ola! Vim pelo site do MyTeacherApp e gostaria de saber mais sobre a plataforma.');
     };
 
     return (

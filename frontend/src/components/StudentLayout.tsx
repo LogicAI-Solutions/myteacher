@@ -1,6 +1,7 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
 import { LogOut, GraduationCap, LayoutDashboard, UserCircle, MessageCircle } from 'lucide-react';
+import { openSupportWhatsApp } from '../utils/support';
 
 export const StudentLayout = () => {
     const { logout, student } = useStudentAuth();
@@ -13,8 +14,7 @@ export const StudentLayout = () => {
     };
 
     const handleSupportClick = () => {
-        const supportMessage = encodeURIComponent('Ola! Preciso de suporte no Portal do Aluno do MyTeacherApp.');
-        window.open(`https://wa.me/5521974546156?text=${supportMessage}`, '_blank', 'noopener,noreferrer');
+        openSupportWhatsApp('Ola! Preciso de suporte no Portal do Aluno do MyTeacherApp.');
     };
 
     return (

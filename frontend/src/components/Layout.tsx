@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { LogOut, LayoutDashboard, Users, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, DollarSign, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { openSupportWhatsApp } from '../utils/support';
 
 
 export const Layout = () => {
@@ -18,8 +19,7 @@ export const Layout = () => {
     };
 
     const handleSupportClick = () => {
-        const supportMessage = encodeURIComponent('Ola! Preciso de ajuda com o MyTeacherApp.');
-        window.open(`https://wa.me/5521974546156?text=${supportMessage}`, '_blank', 'noopener,noreferrer');
+        openSupportWhatsApp('Ola! Preciso de ajuda com o MyTeacherApp.');
     };
 
     return (

@@ -46,6 +46,9 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile.prod
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+        VITE_SUPPORT_WHATSAPP_NUMBER: ${VITE_SUPPORT_WHATSAPP_NUMBER:-5521974546156}
     container_name: myteacher_frontend
     restart: always
     depends_on:

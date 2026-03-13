@@ -1,5 +1,6 @@
 import { Clock, MessageCircle, Lock, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { buildSupportWhatsAppUrl } from '../utils/support';
 
 export const TrialExpired = () => {
     const navigate = useNavigate();
@@ -40,7 +41,7 @@ export const TrialExpired = () => {
 
                     {/* CTA Button */}
                     <a
-                        href="https://wa.me/5521974546156?text=Olá! Meu período de teste do MyTeacher acabou e gostaria de saber sobre os planos disponíveis."
+                        href={buildSupportWhatsAppUrl('Ola! Meu periodo de teste do MyTeacher acabou e gostaria de saber sobre os planos disponiveis.')}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg shadow-green-500/25 transition-all transform hover:scale-[1.02] active:scale-[0.98] w-full justify-center text-lg"
