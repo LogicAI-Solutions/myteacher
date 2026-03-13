@@ -3,7 +3,7 @@ import api from '../api';
 import { Loading } from '../components/Loading';
 import { PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from 'recharts';
 import { Users, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+
 
 interface DashboardStats {
     students: {
@@ -24,11 +24,11 @@ const COLORS = ['var(--color-primary)', 'var(--color-text-muted)'];
 
 
 export const Dashboard = () => {
-    const { theme } = useTheme();
+
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [chartWidth, setChartWidth] = useState(400);
+
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Measure container width for responsive charts
@@ -36,7 +36,7 @@ export const Dashboard = () => {
         const updateWidth = () => {
             if (containerRef.current) {
                 const width = containerRef.current.offsetWidth - 48; // minus padding
-                setChartWidth(Math.max(300, width));
+                Math.max(300, width);
             }
         };
 

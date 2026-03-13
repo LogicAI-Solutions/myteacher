@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from passlib.context import CryptContext
+from datetime import datetime
 from backend.models.users import User
 from backend.schemas.users import UserCreate, UserUpdate
 
@@ -30,7 +31,9 @@ def create_user(db: Session, user: UserCreate):
         hashed_password=hashed_password,
         full_name=user.full_name,
         birth_date=user.birth_date,
-        nickname=user.nickname
+        nickname=user.nickname,
+        is_trial=user.is_trial if user.is_trial else False,
+        trial_started_at=datetime.utcnow() if user.is_trial else None
     )
     db.add(db_user)
     db.commit()
@@ -63,6 +66,15 @@ def update_user(db: Session, user_id: int, user_update: UserUpdate):
         hashed_password = pwd_context.hash(update_data["password"])
         update_data["hashed_password"] = hashed_password
         del update_data["password"]
+    
+    # Lógica de trial: ao ativar trial, setar trial_started_at
+    if "is_trial" in update_data:
+        if update_data["is_trial"] and not db_user.is_trial:
+            # Ativando trial -> setar data de início
+            update_data["trial_started_at"] = datetime.utcnow()
+        elif not update_data["is_trial"]:
+            # Desativando trial -> limpar data
+            update_data["trial_started_at"] = None
     
     for key, value in update_data.items():
         setattr(db_user, key, value)

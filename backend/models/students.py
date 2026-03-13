@@ -20,6 +20,7 @@ class Student(Base):
     
     username = Column(String, unique=True, index=True, nullable=True)
     hashed_password = Column(String, nullable=True)
+    photo = Column(String, nullable=True)
 
     owner = relationship("User", back_populates="students")
     enrollments = relationship("Enrollment", back_populates="student")

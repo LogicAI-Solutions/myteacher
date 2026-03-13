@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
-import { DollarSign, CheckCircle, AlertCircle, Search, ArrowUp, ArrowDown } from 'lucide-react';
+import { DollarSign, CheckCircle, AlertCircle, Search, ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
 import { formatCurrency, parseCurrency } from '../utils/masks';
 import { Loading } from '../components/Loading';
 
@@ -239,7 +239,7 @@ export const Payments = () => {
                         value={filterStatus}
                         onChange={e => setFilterStatus(e.target.value as 'all' | 'PAID' | 'PENDING')}
                         style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
-                        className="rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none border [&>option]:bg-bg-dark"
+                        className="rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none border"
                     >
                         <option value="all">Todos os Status</option>
                         <option value="PAID">Pagos</option>
@@ -250,12 +250,12 @@ export const Payments = () => {
 
                     <select style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }} value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="border rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none">
                         {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                            <option key={m} value={m} className="bg-bg-dark text-text-main">{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'short' })}</option>
+                            <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'short' })}</option>
                         ))}
                     </select>
                     <select style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }} value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="border rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none">
                         {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
-                            <option key={y} value={y} className="bg-bg-dark text-text-main">{y}</option>
+                            <option key={y} value={y}>{y}</option>
                         ))}
                     </select>
                     <button
@@ -344,9 +344,14 @@ export const Payments = () => {
             </div>
 
             {/* Table */}
+            <div className="md:hidden flex justify-end mb-2">
+                <span className="text-xs font-medium text-text-muted flex items-center gap-1 bg-black/5 px-3 py-1.5 rounded-full border border-black/5">
+                    Deslize para ver mais <ArrowRight size={14} />
+                </span>
+            </div>
             <div className="glass-card overflow-hidden relative h-[500px] flex flex-col">
                 {(loading || saving) && (
-                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl z-[60]">
+                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-dark/50 backdrop-blur-sm">
                         <Loading text={saving ? "Salvando alterações..." : "Carregando financeiro..."} />
                     </div>
                 )}
@@ -363,8 +368,8 @@ export const Payments = () => {
                         {saving ? 'Salvando...' : <><DollarSign size={16} /> Salvar Alterações</>}
                     </button>
                 </div>
-                <div className="overflow-x-auto flex-1 overflow-y-auto">
-                    <table className="w-full">
+                <div className="overflow-x-auto flex-1 overflow-y-auto custom-scrollbar">
+                    <table className="w-full border-collapse" style={{ minWidth: '900px' }}>
                         <thead className="glass-header sticky top-0 z-10 [&_th:first-child]:rounded-none [&_th:last-child]:rounded-none">
                             <tr>
                                 <th
@@ -374,9 +379,9 @@ export const Payments = () => {
                                     Aluno
                                     {sortDesc ? <ArrowDown size={14} className="text-primary" /> : <ArrowUp size={14} className="text-primary" />}
                                 </th>
-                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider hidden md:table-cell">Responsável</th>
-                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider hidden xl:table-cell">Ano</th>
-                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider hidden xl:table-cell">Tipo</th>
+                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider whitespace-nowrap min-w-[150px]">Responsável</th>
+                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider whitespace-nowrap min-w-[120px]">Ano</th>
+                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider whitespace-nowrap min-w-[120px]">Tipo</th>
                                 <th className="text-center p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider w-[90px] sm:w-[140px]">Status</th>
                                 <th className="text-right p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider w-[80px] sm:w-[140px]">Valor</th>
                             </tr>
@@ -388,21 +393,21 @@ export const Payments = () => {
                                 return (
                                     <tr key={student.id} className="hover:bg-white/5 transition-colors group">
                                         <td className="p-2 sm:p-4">
-                                            <div className="font-medium text-white text-xs sm:text-sm truncate max-w-[100px] sm:max-w-none">{student.name}</div>
+                                            <div className="font-medium text-text-main text-xs sm:text-sm truncate max-w-[100px] sm:max-w-none">{student.name}</div>
                                         </td>
-                                        <td className="p-2 sm:p-4 hidden md:table-cell">
-                                            <div className="text-sm text-text-muted truncate max-w-[120px]">{student.parent_name || '-'}</div>
+                                        <td className="p-2 sm:p-4 whitespace-nowrap">
+                                            <div className="text-sm text-text-muted truncate max-w-[150px]">{student.parent_name || '-'}</div>
                                         </td>
-                                        <td className="p-2 sm:p-4 text-left text-sm text-text-muted hidden xl:table-cell">{student.school_year || '-'}</td>
-                                        <td className="p-2 sm:p-4 text-left text-sm text-text-muted hidden xl:table-cell">{student.class_type || '-'}</td>
+                                        <td className="p-2 sm:p-4 text-left text-sm text-text-muted whitespace-nowrap">{student.school_year || '-'}</td>
+                                        <td className="p-2 sm:p-4 text-left text-sm text-text-muted whitespace-nowrap">{student.class_type || '-'}</td>
                                         <td className="p-2 sm:p-4">
                                             <select
                                                 className={`w-full px-2 py-1 sm:p-2 rounded-xl text-xs sm:text-sm border focus:ring-2 focus:ring-primary/40 outline-none transition-all cursor-pointer backdrop-blur-sm ${isPaid ? 'bg-success/10 text-success border-success/30' : 'bg-warning/10 text-warning border-warning/30'}`}
                                                 value={payment.status}
                                                 onChange={e => updateLocalPayment(student.id, 'status', e.target.value)}
                                             >
-                                                <option value="PENDING" className="bg-white text-text-main">Pendente</option>
-                                                <option value="PAID" className="bg-white text-text-main">Pago</option>
+                                                <option value="PENDING">Pendente</option>
+                                                <option value="PAID">Pago</option>
                                             </select>
                                         </td>
                                         <td className="p-2 sm:p-4">

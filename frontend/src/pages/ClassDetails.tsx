@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../api';
-import { Plus, Save, Calendar, Users, X, FileText, Pencil, Trash2, AlertTriangle, Eye, Download, BookOpen, ClipboardList, History, ArrowLeft, DollarSign, GraduationCap } from 'lucide-react';
+import { Plus, Save, Calendar, Users, X, FileText, Pencil, Trash2, AlertTriangle, Eye, Download, BookOpen, ClipboardList, History, ArrowLeft, DollarSign, GraduationCap, ArrowRight } from 'lucide-react';
 import { formatPhone, unmaskPhone, formatCurrency, parseCurrency } from '../utils/masks';
 import { Loading } from '../components/Loading';
 import { ManageStudentsModal } from '../components/ManageStudentsModal';
@@ -713,9 +713,14 @@ export const ClassDetails = () => {
                             </div>
                         </div>
 
+                        <div className="md:hidden flex justify-end mb-2">
+                            <span className="text-xs font-medium text-text-muted flex items-center gap-1 bg-black/5 px-3 py-1.5 rounded-full border border-black/5">
+                                Deslize para ver mais <ArrowRight size={14} />
+                            </span>
+                        </div>
                         <div className="overflow-hidden rounded-xl border border-black/5 bg-black/5">
                             <div className="overflow-x-auto">
-                                <table className="w-full">
+                                <table className="w-full min-w-[900px]">
                                     <thead className="glass-header">
                                         <tr>
                                             <th className="text-left p-4 text-xs font-bold text-text-muted uppercase tracking-wider min-w-[200px]">Aluno</th>
@@ -737,8 +742,8 @@ export const ClassDetails = () => {
                                                             value={log.status}
                                                             onChange={e => updateLog(s.id, 'status', e.target.value)}
                                                         >
-                                                            <option value="present" className="bg-bg-dark text-text-main">Presente</option>
-                                                            <option value="absent" className="bg-bg-dark text-text-main">Ausente</option>
+                                                            <option value="present">Presente</option>
+                                                            <option value="absent">Ausente</option>
                                                         </select>
                                                     </td>
                                                     <td className="p-4 text-center">
@@ -867,12 +872,12 @@ export const ClassDetails = () => {
                         <div className="flex gap-2">
                             <select value={selectedMonth} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedMonth(Number(e.target.value))} className="bg-black/5 border border-black/10 rounded-xl px-4 py-2 text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer">
                                 {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                                    <option key={m} value={m} className="bg-white text-text-main">{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'long' })}</option>
+                                    <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'long' })}</option>
                                 ))}
                             </select>
                             <select value={selectedYear} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedYear(Number(e.target.value))} className="bg-black/5 border border-black/10 rounded-xl px-4 py-2 text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer">
                                 {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
-                                    <option key={y} value={y} className="bg-white text-text-main">{y}</option>
+                                    <option key={y} value={y}>{y}</option>
                                 ))}
                             </select>
                         </div>
@@ -899,8 +904,8 @@ export const ClassDetails = () => {
                                             value={payment.status}
                                             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateLocalPayment(s.id, 'status', e.target.value)}
                                         >
-                                            <option value="PENDING" className="bg-white text-text-main">Pendente</option>
-                                            <option value="PAID" className="bg-white text-text-main">Pago</option>
+                                            <option value="PENDING">Pendente</option>
+                                            <option value="PAID">Pago</option>
                                         </select>
                                         <input
                                             type="text"

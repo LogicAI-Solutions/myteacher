@@ -3,12 +3,15 @@ import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
 import { LogOut, LayoutDashboard, Users, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, DollarSign, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
+
 export const Layout = () => {
     const { logout, user } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+
     const handleLogout = () => {
         logout();
         navigate('/login');

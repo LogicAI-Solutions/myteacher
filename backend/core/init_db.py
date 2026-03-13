@@ -6,7 +6,7 @@ import os
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def init_db(db: Session = next(database.get_db())):
+def init_db(db: Session):
     admin_email = os.getenv("PGADMIN_DEFAULT_EMAIL")
     admin_password = os.getenv("PGADMIN_DEFAULT_PASSWORD")
 

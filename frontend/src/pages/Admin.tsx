@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import { User, Plus, Trash2, Key, X, AlertTriangle, Edit, Search } from 'lucide-react';
+import { User, Plus, Trash2, Key, X, AlertTriangle, Edit, Search, ArrowRight } from 'lucide-react';
 
 interface UserData {
     id: number;
     email: string;
     is_active: boolean;
+    is_trial: boolean;
+    trial_started_at?: string;
+    trial_days_remaining?: number | null;
+    trial_expired?: boolean;
     full_name?: string;
     birth_date?: string;
     nickname?: string;
@@ -30,6 +34,7 @@ const Admin = () => {
     const [newUserName, setNewUserName] = useState('');
     const [newUserBirthDate, setNewUserBirthDate] = useState('');
     const [newUserNickname, setNewUserNickname] = useState('');
+    const [newUserIsTrial, setNewUserIsTrial] = useState(false);
     const [newPassword, setNewPassword] = useState('');
 
     // Edit form states
@@ -38,6 +43,7 @@ const Admin = () => {
     const [editUserBirthDate, setEditUserBirthDate] = useState('');
     const [editUserNickname, setEditUserNickname] = useState('');
     const [editUserIsActive, setEditUserIsActive] = useState(true);
+    const [editUserIsTrial, setEditUserIsTrial] = useState(false);
 
     // Search state
     const [searchTerm, setSearchTerm] = useState('');
@@ -84,7 +90,8 @@ const Admin = () => {
                 password: newUserPassword,
                 full_name: newUserName,
                 birth_date: newUserBirthDate || null,
-                nickname: newUserNickname
+                nickname: newUserNickname,
+                is_trial: newUserIsTrial
             });
             setSuccess('Usuário criado com sucesso!');
             setNewUserEmail('');
@@ -92,6 +99,7 @@ const Admin = () => {
             setNewUserName('');
             setNewUserBirthDate('');
             setNewUserNickname('');
+            setNewUserIsTrial(false);
             setIsCreateModalOpen(false);
             loadUsers();
         } catch (err: any) {
@@ -115,7 +123,8 @@ const Admin = () => {
                 full_name: editUserName,
                 birth_date: editUserBirthDate || null,
                 nickname: editUserNickname,
-                is_active: editUserIsActive
+                is_active: editUserIsActive,
+                is_trial: editUserIsTrial
             });
             setSuccess('Usuário atualizado com sucesso!');
             setIsEditModalOpen(false);
@@ -192,6 +201,7 @@ const Admin = () => {
         setNewUserName('');
         setNewUserBirthDate('');
         setNewUserNickname('');
+        setNewUserIsTrial(false);
         setError('');
         setSuccess('');
     };
@@ -203,6 +213,7 @@ const Admin = () => {
         setEditUserBirthDate(user.birth_date || '');
         setEditUserNickname(user.nickname || '');
         setEditUserIsActive(user.is_active);
+        setEditUserIsTrial(user.is_trial || false);
         setIsEditModalOpen(true);
         setError('');
         setSuccess('');
@@ -233,7 +244,7 @@ const Admin = () => {
                 {/* Users List with Search and Sort */}
                 <div className="glass-card p-6">
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                        <h2 className="text-xl font-bold flex items-center gap-2 text-white">
+                        <h2 className="text-xl font-bold flex items-center gap-2 text-text-main">
                             <User size={20} className="text-primary" /> Usuários Cadastrados
                         </h2>
 
@@ -243,7 +254,7 @@ const Admin = () => {
                                 <input
                                     type="text"
                                     placeholder="Buscar por nome, email..."
-                                    className="w-full pl-10 pr-4 py-2 bg-bg-dark/50 border border-white/10 rounded-lg text-white focus:outline-none focus:border-primary/50 transition-all placeholder:text-text-muted/50"
+                                    className="w-full pl-10 pr-4 py-2 bg-bg-dark/50 border border-white/10 rounded-lg text-text-main focus:outline-none focus:border-primary/50 transition-all placeholder:text-text-muted/50"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
@@ -257,8 +268,13 @@ const Admin = () => {
                         </div>
                     </div>
 
+                    <div className="md:hidden flex justify-end mb-2 mt-4">
+                        <span className="text-xs font-medium text-text-muted flex items-center gap-1 bg-black/5 px-3 py-1.5 rounded-full border border-white/5">
+                            Deslize para ver mais <ArrowRight size={14} />
+                        </span>
+                    </div>
                     <div className="overflow-x-auto custom-scrollbar rounded-lg border border-white/5">
-                        <table className="w-full text-left border-collapse">
+                        <table className="w-full text-left border-collapse" style={{ minWidth: '800px' }}>
                             <thead>
                                 <tr className="bg-white/5 border-b border-white/10 text-text-muted text-sm uppercase tracking-wider">
                                     <th className="p-4 font-medium sticky top-0 bg-bg-card z-10 w-[25%]">
@@ -270,6 +286,7 @@ const Admin = () => {
                                     <th className="p-4 font-medium sticky top-0 bg-bg-card z-10 w-[25%]">
                                         <div className="flex items-center gap-2">Email</div>
                                     </th>
+                                    <th className="p-4 font-medium text-center">Trial</th>
                                     <th className="p-4 font-medium text-center">Status</th>
                                     <th className="p-4 font-medium text-right">Ações</th>
                                 </tr>
@@ -277,9 +294,22 @@ const Admin = () => {
                             <tbody className="text-sm">
                                 {users.map(user => (
                                     <tr key={user.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                                        <td className="p-4 font-medium text-white">{user.full_name || '-'}</td>
+                                        <td className="p-4 font-medium text-text-main">{user.full_name || '-'}</td>
                                         <td className="p-4 text-text-muted">{user.nickname || '-'}</td>
                                         <td className="p-4 text-text-muted">{user.email}</td>
+                                        <td className="p-4 text-center">
+                                            {user.is_trial && (
+                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold mr-2 ${user.trial_expired
+                                                    ? 'bg-danger/20 text-danger'
+                                                    : 'bg-warning/20 text-warning'
+                                                    }`}>
+                                                    {user.trial_expired
+                                                        ? '⏰ Expirado'
+                                                        : `🧪 Trial (${user.trial_days_remaining}d)`
+                                                    }
+                                                </span>
+                                            )}
+                                        </td>
                                         <td className="p-4 text-center">
                                             <select
                                                 className={`px-3 py-1.5 rounded-lg text-xs font-medium border-none focus:ring-2 focus:ring-primary outline-none transition-colors cursor-pointer ${user.is_active
@@ -288,8 +318,8 @@ const Admin = () => {
                                                 value={user.is_active ? 'true' : 'false'}
                                                 onChange={(e) => handleUpdateStatus(user, e.target.value === 'true')}
                                             >
-                                                <option value="true" className="bg-bg-card text-white">Ativo</option>
-                                                <option value="false" className="bg-bg-card text-white">Inativo</option>
+                                                <option value="true">Ativo</option>
+                                                <option value="false">Inativo</option>
                                             </select>
                                         </td>
                                         <td className="p-4 text-right">
@@ -321,7 +351,7 @@ const Admin = () => {
                                 ))}
                                 {users.length === 0 && (
                                     <tr>
-                                        <td colSpan={5} className="p-8 text-center text-text-muted">
+                                        <td colSpan={6} className="p-8 text-center text-text-muted">
                                             Nenhum usuário encontrado.
                                         </td>
                                     </tr>
@@ -354,10 +384,10 @@ const Admin = () => {
             {isCreateModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
                     <div className="glass-card w-full max-w-md p-6 relative animate-slide-up">
-                        <button onClick={() => setIsCreateModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-white">
+                        <button onClick={() => setIsCreateModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-text-main">
                             <X size={20} />
                         </button>
-                        <h2 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
+                        <h2 className="text-xl font-bold mb-6 text-text-main flex items-center gap-2">
                             <Plus size={20} className="text-primary" /> Novo Professor
                         </h2>
                         <form onSubmit={handleCreateUser} className="space-y-4">
@@ -365,7 +395,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome Completo</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserName}
                                     onChange={e => setNewUserName(e.target.value)}
                                     placeholder="João da Silva"
@@ -375,7 +405,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Data de Nascimento</label>
                                 <input
                                     type="date"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserBirthDate}
                                     onChange={e => setNewUserBirthDate(e.target.value)}
                                 />
@@ -384,7 +414,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nickname (Apelido)</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserNickname}
                                     onChange={e => setNewUserNickname(e.target.value)}
                                     placeholder="Prof. João"
@@ -394,7 +424,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Email</label>
                                 <input
                                     type="email"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserEmail}
                                     onChange={e => setNewUserEmail(e.target.value)}
                                     required
@@ -405,12 +435,24 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Senha Inicial</label>
                                 <input
                                     type="password"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserPassword}
                                     onChange={e => setNewUserPassword(e.target.value)}
                                     required
                                     placeholder="********"
                                 />
+                            </div>
+                            <div className="flex items-center gap-2 pt-2">
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
+                                        checked={newUserIsTrial}
+                                        onChange={e => setNewUserIsTrial(e.target.checked)}
+                                    />
+                                    <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-warning peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-warning"></div>
+                                    <span className="ml-3 text-sm font-medium text-white">🧪 Usuário de Teste (7 dias grátis)</span>
+                                </label>
                             </div>
                             <div className="flex justify-end gap-3 mt-6">
                                 <button
@@ -441,7 +483,7 @@ const Admin = () => {
                             <div className="w-12 h-12 rounded-full bg-danger/20 flex items-center justify-center mb-4 text-danger">
                                 <AlertTriangle size={24} />
                             </div>
-                            <h3 className="text-xl font-bold text-white mb-2">Excluir Usuário?</h3>
+                            <h3 className="text-xl font-bold text-text-main mb-2">Excluir Usuário?</h3>
                             <p className="text-text-muted mb-6">
                                 Tem certeza que deseja remover <strong>{selectedUser.email}</strong>? Esta ação não pode ser desfeita.
                             </p>
@@ -469,10 +511,10 @@ const Admin = () => {
             {isResetModalOpen && selectedUser && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
                     <div className="glass-card w-full max-w-md p-6 relative animate-slide-up">
-                        <button onClick={() => setIsResetModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-white">
+                        <button onClick={() => setIsResetModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-text-main">
                             <X size={20} />
                         </button>
-                        <h2 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
+                        <h2 className="text-xl font-bold mb-6 text-text-main flex items-center gap-2">
                             <Key size={20} className="text-primary" /> Nova Senha
                         </h2>
                         <p className="text-sm text-text-muted mb-4">
@@ -483,7 +525,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nova Senha</label>
                                 <input
                                     type="password"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newPassword}
                                     onChange={e => setNewPassword(e.target.value)}
                                     required
@@ -519,7 +561,7 @@ const Admin = () => {
                         <button onClick={() => setIsEditModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-white">
                             <X size={20} />
                         </button>
-                        <h2 className="text-xl font-bold mb-6 text-white flex items-center gap-2">
+                        <h2 className="text-xl font-bold mb-6 text-text-main flex items-center gap-2">
                             <Edit size={20} className="text-primary" /> Editar Professor
                         </h2>
                         <form onSubmit={handleEditUser} className="space-y-4">
@@ -527,7 +569,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome Completo</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editUserName}
                                     onChange={e => setEditUserName(e.target.value)}
                                     placeholder="João da Silva"
@@ -537,7 +579,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Data de Nascimento</label>
                                 <input
                                     type="date"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editUserBirthDate}
                                     onChange={e => setEditUserBirthDate(e.target.value)}
                                 />
@@ -546,7 +588,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nickname (Apelido)</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editUserNickname}
                                     onChange={e => setEditUserNickname(e.target.value)}
                                     placeholder="Prof. João"
@@ -556,7 +598,7 @@ const Admin = () => {
                                 <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Email</label>
                                 <input
                                     type="email"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editUserEmail}
                                     onChange={e => setEditUserEmail(e.target.value)}
                                     required
@@ -574,6 +616,19 @@ const Admin = () => {
                                     />
                                     <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-primary peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                     <span className="ml-3 text-sm font-medium text-white">Usuário Ativo</span>
+                                </label>
+                            </div>
+
+                            <div className="flex items-center gap-2 pt-2">
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="sr-only peer"
+                                        checked={editUserIsTrial}
+                                        onChange={e => setEditUserIsTrial(e.target.checked)}
+                                    />
+                                    <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-warning peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-warning"></div>
+                                    <span className="ml-3 text-sm font-medium text-white">🧪 Usuário de Teste (7 dias grátis)</span>
                                 </label>
                             </div>
 

@@ -30,6 +30,11 @@ export const Login = () => {
             navigate('/dashboard');
         } catch (err: any) {
             console.error(err);
+            // Se trial expirou, redirecionar para tela de trial expirado
+            if (err.response?.status === 403 && err.response?.data?.detail === 'TRIAL_EXPIRED') {
+                navigate('/trial-expired');
+                return;
+            }
             if (err.code === 'ERR_NETWORK' || !err.response) {
                 setError('Sistema offline. Verifique sua conexão.');
             } else if (err.response?.data?.detail) {

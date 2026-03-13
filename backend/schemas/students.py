@@ -13,6 +13,7 @@ class StudentBase(BaseModel):
     intended_profession: Optional[str] = None
     class_type: Optional[str] = None
     active: bool = True
+    photo: Optional[str] = None
 
 class StudentCreate(StudentBase):
     username: Optional[str] = None

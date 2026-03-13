@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import { Plus, Search, Pencil, Trash, X, AlertTriangle, UserCircle, LineChart as LineChartIcon, Download, MoreVertical, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, Pencil, Trash, X, AlertTriangle, UserCircle, LineChart as LineChartIcon, Download, MoreVertical, ArrowUp, ArrowDown, ArrowUpDown, ArrowRight } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { formatPhone, unmaskPhone } from '../utils/masks';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
+import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
 import { Loading } from '../components/Loading';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+
 import { Toast, type ToastType } from '../components/Toast';
 
 interface Student {
@@ -46,8 +45,7 @@ export const Students = () => {
     const [totalStudents, setTotalStudents] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
 
-    const { user } = useAuth();
-    const { theme } = useTheme();
+
 
     // Filter & Sort States
     const [sortBy, setSortBy] = useState('name');
@@ -366,14 +364,19 @@ export const Students = () => {
             </div>
 
             {/* Table */}
+            <div className="md:hidden flex justify-end mb-2">
+                <span className="text-xs font-medium text-text-muted flex items-center gap-1 bg-black/5 px-3 py-1.5 rounded-full border border-black/5">
+                    Deslize para ver mais <ArrowRight size={14} />
+                </span>
+            </div>
             <div className="glass-card !p-0 overflow-hidden relative h-[calc(100vh-280px)] min-h-[400px] flex flex-col">
                 {isLoading && (
-                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm rounded-2xl">
+                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-dark/50 backdrop-blur-sm rounded-2xl">
                         <Loading text="Carregando alunos..." />
                     </div>
                 )}
-                <div className="overflow-x-auto flex-1 overflow-y-auto">
-                    <table className="w-full min-w-[800px]">
+                <div className="overflow-x-auto flex-1 overflow-y-auto custom-scrollbar">
+                    <table className="w-full border-collapse" style={{ minWidth: '1000px' }}>
                         <thead className="glass-header sticky top-0 z-10 [&_th:first-child]:rounded-none [&_th:last-child]:rounded-none">
                             <tr>
                                 <th
@@ -392,9 +395,9 @@ export const Students = () => {
                                         )}
                                     </div>
                                 </th>
-                                <th className="text-left p-3 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider hidden md:table-cell">Contato</th>
+                                <th className="text-left p-3 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider whitespace-nowrap min-w-[150px]">Contato</th>
                                 <th
-                                    className="text-left p-3 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider hidden lg:table-cell cursor-pointer hover:text-white transition-colors group select-none"
+                                    className="text-left p-3 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider whitespace-nowrap min-w-[200px] cursor-pointer hover:text-white transition-colors group select-none"
                                     onClick={() => {
                                         if (sortBy === 'parent_name') setSortDesc(!sortDesc);
                                         else { setSortBy('parent_name'); setSortDesc(false); }
@@ -409,8 +412,8 @@ export const Students = () => {
                                         )}
                                     </div>
                                 </th>
-                                <th className="text-left p-3 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider hidden xl:table-cell">Ano Escolar</th>
-                                <th className="text-left p-3 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider hidden xl:table-cell">Tipo de Aula</th>
+                                <th className="text-left p-3 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider whitespace-nowrap min-w-[150px]">Ano Escolar</th>
+                                <th className="text-left p-3 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider whitespace-nowrap min-w-[150px]">Tipo de Aula</th>
                                 <th
                                     className="text-center p-3 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-main transition-colors group select-none"
                                     onClick={() => {
@@ -435,22 +438,21 @@ export const Students = () => {
                                 const isLastItems = students.length > 2 && index >= students.length - 2;
                                 return (
                                     <tr key={student.id} className="hover:bg-black/5 transition-colors">
-                                        <td className="p-3 sm:p-4">
+                                        <td className="p-3 sm:p-4 min-w-[200px]">
                                             <div className="font-medium text-text-main text-sm sm:text-base">{student.name}</div>
-                                            <div className="text-xs text-text-muted md:hidden">{student.phone ? formatPhone(student.phone) : ''}</div>
                                         </td>
-                                        <td className="p-3 sm:p-4 text-text-muted text-sm hidden md:table-cell">{student.phone ? formatPhone(student.phone) : '-'}</td>
-                                        <td className="p-3 sm:p-4 hidden lg:table-cell">
+                                        <td className="p-3 sm:p-4 text-text-muted text-sm whitespace-nowrap">{student.phone ? formatPhone(student.phone) : '-'}</td>
+                                        <td className="p-3 sm:p-4 whitespace-nowrap">
                                             <div className="text-sm text-text-main">{student.parent_name || '-'}</div>
                                             <div className="text-xs text-text-muted">{student.parent_phone ? formatPhone(student.parent_phone) : ''}</div>
                                         </td>
-                                        <td className="p-3 sm:p-4 text-text-muted text-sm hidden xl:table-cell">{student.school_year || '-'}</td>
-                                        <td className="p-3 sm:p-4 text-text-muted text-sm hidden xl:table-cell">{student.class_type || '-'}</td>
+                                        <td className="p-3 sm:p-4 text-text-muted text-sm whitespace-nowrap">{student.school_year || '-'}</td>
+                                        <td className="p-3 sm:p-4 text-text-muted text-sm whitespace-nowrap">{student.class_type || '-'}</td>
                                         <td className="p-3 sm:p-4 text-center">
                                             <select
                                                 className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-medium border focus:ring-2 focus:ring-primary/40 outline-none transition-all cursor-pointer backdrop-blur-sm ${student.active
                                                     ? 'bg-success/10 text-success border-success/20'
-                                                    : 'bg-black/5 text-text-muted border-black/5'}`}
+                                                    : 'bg-black/5 text-text-muted border-black/10'}`}
                                                 value={student.active ? 'true' : 'false'}
                                                 onClick={(e) => e.stopPropagation()}
                                                 onChange={async (e) => {
@@ -464,8 +466,8 @@ export const Students = () => {
                                                     }
                                                 }}
                                             >
-                                                <option value="true" className="bg-white text-text-main">Ativo</option>
-                                                <option value="false" className="bg-white text-text-main">Inativo</option>
+                                                <option value="true">Ativo</option>
+                                                <option value="false">Inativo</option>
                                             </select>
                                         </td>
                                         <td className="p-3 sm:p-4 text-right relative action-menu-container">
@@ -480,13 +482,13 @@ export const Students = () => {
                                             </button>
 
                                             {openMenuId === student.id && (
-                                                <div className={`absolute right-4 z-50 w-48 bg-white/95 backdrop-blur-xl border border-black/5 rounded-2xl shadow-2xl overflow-hidden animate-fade-in ${isLastItems ? 'bottom-12 origin-bottom-right' : 'top-12 origin-top-right'}`}>
+                                                <div className={`absolute right-4 z-50 w-48 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden animate-fade-in ${isLastItems ? 'bottom-12 origin-bottom-right' : 'top-12 origin-top-right'}`} style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)' }}>
                                                     <button
                                                         onClick={() => {
                                                             handleViewEvolution(student);
                                                             setOpenMenuId(null);
                                                         }}
-                                                        className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-black/5 flex items-center gap-2 transition-colors"
+                                                        className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-primary/10 flex items-center gap-2 transition-colors"
                                                     >
                                                         <LineChartIcon size={16} /> Ver Evolução
                                                     </button>
@@ -518,11 +520,11 @@ export const Students = () => {
                                                             }
                                                             setOpenMenuId(null);
                                                         }}
-                                                        className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-black/5 flex items-center gap-2 transition-colors"
+                                                        className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-primary/10 flex items-center gap-2 transition-colors"
                                                     >
                                                         <Pencil size={16} /> Editar
                                                     </button>
-                                                    <div className="h-[1px] bg-black/5 mx-2 my-1"></div>
+                                                    <div className="h-[1px] mx-2 my-1" style={{ background: 'var(--color-border)' }}></div>
                                                     <button
                                                         onClick={() => {
                                                             setDeletingStudent(student);
@@ -638,9 +640,9 @@ export const Students = () => {
                                         <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Tipo de Turma</label>
                                         <select className="glass-input"
                                             value={newStudentData.class_type} onChange={e => setNewStudentData({ ...newStudentData, class_type: e.target.value })}>
-                                            <option value="" className="bg-white text-text-main">-- Selecione --</option>
-                                            <option value="Semanal" className="bg-white text-text-main">Semanal</option>
-                                            <option value="Quinzenal" className="bg-white text-text-main">Quinzenal</option>
+                                            <option value="">-- Selecione --</option>
+                                            <option value="Semanal">Semanal</option>
+                                            <option value="Quinzenal">Quinzenal</option>
                                         </select>
                                     </div>
                                 </div>
@@ -682,8 +684,8 @@ export const Students = () => {
                                         value={selectedClassId}
                                         onChange={e => setSelectedClassId(Number(e.target.value) || '')}
                                     >
-                                        <option value="" className="bg-white text-text-main">-- Selecione uma turma --</option>
-                                        {classes.map(c => <option key={c.id} value={c.id} className="bg-white text-text-main">{c.name}</option>)}
+                                        <option value="">-- Selecione uma turma --</option>
+                                        {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                     </select>
                                 </div>
 
@@ -765,9 +767,9 @@ export const Students = () => {
                                     <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Tipo de Turma</label>
                                     <select className="glass-input"
                                         value={editStudentData.class_type} onChange={e => setEditStudentData({ ...editStudentData, class_type: e.target.value })}>
-                                        <option value="" className="bg-white text-text-main">-- Selecione --</option>
-                                        <option value="Semanal" className="bg-white text-text-main">Semanal</option>
-                                        <option value="Quinzenal" className="bg-white text-text-main">Quinzenal</option>
+                                        <option value="">-- Selecione --</option>
+                                        <option value="Semanal">Semanal</option>
+                                        <option value="Quinzenal">Quinzenal</option>
                                     </select>
                                 </div>
                             </div>
@@ -800,8 +802,8 @@ export const Students = () => {
                                     value={editClassId}
                                     onChange={e => setEditClassId(Number(e.target.value) || '')}
                                 >
-                                    <option value="" className="bg-white text-text-main">-- Nenhuma turma --</option>
-                                    {classes.map(c => <option key={c.id} value={c.id} className="bg-white text-text-main">{c.name}</option>)}
+                                    <option value="">-- Nenhuma turma --</option>
+                                    {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                                 </select>
                             </div>
 
@@ -838,9 +840,9 @@ export const Students = () => {
                                     onChange={e => setReportMonth(e.target.value === '' ? '' : Number(e.target.value))}
                                     className="bg-black/5 border border-black/5 rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none focus:ring-1 focus:ring-primary/40"
                                 >
-                                    <option value="" className="bg-white text-text-main">Todos</option>
+                                    <option value="">Todos</option>
                                     {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                                        <option key={m} value={m} className="bg-white text-text-main">{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'short' })}</option>
+                                        <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'short' })}</option>
                                     ))}
                                 </select>
                                 <select
@@ -850,7 +852,7 @@ export const Students = () => {
                                     disabled={reportMonth === ''}
                                 >
                                     {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - 5 + i).map(y => (
-                                        <option key={y} value={y} className="bg-bg-dark text-text-main">{y}</option>
+                                        <option key={y} value={y}>{y}</option>
                                     ))}
                                 </select>
                                 <button
