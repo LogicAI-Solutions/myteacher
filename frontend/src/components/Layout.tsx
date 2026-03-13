@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { LogOut, LayoutDashboard, Users, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, Key, DollarSign, Palette } from 'lucide-react';
-import { useTheme } from '../context/ThemeContext';
+import { LogOut, LayoutDashboard, Users, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, DollarSign, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import api from '../api';
 
 export const Layout = () => {
     const { logout, user } = useAuth();
@@ -11,17 +9,15 @@ export const Layout = () => {
     const location = useLocation();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-    const { theme, setTheme } = useTheme();
-    // Messaging State
-    const [message, setMessage] = useState('');
-    const [error, setError] = useState('');
-
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
 
-    // Removed handleUpdatePassword since it's now in Profile.tsx
+    const handleSupportClick = () => {
+        const supportMessage = encodeURIComponent('Ola! Preciso de ajuda com o MyTeacherApp.');
+        window.open(`https://wa.me/5521974546156?text=${supportMessage}`, '_blank', 'noopener,noreferrer');
+    };
 
     return (
         <div className="flex h-screen bg-bg-dark overflow-hidden relative">
@@ -157,6 +153,14 @@ export const Layout = () => {
                             </div>
                         )}
                     </Link>
+                    <button
+                        onClick={handleSupportClick}
+                        className={`btn w-full text-green-300 border-green-400/20 bg-green-500/10 hover:bg-green-500/20 backdrop-blur-sm ${isSidebarCollapsed ? 'justify-center px-2' : 'justify-start'}`}
+                        title="Suporte via WhatsApp"
+                    >
+                        <MessageCircle size={18} />
+                        {!isSidebarCollapsed && <span>Suporte</span>}
+                    </button>
                     <button
                         onClick={handleLogout}
                         className={`btn w-full text-danger border-danger/30 bg-danger/10 hover:bg-danger/20 backdrop-blur-sm ${isSidebarCollapsed ? 'justify-center px-2' : 'justify-start'}`}
