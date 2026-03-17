@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
-import { Plus, Search, Pencil, Trash, X, AlertTriangle, UserCircle, LineChart as LineChartIcon, Download, MoreVertical, ArrowUp, ArrowDown, ArrowUpDown, ArrowRight } from 'lucide-react';
+import { Plus, Search, Pencil, Trash, X, AlertTriangle, UserCircle, LineChart as LineChartIcon, Download, MoreVertical, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { formatPhone, unmaskPhone } from '../utils/masks';
 import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
@@ -363,13 +363,103 @@ export const Students = () => {
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="md:hidden flex justify-end mb-2">
-                <span className="text-xs font-medium text-text-muted flex items-center gap-1 bg-black/5 px-3 py-1.5 rounded-full border border-black/5">
-                    Deslize para ver mais <ArrowRight size={14} />
-                </span>
+            {/* Mobile Cards (shown only on small screens) */}
+            <div className="md:hidden space-y-3 mb-4">
+                {isLoading && (
+                    <div className="flex items-center justify-center py-12">
+                        <Loading text="Carregando alunos..." />
+                    </div>
+                )}
+                {!isLoading && students.map((student: Student) => (
+                    <div key={student.id} className="glass-card p-4 relative action-menu-container">
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3 min-w-0">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-indigo-500/20 flex items-center justify-center border border-primary/20 shrink-0">
+                                    <span className="text-sm font-bold text-primary">{student.name.charAt(0).toUpperCase()}</span>
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="font-semibold text-text-main text-sm truncate">{student.name}</p>
+                                    <p className="text-xs text-text-muted">{student.phone ? formatPhone(student.phone) : 'Sem telefone'}</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <select
+                                    className={`px-2 py-1 rounded-lg text-xs font-medium border focus:ring-2 focus:ring-primary/40 outline-none transition-all cursor-pointer backdrop-blur-sm ${student.active
+                                        ? 'bg-success/10 text-success border-success/20'
+                                        : 'bg-primary/5 text-text-muted border-border'}`}
+                                    value={student.active ? 'true' : 'false'}
+                                    onChange={async (e) => {
+                                        const newActive = e.target.value === 'true';
+                                        try {
+                                            await api.put(`/students/${student.id}`, { ...student, active: newActive });
+                                            fetchData();
+                                        } catch (err: unknown) {
+                                            console.error(err);
+                                            showToast('Erro ao atualizar status', 'error');
+                                        }
+                                    }}
+                                >
+                                    <option value="true">Ativo</option>
+                                    <option value="false">Inativo</option>
+                                </select>
+                                <button
+                                    onClick={() => setOpenMenuId(openMenuId === student.id ? null : student.id)}
+                                    className={`p-2 rounded-xl transition-all ${openMenuId === student.id ? 'bg-primary/10 text-primary' : 'text-text-muted hover:text-text-main'}`}
+                                >
+                                    <MoreVertical size={16} />
+                                </button>
+                            </div>
+                        </div>
+                        {student.parent_name && (
+                            <div className="flex items-center gap-2 mt-2 text-xs text-text-muted">
+                                <span>Resp: {student.parent_name}</span>
+                                {student.school_year && <span className="opacity-40">•</span>}
+                                {student.school_year && <span>{student.school_year}</span>}
+                            </div>
+                        )}
+                        {openMenuId === student.id && (
+                            <div className="absolute right-4 top-14 z-50 w-48 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden animate-fade-in" style={{ background: 'var(--color-bg-card)', border: '1px solid var(--color-border)' }}>
+                                <button onClick={() => { handleViewEvolution(student); setOpenMenuId(null); }} className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-primary/10 flex items-center gap-2 transition-colors">
+                                    <LineChartIcon size={16} /> Ver Evolução
+                                </button>
+                                <button onClick={async () => {
+                                    setEditingStudent(student);
+                                    setEditStudentData({ name: student.name, phone: student.phone || '', parent_name: student.parent_name || '', parent_phone: student.parent_phone || '', parent_email: student.parent_email || '', school_year: student.school_year || '', school: student.school || '', intended_profession: student.intended_profession || '', class_type: student.class_type || '', active: student.active ?? true, username: student.username || '', password: '' });
+                                    try { const res = await api.get(`/students/${student.id}/enrollment`); setEditClassId(res.data.class_id || ''); setOriginalClassId(res.data.class_id); } catch { setEditClassId(''); setOriginalClassId(null); }
+                                    setOpenMenuId(null);
+                                }} className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-primary/10 flex items-center gap-2 transition-colors">
+                                    <Pencil size={16} /> Editar
+                                </button>
+                                <div className="h-[1px] mx-2 my-1" style={{ background: 'var(--color-border)' }} />
+                                <button onClick={() => { setDeletingStudent(student); setOpenMenuId(null); }} className="w-full text-left px-4 py-3 text-sm text-danger hover:bg-danger/10 flex items-center gap-2 transition-colors">
+                                    <Trash size={16} /> Excluir
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                ))}
+                {students.length === 0 && !isLoading && (
+                    <div className="glass-card p-8 text-center">
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                            <UserCircle size={28} className="text-primary/50" />
+                        </div>
+                        <p className="text-text-muted text-sm">Nenhum aluno encontrado.</p>
+                        <p className="text-text-muted/60 text-xs mt-1">Clique em "Novo Aluno" para começar.</p>
+                    </div>
+                )}
             </div>
-            <div className="glass-card !p-0 overflow-hidden relative h-[calc(100vh-280px)] min-h-[400px] flex flex-col">
+
+            {/* Mobile pagination */}
+            <div className="md:hidden flex justify-between items-center glass-card p-3 mb-4">
+                <button onClick={() => setPage(p => Math.max(0, Number(p) - 1))} disabled={page === 0} className="px-3 py-1.5 btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-xs">Anterior</button>
+                <span className="text-text-muted text-xs">Pág. {page + 1} de {Math.max(1, Math.ceil(totalStudents / limit))}</span>
+                <button onClick={() => setPage(p => Number(p) + 1)} disabled={(page + 1) * limit >= totalStudents} className="px-3 py-1.5 btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-xs">Próxima</button>
+            </div>
+
+            {/* Desktop Table */}
+            <div className="hidden md:flex justify-end mb-2">
+            </div>
+            <div className="hidden md:flex glass-card !p-0 overflow-hidden relative h-[calc(100vh-280px)] min-h-[400px] flex-col">
                 {isLoading && (
                     <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-dark/50 backdrop-blur-sm rounded-2xl">
                         <Loading text="Carregando alunos..." />
@@ -391,7 +481,7 @@ export const Students = () => {
                                         {sortBy === 'name' ? (
                                             sortDesc ? <ArrowDown size={14} className="text-primary" /> : <ArrowUp size={14} className="text-primary" />
                                         ) : (
-                                            <ArrowUpDown size={14} className="text-black/10 group-hover:text-black/30 transition-colors" />
+                                            <ArrowUpDown size={14} className="text-text-muted/30 group-hover:text-text-muted/60 transition-colors" />
                                         )}
                                     </div>
                                 </th>
@@ -452,7 +542,7 @@ export const Students = () => {
                                             <select
                                                 className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl text-xs font-medium border focus:ring-2 focus:ring-primary/40 outline-none transition-all cursor-pointer backdrop-blur-sm ${student.active
                                                     ? 'bg-success/10 text-success border-success/20'
-                                                    : 'bg-black/5 text-text-muted border-black/10'}`}
+                                                    : 'bg-primary/5 text-text-muted border-border'}`}
                                                 value={student.active ? 'true' : 'false'}
                                                 onClick={(e) => e.stopPropagation()}
                                                 onChange={async (e) => {
@@ -542,7 +632,7 @@ export const Students = () => {
                             })}
                             {students.length === 0 && !isLoading && (
                                 <tr>
-                                    <td colSpan={4} className="p-8 text-center text-text-muted italic">Nenhum aluno encontrado.</td>
+                                    <td colSpan={7} className="p-8 text-center text-text-muted italic">Nenhum aluno encontrado.</td>
                                 </tr>
                             )}
                         </tbody>

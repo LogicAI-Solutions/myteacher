@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
-import { DollarSign, CheckCircle, AlertCircle, Search, ArrowUp, ArrowDown, ArrowRight } from 'lucide-react';
+import { DollarSign, CheckCircle, AlertCircle, Search, ArrowUp, ArrowDown } from 'lucide-react';
 import { formatCurrency, parseCurrency } from '../utils/masks';
 import { Loading } from '../components/Loading';
 
@@ -343,13 +343,67 @@ export const Payments = () => {
                 </div>
             </div>
 
-            {/* Table */}
-            <div className="md:hidden flex justify-end mb-2">
-                <span className="text-xs font-medium text-text-muted flex items-center gap-1 bg-black/5 px-3 py-1.5 rounded-full border border-black/5">
-                    Deslize para ver mais <ArrowRight size={14} />
-                </span>
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-3 mb-4">
+                {(loading || saving) && (
+                    <div className="flex items-center justify-center py-12">
+                        <Loading text={saving ? "Salvando..." : "Carregando..."} />
+                    </div>
+                )}
+                {!loading && !saving && students.map(student => {
+                    const payment = localPayments[student.id] || { status: 'PENDING', amount: 0, student_id: student.id };
+                    const isPaid = payment.status === 'PAID';
+                    return (
+                        <div key={student.id} className="glass-card p-4">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="min-w-0">
+                                    <p className="font-semibold text-text-main text-sm truncate">{student.name}</p>
+                                    <p className="text-xs text-text-muted">{student.parent_name || 'Sem responsável'}</p>
+                                </div>
+                                <select
+                                    className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all cursor-pointer backdrop-blur-sm ${isPaid ? 'bg-success/10 text-success border-success/30' : 'bg-warning/10 text-warning border-warning/30'}`}
+                                    value={payment.status}
+                                    onChange={e => updateLocalPayment(student.id, 'status', e.target.value)}
+                                >
+                                    <option value="PENDING">Pendente</option>
+                                    <option value="PAID">Pago</option>
+                                </select>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs text-text-muted">{student.school_year || ''} {student.class_type ? `• ${student.class_type}` : ''}</span>
+                                <input
+                                    type="text"
+                                    className="w-28 bg-transparent border-b border-border outline-none py-1 text-sm font-mono text-right focus:border-primary text-text-main"
+                                    value={formatCurrency(payment.amount)}
+                                    onChange={e => updateLocalPayment(student.id, 'amount', parseCurrency(e.target.value))}
+                                    placeholder="R$ 0"
+                                />
+                            </div>
+                        </div>
+                    );
+                })}
+                {students.length === 0 && !loading && (
+                    <div className="glass-card p-8 text-center">
+                        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-success/10 flex items-center justify-center border border-success/20">
+                            <DollarSign size={28} className="text-success/50" />
+                        </div>
+                        <p className="text-text-muted text-sm">Nenhum aluno encontrado.</p>
+                    </div>
+                )}
             </div>
-            <div className="glass-card overflow-hidden relative h-[500px] flex flex-col">
+
+            {/* Mobile Save + Pagination */}
+            <div className="md:hidden space-y-3 mb-4">
+                <button onClick={handleSavePayments} disabled={saving} className={`btn-success-gradient w-full px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 text-sm ${saving ? 'opacity-70 cursor-wait' : ''}`}>
+                    {saving ? 'Salvando...' : <><DollarSign size={16} /> Salvar Alterações</>}
+                </button>
+                <div className="flex justify-between items-center glass-card p-3">
+                    <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} className="px-3 py-1.5 btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-xs">Anterior</button>
+                    <span className="text-text-muted text-xs">Pág. {page + 1} de {Math.max(1, Math.ceil(totalStudents / limit))}</span>
+                    <button onClick={() => setPage(p => p + 1)} disabled={(page + 1) * limit >= totalStudents} className="px-3 py-1.5 btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-xs">Próxima</button>
+                </div>
+            </div>
+            <div className="hidden md:flex glass-card overflow-hidden relative h-[500px] flex-col">
                 {(loading || saving) && (
                     <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-dark/50 backdrop-blur-sm">
                         <Loading text={saving ? "Salvando alterações..." : "Carregando financeiro..."} />

@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef } from 'react';
 import api from '../api';
+import { useAuth } from '../context/AuthContext';
 import { Loading } from '../components/Loading';
 import { PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from 'recharts';
-import { Users, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
+import { Users, DollarSign, TrendingUp, AlertCircle, GraduationCap, ClipboardList, ArrowRight, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 
 interface DashboardStats {
@@ -24,10 +26,17 @@ const COLORS = ['var(--color-primary)', 'var(--color-text-muted)'];
 
 
 export const Dashboard = () => {
+    const { user } = useAuth();
 
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [hideTutorial, setHideTutorial] = useState(() => localStorage.getItem('hideTutorial') === 'true');
+
+    const handleDismissTutorial = () => {
+        localStorage.setItem('hideTutorial', 'true');
+        setHideTutorial(true);
+    };
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -94,14 +103,67 @@ export const Dashboard = () => {
         { name: 'Pendentes', value: stats.payments.pending, fill: 'var(--color-warning)' },
     ];
 
+    const isFirstTime = !hideTutorial;
+    const firstName = user?.full_name?.split(' ')[0] || 'Professor(a)';
+
     return (
         <div className="animate-slide-up space-y-8">
             <div className="mb-8">
-                <h2 className="text-3xl font-bold text-text-main">
-                    Visão Geral
+                <h2 className="text-2xl sm:text-3xl font-bold text-text-main">
+                    Olá, {firstName}! 👋
                 </h2>
                 <p className="text-text-muted mt-2">Acompanhe o desempenho da sua escola em tempo real.</p>
             </div>
+
+            {isFirstTime && (
+                <div className="glass-card p-6 sm:p-8 border-l-4 border-l-primary relative overflow-hidden">
+                    <button 
+                        onClick={handleDismissTutorial}
+                        className="absolute top-4 right-4 p-2 text-text-muted hover:text-text-main hover:bg-black/5 rounded-xl transition-all z-10"
+                        title="Ocultar passo a passo"
+                    >
+                        <X size={20} />
+                    </button>
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+                    <h3 className="text-xl font-bold text-text-main mb-2">Bem-vindo ao MyTeacherApp! 🎉</h3>
+                    <p className="text-text-muted mb-6">Aqui está o passo a passo sugerido para configurar a sua escola:</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <Link to="/dashboard/classes" className="flex items-center gap-3 p-4 rounded-xl bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-all group no-underline">
+                            <div className="p-2 flex-shrink-0 rounded-lg bg-primary/20 text-primary">
+                                <GraduationCap size={20} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs text-primary font-bold">Passo 1</p>
+                                <p className="text-sm font-bold text-text-main group-hover:text-primary transition-colors truncate">Criar Turma</p>
+                                <p className="text-[10px] text-text-muted/80 leading-tight mt-0.5">Defina disciplina e valor</p>
+                            </div>
+                            <ArrowRight size={16} className="flex-shrink-0 ml-1 text-text-muted group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                        </Link>
+                        <Link to="/dashboard/students" className="flex items-center gap-3 p-4 rounded-xl bg-primary/5 border border-border hover:bg-primary/10 transition-all group no-underline">
+                            <div className="p-2 flex-shrink-0 rounded-lg bg-primary/10 text-primary/70">
+                                <Users size={20} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs text-primary/80 font-bold">Passo 2</p>
+                                <p className="text-sm font-bold text-text-main group-hover:text-primary transition-colors truncate">Adicionar Alunos</p>
+                                <p className="text-[10px] text-text-muted/80 leading-tight mt-0.5">Cadastre na plataforma</p>
+                            </div>
+                            <ArrowRight size={16} className="flex-shrink-0 ml-1 text-text-muted group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                        </Link>
+                        <Link to="/dashboard/classes" className="flex items-center gap-3 p-4 rounded-xl bg-primary/5 border border-border hover:bg-primary/10 transition-all group no-underline" title="Vá em Turmas, abra a turma criada e faça a chamada!">
+                            <div className="p-2 flex-shrink-0 rounded-lg bg-primary/10 text-primary/70">
+                                <ClipboardList size={20} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs text-primary/80 font-bold">Passo 3</p>
+                                <p className="text-sm font-bold text-text-main group-hover:text-primary transition-colors truncate">Fazer Chamada</p>
+                                <p className="text-[10px] text-text-muted/80 leading-tight mt-0.5">Abra a turma e preencha a lista</p>
+                            </div>
+                            <ArrowRight size={16} className="flex-shrink-0 ml-1 text-text-muted group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                        </Link>
+                    </div>
+                </div>
+            )}
 
             {/* Quick Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -205,16 +267,16 @@ export const Dashboard = () => {
                                     bottom: 5,
                                 }}
                             >
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
-                                <XAxis dataKey="name" stroke="#9ca3af" tick={{ fill: '#9ca3af' }} axisLine={{ stroke: 'rgba(0,0,0,0.1)' }} />
-                                <YAxis stroke="#9ca3af" tick={{ fill: '#9ca3af' }} axisLine={{ stroke: 'rgba(0,0,0,0.1)' }} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                                <XAxis dataKey="name" stroke="var(--color-text-muted)" tick={{ fill: 'var(--color-text-muted)' }} axisLine={{ stroke: 'var(--color-border)' }} />
+                                <YAxis stroke="var(--color-text-muted)" tick={{ fill: 'var(--color-text-muted)' }} axisLine={{ stroke: 'var(--color-border)' }} />
                                 <Tooltip
                                     isAnimationActive={false}
                                     cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                                     content={({ active, payload }: any) => {
                                         if (active && payload && payload.length) {
                                             return (
-                                                <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '12px', padding: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                                                <div style={{ backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--color-border)', borderRadius: '12px', padding: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)' }}>
                                                     <p className="text-text-main" style={{ margin: 0 }}>
                                                         Quantidade: <span style={{ fontWeight: 'bold' }}>{payload[0].value}</span>
                                                     </p>

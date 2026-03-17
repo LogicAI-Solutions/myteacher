@@ -3,6 +3,7 @@ import api from '../api';
 import { Plus, Calendar, Pencil, Trash, X, AlertTriangle, GripVertical, ArrowUpDown, BookOpen, Users, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Loading } from '../components/Loading';
+import { Toast, type ToastType } from '../components/Toast';
 import {
     DndContext,
     closestCenter,
@@ -165,6 +166,12 @@ export const Classes = () => {
     const [editClassName, setEditClassName] = useState('');
     const [editClassSchedule, setEditClassSchedule] = useState('');
     const [deletingClass, setDeletingClass] = useState<ClassModel | null>(null);
+    const [toast, setToast] = useState<{ message: string, type: ToastType } | null>(null);
+
+    const showToast = (message: string, type: ToastType) => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3000);
+    };
 
     // DnD sensors
     const sensors = useSensors(
@@ -221,6 +228,7 @@ export const Classes = () => {
             fetchClasses();
         } catch (error: unknown) {
             alert('Error creating class');
+            showToast('Erro ao criar turma', 'error');
         }
     };
 
@@ -232,7 +240,7 @@ export const Classes = () => {
             setEditingClass(null);
             fetchClasses();
         } catch (error: unknown) {
-            alert('Erro ao atualizar turma');
+            showToast('Erro ao atualizar turma', 'error');
         }
     };
 
@@ -243,7 +251,7 @@ export const Classes = () => {
             setDeletingClass(null);
             fetchClasses();
         } catch (error: unknown) {
-            alert('Erro ao excluir turma');
+            showToast('Erro ao excluir turma', 'error');
         }
     };
 
@@ -282,7 +290,7 @@ export const Classes = () => {
             setIsReorderMode(false);
         } catch (error: unknown) {
             console.error('Error saving order:', error);
-            alert('Erro ao salvar a nova ordem');
+            showToast('Erro ao salvar a nova ordem', 'error');
         }
     };
 
@@ -303,6 +311,7 @@ export const Classes = () => {
 
     return (
         <div>
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             {/* Header */}
             <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>

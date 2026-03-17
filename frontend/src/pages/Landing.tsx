@@ -212,7 +212,7 @@ export const Landing = () => {
                         <a href="#" className="hover:text-white transition-colors hover:underline decoration-white/20 underline-offset-4">Termos</a>
                         <a href="#" className="hover:text-white transition-colors hover:underline decoration-white/20 underline-offset-4">Privacidade</a>
                     </div>
-                    <p>&copy; 2024 LogicIA Solutions.</p>
+                    <p>&copy; {new Date().getFullYear()} LogicIA Solutions.</p>
                 </div>
             </footer>
         </div>

@@ -286,7 +286,7 @@ export const ClassDetails = () => {
             await handleEnrollStudent(res.data.id);
             setNewStudentData({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '' });
             setShowCreateStudentModal(false);
-        } catch (e) { alert('Erro ao criar aluno'); }
+        } catch (e) { showNotification('Erro ao criar aluno', 'error'); }
         finally { setCreatingStudent(false); }
     };
 
@@ -302,7 +302,7 @@ export const ClassDetails = () => {
             await api.put(`/students/${editingStudent.id}`, payload);
             setEditingStudent(null);
             fetchStudents();
-        } catch (e: unknown) { alert('Erro ao atualizar aluno'); }
+        } catch (e: unknown) { showNotification('Erro ao atualizar aluno', 'error'); }
     };
 
     const handleDeleteStudent = async () => {
@@ -311,7 +311,7 @@ export const ClassDetails = () => {
             await api.delete(`/students/${deletingStudent.id}`);
             setDeletingStudent(null);
             fetchStudents();
-        } catch (e: unknown) { alert('Erro ao excluir aluno'); }
+        } catch (e: unknown) { showNotification('Erro ao excluir aluno', 'error'); }
     };
 
     const downloadFile = async (url: string, filename: string, method: 'GET' | 'POST' = 'GET', body: unknown = {}) => {
