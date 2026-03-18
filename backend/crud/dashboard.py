@@ -3,6 +3,8 @@ from sqlalchemy import func
 from datetime import date
 from backend.models.students import Student
 from backend.models.payments import Payment
+from backend.models.classes import Class
+from backend.models.attendance import AttendanceSession
 
 def get_dashboard_stats(db: Session, user_id: int):
     # 1. Alunos Ativos vs Inativos
@@ -35,8 +37,15 @@ def get_dashboard_stats(db: Session, user_id: int):
         Payment.month == current_month,
         Payment.year == current_year
     ).count()
-    
+    # 3. Turmas e Sessões
+    classes_count = db.query(Class).filter(Class.owner_id == user_id).count()
+    sessions_count = db.query(AttendanceSession).join(Class).filter(Class.owner_id == user_id).count()
+
     return {
+        "overview": {
+            "classes_count": classes_count,
+            "sessions_count": sessions_count
+        },
         "students": {
             "active": active_count,
             "inactive": inactive_count,

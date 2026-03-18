@@ -8,6 +8,10 @@ import { Link } from 'react-router-dom';
 
 
 interface DashboardStats {
+    overview: {
+        classes_count: number;
+        sessions_count: number;
+    };
     students: {
         active: number;
         inactive: number;
@@ -59,6 +63,12 @@ export const Dashboard = () => {
             try {
                 const res = await api.get('/dashboard/stats');
                 setStats(res.data);
+                
+                // Automatically hide tutorial if the user has already completed the steps
+                if (res.data?.overview?.sessions_count > 0 && !hideTutorial) {
+                    localStorage.setItem('hideTutorial', 'true');
+                    setHideTutorial(true);
+                }
             } catch (err: any) {
                 console.error("Error fetching dashboard stats:", err);
                 setError(err.message || 'Erro ao carregar dados');

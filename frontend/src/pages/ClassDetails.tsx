@@ -483,6 +483,7 @@ export const ClassDetails = () => {
             } else {
                 await api.post(`/classes/${id}/attendance`, payload);
                 showNotification('Chamada salva com sucesso!', 'success');
+                localStorage.setItem('hideTutorial', 'true');
             }
 
             setSessionDesc('');
