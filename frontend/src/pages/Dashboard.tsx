@@ -3,7 +3,7 @@ import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import { Loading } from '../components/Loading';
 import { PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, ResponsiveContainer } from 'recharts';
-import { Users, DollarSign, TrendingUp, AlertCircle, GraduationCap, ClipboardList, ArrowRight, X } from 'lucide-react';
+import { Users, DollarSign, TrendingUp, AlertCircle, GraduationCap, ClipboardList, ArrowRight, X, HelpCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 
@@ -64,11 +64,7 @@ export const Dashboard = () => {
                 const res = await api.get('/dashboard/stats');
                 setStats(res.data);
                 
-                // Automatically hide tutorial if the user has already completed the steps
-                if (res.data?.overview?.sessions_count > 0 && !hideTutorial) {
-                    localStorage.setItem('hideTutorial', 'true');
-                    setHideTutorial(true);
-                }
+
             } catch (err: any) {
                 console.error("Error fetching dashboard stats:", err);
                 setError(err.message || 'Erro ao carregar dados');
@@ -118,11 +114,26 @@ export const Dashboard = () => {
 
     return (
         <div className="animate-slide-up space-y-8">
-            <div className="mb-8">
-                <h2 className="text-2xl sm:text-3xl font-bold text-text-main">
-                    Olá, {firstName}! 👋
-                </h2>
-                <p className="text-text-muted mt-2">Acompanhe o desempenho da sua escola em tempo real.</p>
+            <div className="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                <div>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-text-main">
+                        Olá, {firstName}! 👋
+                    </h2>
+                    <p className="text-text-muted mt-2">Acompanhe o desempenho da sua escola em tempo real.</p>
+                </div>
+                {hideTutorial && (
+                    <button 
+                        onClick={() => {
+                            localStorage.setItem('hideTutorial', 'false');
+                            setHideTutorial(false);
+                        }}
+                        className="glass-button flex items-center gap-2 px-4 py-2 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        title="Mostrar dicas iniciais"
+                    >
+                        <HelpCircle size={20} className="text-primary" />
+                        <span className="font-medium text-text-main">Mostrar Ajuda</span>
+                    </button>
+                )}
             </div>
 
             {isFirstTime && (
