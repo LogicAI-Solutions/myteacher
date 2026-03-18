@@ -686,7 +686,7 @@ export const ClassDetails = () => {
                 {activeTab === 'attendance' && (
                     <div className="glass-card p-5 sm:p-6 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 p-4 rounded-xl border border-border bg-black/5 gap-3 shadow-sm">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--glass-bg)] gap-3 shadow-sm">
                             <h2 className="text-lg font-bold flex items-center gap-3 text-text-main">
                                 <div className="bg-primary/15 p-2 rounded-lg border border-primary/20 shadow-sm">
                                     <ClipboardList size={20} className="text-primary" />
@@ -694,7 +694,7 @@ export const ClassDetails = () => {
                                 {editingSessionId ? 'Editando Chamada' : 'Nova Chamada'}
                             </h2>
                             <div className="flex items-center gap-3 w-full sm:w-auto mt-3 sm:mt-0">
-                                <button onClick={loadAllStudents} className="btn flex-1 sm:flex-none justify-center px-4 py-2 border-[1.5px] border-primary/30 hover:border-primary/60 hover:bg-primary/10 rounded-xl transition-all text-primary font-semibold shadow-sm">
+                                <button onClick={loadAllStudents} className="btn flex-1 sm:flex-none justify-center px-4 py-2 border border-primary/40 bg-primary/10 hover:border-primary/60 hover:bg-primary/20 rounded-xl transition-all text-primary font-semibold shadow-sm">
                                     <Users size={16} /> Gerenciar Alunos
                                 </button>
                                 <div className="text-sm whitespace-nowrap text-text-muted px-4 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--glass-bg)] shadow-sm">

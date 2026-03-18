@@ -403,7 +403,7 @@ export const Payments = () => {
                     <button onClick={() => setPage(p => p + 1)} disabled={(page + 1) * limit >= totalStudents} className="px-3 py-1.5 btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-xs">Próxima</button>
                 </div>
             </div>
-            <div className="hidden md:flex glass-card overflow-hidden relative h-[500px] flex-col">
+            <div className="hidden md:flex glass-card !p-0 overflow-hidden relative h-[500px] flex-col">
                 {(loading || saving) && (
                     <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-dark/50 backdrop-blur-sm">
                         <Loading text={saving ? "Salvando alterações..." : "Carregando financeiro..."} />
