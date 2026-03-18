@@ -2,14 +2,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, ArrowRight, CheckCircle, BarChart3, Users, DollarSign, CalendarCheck, MessageCircle, Shield } from 'lucide-react';
 import teacherIllustration from '../assets/teacher_login_illustration.png';
+import { openSupportWhatsApp } from '../utils/support';
 
 export const Landing = () => {
     const navigate = useNavigate();
 
     const handleWhatsAppClick = () => {
-        // Mensagem contextualizada para identificar a origem do contato
-        const message = encodeURIComponent("Olá! Vim pelo site do MyTeacherApp e gostaria de saber mais sobre a plataforma");
-        window.open(`https://wa.me/5521974546156?text=${message}`, '_blank');
+        openSupportWhatsApp('Ola! Vim pelo site do MyTeacherApp e gostaria de saber mais sobre a plataforma.');
     };
 
     return (
@@ -207,13 +206,13 @@ export const Landing = () => {
                     </div>
                     <div className="flex gap-6">
                         <span onClick={handleWhatsAppClick} className="hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 group">
-                            <MessageCircle size={16} className="text-primary group-hover:text-green-400 transition-colors" />
+                            <MessageCircle size={16} className="text-primary group-hover:text-success transition-colors" />
                             <span className="group-hover:underline decoration-primary/50 underline-offset-4">Fale Conosco</span>
                         </span>
                         <a href="#" className="hover:text-white transition-colors hover:underline decoration-white/20 underline-offset-4">Termos</a>
                         <a href="#" className="hover:text-white transition-colors hover:underline decoration-white/20 underline-offset-4">Privacidade</a>
                     </div>
-                    <p>&copy; 2024 LogicIA Solutions.</p>
+                    <p>&copy; {new Date().getFullYear()} LogicIA Solutions.</p>
                 </div>
             </footer>
         </div>

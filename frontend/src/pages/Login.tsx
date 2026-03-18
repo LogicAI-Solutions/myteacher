@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, GraduationCap, ArrowLeft, Lock, User, ArrowRight } from 'lucide-react';
 import loginHeroImage from '../assets/login_hero_female.png';
+import { openSupportWhatsApp } from '../utils/support';
 
 export const Login = () => {
     const [nickname, setNickname] = useState('');
@@ -54,9 +55,9 @@ export const Login = () => {
             {/* Left Side - Image/Brand */}
             <div className="hidden lg:flex lg:w-1/2 relative bg-bg-darker items-center justify-center p-12 overflow-hidden">
                 {/* Background Decor */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-bg-darker to-purple-900/20"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-bg-darker to-primary-light/20"></div>
                 <div className="absolute top-[-20%] left-[-20%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[100px] animate-pulse"></div>
-                <div className="absolute bottom-[-20%] right-[-20%] w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
+                <div className="absolute bottom-[-20%] right-[-20%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '2s' }}></div>
 
                 {/* Content */}
                 <div className="relative z-10 w-full max-w-lg">
@@ -153,7 +154,7 @@ export const Login = () => {
                                 <button
                                     type="button"
                                     className="text-xs text-primary-light hover:text-white transition-colors"
-                                    onClick={() => window.open('https://wa.me/5521974546156', '_blank')}
+                                    onClick={() => openSupportWhatsApp()}
                                 >
                                     Esqueceu a senha?
                                 </button>

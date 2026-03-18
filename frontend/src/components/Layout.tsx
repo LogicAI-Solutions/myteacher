@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { LogOut, LayoutDashboard, Users, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, DollarSign } from 'lucide-react';
-
+import { LogOut, LayoutDashboard, Users, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, DollarSign, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { openSupportWhatsApp } from '../utils/support';
 
 
 export const Layout = () => {
@@ -18,7 +18,9 @@ export const Layout = () => {
         navigate('/login');
     };
 
-    // Removed handleUpdatePassword since it's now in Profile.tsx
+    const handleSupportClick = () => {
+        openSupportWhatsApp('Ola! Preciso de ajuda com o MyTeacherApp.');
+    };
 
     return (
         <div className="flex h-screen bg-bg-dark overflow-hidden relative">
@@ -31,7 +33,7 @@ export const Layout = () => {
                 <h1 className="flex items-center gap-2 font-bold text-lg text-gradient">
                     <GraduationCap size={22} className="text-primary" /> MyTeacherApp
                 </h1>
-                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-text-muted hover:text-text-main rounded-xl hover:bg-white/5 transition-all duration-300">
+                <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-text-muted hover:text-text-main rounded-xl hover:bg-white/5 transition-all duration-300" aria-label="Menu de navegação">
                     {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
             </header>
@@ -65,6 +67,7 @@ export const Layout = () => {
                     <button
                         onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
                         className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-white/10 backdrop-blur-xl border border-white/10 rounded-full p-1.5 hidden md:flex text-text-muted hover:text-text-main hover:border-primary/50 transition-all shadow-md z-10 hover:bg-white/20"
+                        aria-label={isSidebarCollapsed ? 'Expandir menu' : 'Recolher menu'}
                     >
                         {isSidebarCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                     </button>
@@ -155,6 +158,14 @@ export const Layout = () => {
                         )}
                     </Link>
                     <button
+                        onClick={handleSupportClick}
+                        className={`btn w-full text-success border-success/20 bg-success/10 hover:bg-success/20 backdrop-blur-sm ${isSidebarCollapsed ? 'justify-center px-2' : 'justify-start'}`}
+                        title="Suporte via WhatsApp"
+                    >
+                        <MessageCircle size={18} />
+                        {!isSidebarCollapsed && <span>Suporte</span>}
+                    </button>
+                    <button
                         onClick={handleLogout}
                         className={`btn w-full text-danger border-danger/30 bg-danger/10 hover:bg-danger/20 backdrop-blur-sm ${isSidebarCollapsed ? 'justify-center px-2' : 'justify-start'}`}
                         title="Sair"
@@ -165,8 +176,40 @@ export const Layout = () => {
                 </div>
             </aside>
 
+            {/* Mobile Bottom Navigation */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-header border-t border-b-0 flex items-center justify-around px-2 py-1 safe-area-bottom" style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
+                <Link
+                    to="/dashboard"
+                    className={`flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-all duration-200 min-w-[60px] ${location.pathname === '/dashboard' ? 'text-primary' : 'text-text-muted'}`}
+                >
+                    <LayoutDashboard size={20} />
+                    <span className="text-[10px] font-medium">Início</span>
+                </Link>
+                <Link
+                    to="/dashboard/classes"
+                    className={`flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-all duration-200 min-w-[60px] ${location.pathname.includes('/classes') || location.pathname.includes('/class/') ? 'text-primary' : 'text-text-muted'}`}
+                >
+                    <GraduationCap size={20} />
+                    <span className="text-[10px] font-medium">Turmas</span>
+                </Link>
+                <Link
+                    to="/dashboard/students"
+                    className={`flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-all duration-200 min-w-[60px] ${location.pathname.includes('/students') ? 'text-primary' : 'text-text-muted'}`}
+                >
+                    <Users size={20} />
+                    <span className="text-[10px] font-medium">Alunos</span>
+                </Link>
+                <Link
+                    to="/dashboard/payments"
+                    className={`flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-all duration-200 min-w-[60px] ${location.pathname.includes('/payments') ? 'text-primary' : 'text-text-muted'}`}
+                >
+                    <DollarSign size={20} />
+                    <span className="text-[10px] font-medium">Financeiro</span>
+                </Link>
+            </nav>
+
             {/* Main Content */}
-            <main className="flex-1 overflow-auto px-3 py-4 sm:p-4 md:p-6 lg:p-8 pt-16 md:pt-6 lg:pt-8 w-full h-screen">
+            <main className="flex-1 overflow-auto px-3 py-4 sm:p-4 md:p-6 lg:p-8 pt-16 md:pt-6 lg:pt-8 pb-20 md:pb-6 lg:pb-8 w-full h-screen">
                 <div className="container mx-auto max-w-6xl">
                     <Outlet />
                 </div>

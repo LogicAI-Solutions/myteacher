@@ -1,6 +1,7 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStudentAuth } from '../context/StudentAuthContext';
-import { LogOut, GraduationCap, LayoutDashboard, UserCircle } from 'lucide-react';
+import { LogOut, GraduationCap, LayoutDashboard, UserCircle, MessageCircle } from 'lucide-react';
+import { openSupportWhatsApp } from '../utils/support';
 
 export const StudentLayout = () => {
     const { logout, student } = useStudentAuth();
@@ -10,6 +11,10 @@ export const StudentLayout = () => {
     const handleLogout = () => {
         logout();
         navigate('/portal/login');
+    };
+
+    const handleSupportClick = () => {
+        openSupportWhatsApp('Ola! Preciso de suporte no Portal do Aluno do MyTeacherApp.');
     };
 
     return (
@@ -48,6 +53,15 @@ export const StudentLayout = () => {
                             <p className="text-xs text-text-muted truncate">{student?.username}</p>
                         </div>
                     </div>
+
+                    <button
+                        onClick={handleSupportClick}
+                        className="w-full flex items-center gap-3 p-3 rounded-xl text-success hover:bg-success/10 transition-all border border-transparent hover:border-success/20 mb-2"
+                        title="Suporte via WhatsApp"
+                    >
+                        <MessageCircle size={22} />
+                        <span className="hidden lg:block font-medium">Suporte</span>
+                    </button>
 
                     <button
                         onClick={handleLogout}

@@ -60,19 +60,19 @@ export const StudentDashboard = () => {
     return (
         <div className="space-y-6 animate-fade-in">
             <header className="mb-8">
-                <h1 className="text-3xl font-bold text-white mb-2">Olá, {student?.name.split(' ')[0]}! 👋</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-text-main mb-2">Olá, {student?.name.split(' ')[0]}! 👋</h1>
                 <p className="text-text-muted">Bem-vindo ao seu painel de acompanhamento.</p>
             </header>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="glass-card p-6 flex items-center gap-4 border-l-4 border-l-secondary">
-                    <div className="p-3 bg-secondary/20 rounded-xl text-secondary">
+                <div className="glass-card p-4 sm:p-6 flex items-center gap-4 border-l-4 border-l-primary">
+                    <div className="p-3 bg-primary/20 rounded-xl text-primary">
                         <BookOpen size={24} />
                     </div>
                     <div>
                         <p className="text-text-muted text-sm font-medium uppercase tracking-wider">Aulas Totais</p>
-                        <p className="text-2xl font-bold text-white">{stats.total_classes}</p>
+                        <p className="text-2xl font-bold text-text-main">{stats.total_classes}</p>
                     </div>
                 </div>
 
@@ -82,17 +82,17 @@ export const StudentDashboard = () => {
                     </div>
                     <div>
                         <p className="text-text-muted text-sm font-medium uppercase tracking-wider">Presença</p>
-                        <p className="text-2xl font-bold text-white">{Math.round(stats.attendance_rate)}%</p>
+                        <p className="text-2xl font-bold text-text-main">{Math.round(stats.attendance_rate)}%</p>
                     </div>
                 </div>
 
-                <div className="glass-card p-6 flex items-center gap-4 border-l-4 border-l-purple-500">
-                    <div className="p-3 bg-purple-500/20 rounded-xl text-purple-400">
+                <div className="glass-card p-6 flex items-center gap-4 border-l-4 border-l-primary">
+                    <div className="p-3 bg-primary/20 rounded-xl text-primary-light">
                         <TrendingUp size={24} />
                     </div>
                     <div>
                         <p className="text-text-muted text-sm font-medium uppercase tracking-wider">Média Geral</p>
-                        <p className="text-2xl font-bold text-white">{stats.avg_grade.toFixed(1)}</p>
+                        <p className="text-2xl font-bold text-text-main">{stats.avg_grade.toFixed(1)}</p>
                     </div>
                 </div>
             </div>
@@ -100,8 +100,8 @@ export const StudentDashboard = () => {
             {/* Evolution Chart */}
             <div className="glass-card p-6 lg:p-8">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                        <TrendingUp className="text-secondary" /> Sua Evolução
+                    <h2 className="text-xl font-bold text-text-main flex items-center gap-2">
+                        <TrendingUp className="text-primary" /> Sua Evolução
                     </h2>
                 </div>
 
@@ -109,25 +109,26 @@ export const StudentDashboard = () => {
                     {evolutionData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={evolutionData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
                                 <XAxis
                                     dataKey="date"
-                                    stroke="#9ca3af"
+                                    stroke="var(--color-text-muted)"
+                                    tick={{ fill: 'var(--color-text-muted)' }}
                                     tickFormatter={(str) => new Date(str).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                                 />
-                                <YAxis stroke="#9ca3af" domain={[0, 10]} />
+                                <YAxis stroke="var(--color-text-muted)" tick={{ fill: 'var(--color-text-muted)' }} domain={[0, 10]} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: 'rgba(15, 23, 42, 0.9)', borderColor: 'rgba(255,255,255,0.1)', color: '#fff', borderRadius: '12px', backdropFilter: 'blur(10px)' }}
-                                    itemStyle={{ color: '#fff' }}
+                                    contentStyle={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-main)', borderRadius: '12px', backdropFilter: 'blur(10px)' }}
+                                    itemStyle={{ color: 'var(--color-text-main)' }}
                                     labelFormatter={(label) => new Date(label).toLocaleDateString('pt-BR')}
                                     formatter={(value: number) => [value, 'Nota']}
                                 />
                                 <Line
                                     type="monotone"
                                     dataKey="grade"
-                                    stroke="#3b82f6"
+                                    stroke="var(--color-primary)"
                                     strokeWidth={3}
-                                    dot={{ r: 4, fill: '#3b82f6' }}
+                                    dot={{ r: 4, fill: 'var(--color-primary)' }}
                                     activeDot={{ r: 8 }}
                                     name="Nota"
                                 />

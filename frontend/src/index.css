@@ -4,6 +4,7 @@
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);
   --color-primary-light: var(--color-primary-light);
+  --color-secondary: var(--color-secondary);
   --color-bg-dark: var(--color-bg-dark);
   --color-bg-card: var(--color-bg-card);
   --color-text-main: var(--color-text-main);
@@ -147,6 +148,7 @@
   --color-primary: #6366f1;
   --color-primary-hover: #4f46e5;
   --color-primary-light: #818cf8;
+  --color-secondary: #a855f7;
   --color-bg-dark: #0f172a;
   --color-bg-card: rgba(15, 23, 42, 0.85);
   --color-text-main: #f8fafc;
@@ -167,6 +169,7 @@
   --color-primary: #2d5a6e;
   --color-primary-hover: #1e3d4a;
   --color-primary-light: #4a7c91;
+  --color-secondary: #5e8499;
   --color-bg-dark: #f1f5f9;
   --color-bg-card: rgba(255, 255, 255, 0.7);
   --color-text-main: #1e293b;
@@ -186,6 +189,7 @@
   --color-primary: #7d8c7b;
   --color-primary-hover: #5d6b5b;
   --color-primary-light: #9fb09c;
+  --color-secondary: #8a9687;
   --color-bg-dark: #fdfbf7;
   --color-bg-card: rgba(255, 255, 255, 0.8);
   --color-text-main: #4a3728;
@@ -426,18 +430,16 @@
   }
 
   .glass-button {
-    @apply px-6 py-3 rounded-xl font-medium transition-all duration-300 backdrop-blur-sm;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.7) 0%, rgba(79, 70, 229, 0.7) 100%);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+    @apply px-6 py-3 rounded-xl font-medium transition-all duration-300 backdrop-blur-sm text-white;
+    @apply bg-gradient-to-br from-primary/70 to-primary-hover/70 shadow-md shadow-primary/20;
   }
 
   .glass-button:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    @apply -translate-y-[1px] shadow-lg shadow-primary/30;
   }
 
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-light via-primary to-purple-400;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-light via-primary to-secondary;
   }
 
   .border-glow {
@@ -450,7 +452,8 @@
     inset: -1px;
     border-radius: inherit;
     padding: 1px;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.5), rgba(168, 85, 247, 0.5), rgba(99, 102, 241, 0.5));
+    background: linear-gradient(135deg, var(--color-primary-light), var(--color-secondary), var(--color-primary));
+    opacity: 0.5;
     -webkit-mask:
       linear-gradient(white 0 0) content-box,
       linear-gradient(white 0 0);
@@ -460,15 +463,15 @@
   }
 
   .glow-primary {
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 30px color-mix(in srgb, var(--color-primary) 30%, transparent);
   }
 
   .glow-success {
-    box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+    box-shadow: 0 0 30px color-mix(in srgb, var(--color-success) 30%, transparent);
   }
 
   .glow-danger {
-    box-shadow: 0 0 30px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 0 30px color-mix(in srgb, var(--color-danger) 30%, transparent);
   }
 
   /* Floating orbs for background decoration */
@@ -482,11 +485,11 @@
   }
 
   .orb-primary {
-    background: rgba(99, 102, 241, 0.2);
+    background: color-mix(in srgb, var(--color-primary) 20%, transparent);
   }
 
   .orb-purple {
-    background: rgba(168, 85, 247, 0.15);
+    background: color-mix(in srgb, var(--color-secondary) 15%, transparent);
   }
 
   /* Custom Scrollbar - Glass Style */
@@ -524,23 +527,21 @@
   }
 
   .btn-primary-gradient {
-    @apply text-white shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 border-none font-medium;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(79, 70, 229, 0.9) 100%);
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    @apply text-white hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 border-none font-medium;
+    @apply bg-gradient-to-br from-primary/90 to-primary-hover/90 shadow-lg shadow-primary/40;
   }
 
   .btn-primary-gradient:hover {
-    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
+    @apply shadow-xl shadow-primary/50;
   }
 
   .btn-success-gradient {
-    @apply text-white shadow-lg hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 border-none font-medium;
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.9) 0%, rgba(22, 163, 74, 0.9) 100%);
-    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.4);
+    @apply text-white hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 border-none font-medium;
+    @apply bg-gradient-to-br from-success/90 to-success/70 shadow-lg shadow-success/40;
   }
 
   .btn-success-gradient:hover {
-    box-shadow: 0 8px 30px rgba(34, 197, 94, 0.5);
+    @apply shadow-xl shadow-success/50;
   }
 
   .card-gradient-1 {
@@ -575,8 +576,7 @@
   }
 
   .nav-link-glass.active {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.9) 0%, rgba(79, 70, 229, 0.9) 100%);
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    @apply bg-gradient-to-br from-primary/90 to-primary-hover/90 shadow-lg shadow-primary/40 text-white;
   }
 
   .nav-link-glass:hover:not(.active) {
@@ -590,8 +590,7 @@
   }
 
   .tab-glass.active {
-    @apply bg-primary text-white;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    @apply bg-primary text-white shadow-lg shadow-primary/40;
   }
 
   .tab-glass:hover:not(.active) {
