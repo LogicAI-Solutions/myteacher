@@ -272,55 +272,55 @@ export const Payments = () => {
             {/* Stats Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
                 <div className="stat-card p-3 sm:p-4 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 border border-indigo-500/30">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary border border-primary/30">
                             <DollarSign size={16} className="sm:hidden" />
                             <DollarSign size={20} className="hidden sm:block" />
                         </div>
                         <span className="text-text-muted text-xs sm:text-sm font-medium hidden sm:inline">Total Alunos</span>
                     </div>
                     <p className="text-xl sm:text-2xl md:text-3xl font-bold text-text-main">{totalStudentsCount}</p>
-                    <p className="text-xs text-indigo-400 mt-0.5 sm:mt-1 font-medium truncate">Alunos</p>
+                    <p className="text-xs text-primary mt-0.5 sm:mt-1 font-medium truncate">Alunos</p>
                 </div>
 
                 <div className="stat-card p-3 sm:p-4 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-success/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 border border-emerald-500/30">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-success/20 flex items-center justify-center text-success border border-success/30">
                             <CheckCircle size={16} className="sm:hidden" />
                             <CheckCircle size={20} className="hidden sm:block" />
                         </div>
                         <span className="text-text-muted text-xs sm:text-sm font-medium hidden sm:inline">Pagos</span>
                     </div>
                     <p className="text-xl sm:text-2xl md:text-3xl font-bold text-text-main">{actualPaidCount}</p>
-                    <p className="text-xs text-emerald-400 mt-0.5 sm:mt-1 font-medium truncate">Pagos</p>
+                    <p className="text-xs text-success mt-0.5 sm:mt-1 font-medium truncate">Pagos</p>
                 </div>
 
                 <div className="stat-card p-3 sm:p-4 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-warning/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 border border-amber-500/30">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-warning/20 flex items-center justify-center text-warning border border-warning/30">
                             <AlertCircle size={16} className="sm:hidden" />
                             <AlertCircle size={20} className="hidden sm:block" />
                         </div>
                         <span className="text-text-muted text-xs sm:text-sm font-medium hidden sm:inline">Pendentes</span>
                     </div>
                     <p className="text-xl sm:text-2xl md:text-3xl font-bold text-text-main">{pendingCount}</p>
-                    <p className="text-xs text-amber-400 mt-0.5 sm:mt-1 font-medium truncate">Pendentes</p>
+                    <p className="text-xs text-warning mt-0.5 sm:mt-1 font-medium truncate">Pendentes</p>
                 </div>
 
                 <div className="stat-card p-3 sm:p-4 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div className="absolute inset-0 bg-gradient-to-br from-success/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-green-500/20 flex items-center justify-center text-green-400 border border-green-500/30">
+                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-success/20 flex items-center justify-center text-success border border-success/30">
                             <DollarSign size={16} className="sm:hidden" />
                             <DollarSign size={20} className="hidden sm:block" />
                         </div>
                         <span className="text-text-muted text-xs sm:text-sm font-medium hidden sm:inline">Total Recebido</span>
                     </div>
                     <p className="text-lg sm:text-xl md:text-2xl font-bold text-text-main">{formatCurrency(totalReceived)}</p>
-                    <p className="text-xs text-green-400 mt-0.5 sm:mt-1 font-medium truncate">Recebido</p>
+                    <p className="text-xs text-success mt-0.5 sm:mt-1 font-medium truncate">Recebido</p>
                 </div>
             </div>
 

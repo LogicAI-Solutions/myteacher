@@ -374,7 +374,7 @@ export const Students = () => {
                     <div key={student.id} className="glass-card p-4 relative action-menu-container">
                         <div className="flex items-center justify-between mb-2">
                             <div className="flex items-center gap-3 min-w-0">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-indigo-500/20 flex items-center justify-center border border-primary/20 shrink-0">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary-light/20 flex items-center justify-center border border-primary/20 shrink-0">
                                     <span className="text-sm font-bold text-primary">{student.name.charAt(0).toUpperCase()}</span>
                                 </div>
                                 <div className="min-w-0">
@@ -919,7 +919,7 @@ export const Students = () => {
             {viewingEvolution && (
                 <div className="modal-overlay animate-fade-in">
                     <div className="glass-modal w-full max-w-4xl p-8 animate-slide-up relative overflow-y-auto max-h-[90vh]">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500/0 via-purple-500 to-purple-500/0"></div>
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0"></div>
                         <button onClick={() => setViewingEvolution(null)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-xl hover:bg-black/5 transition-all"><X size={20} /></button>
 
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">

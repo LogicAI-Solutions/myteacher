@@ -159,7 +159,7 @@ export const Layout = () => {
                     </Link>
                     <button
                         onClick={handleSupportClick}
-                        className={`btn w-full text-green-300 border-green-400/20 bg-green-500/10 hover:bg-green-500/20 backdrop-blur-sm ${isSidebarCollapsed ? 'justify-center px-2' : 'justify-start'}`}
+                        className={`btn w-full text-success border-success/20 bg-success/10 hover:bg-success/20 backdrop-blur-sm ${isSidebarCollapsed ? 'justify-center px-2' : 'justify-start'}`}
                         title="Suporte via WhatsApp"
                     >
                         <MessageCircle size={18} />

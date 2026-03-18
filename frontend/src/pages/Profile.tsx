@@ -109,7 +109,7 @@ export const Profile = () => {
             });
             updateUser({ full_name: fullName, avatar: avatar });
             setProfileMessage({ type: 'success', text: 'Perfil atualizado com sucesso!' });
-        } catch (err: any) {
+        } catch (error) {
             setProfileMessage({ type: 'error', text: 'Erro ao atualizar perfil.' });
         } finally {
             setProfileLoading(false);
@@ -130,7 +130,7 @@ export const Profile = () => {
             setPasswordMessage({ type: 'success', text: 'Senha alterada com sucesso!' });
             setNewPassword('');
             setConfirmPassword('');
-        } catch (err: any) {
+        } catch (error) {
             setPasswordMessage({ type: 'error', text: 'Erro ao atualizar senha.' });
         } finally {
             setPasswordLoading(false);

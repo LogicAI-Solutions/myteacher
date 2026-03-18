@@ -86,8 +86,8 @@ export const StudentDashboard = () => {
                     </div>
                 </div>
 
-                <div className="glass-card p-6 flex items-center gap-4 border-l-4 border-l-purple-500">
-                    <div className="p-3 bg-purple-500/20 rounded-xl text-purple-400">
+                <div className="glass-card p-6 flex items-center gap-4 border-l-4 border-l-primary">
+                    <div className="p-3 bg-primary/20 rounded-xl text-primary-light">
                         <TrendingUp size={24} />
                     </div>
                     <div>

@@ -56,7 +56,7 @@ export const StudentLayout = () => {
 
                     <button
                         onClick={handleSupportClick}
-                        className="w-full flex items-center gap-3 p-3 rounded-xl text-green-300 hover:bg-green-500/10 transition-all border border-transparent hover:border-green-400/20 mb-2"
+                        className="w-full flex items-center gap-3 p-3 rounded-xl text-success hover:bg-success/10 transition-all border border-transparent hover:border-success/20 mb-2"
                         title="Suporte via WhatsApp"
                     >
                         <MessageCircle size={22} />

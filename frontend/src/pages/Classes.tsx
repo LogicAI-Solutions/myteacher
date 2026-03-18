@@ -42,11 +42,9 @@ interface SortableClassCardProps {
 // Palette of accent colors for cards
 const cardAccents = [
     { bg: 'bg-primary/15', border: 'border-primary/20', text: 'text-primary', glow: 'shadow-primary/10' },
-    { bg: 'bg-indigo-500/15', border: 'border-indigo-500/20', text: 'text-indigo-600', glow: 'shadow-indigo-500/10' },
-    { bg: 'bg-violet-500/15', border: 'border-violet-500/20', text: 'text-violet-600', glow: 'shadow-violet-500/10' },
-    { bg: 'bg-cyan-500/15', border: 'border-cyan-500/20', text: 'text-cyan-600', glow: 'shadow-cyan-500/10' },
-    { bg: 'bg-emerald-500/15', border: 'border-emerald-500/20', text: 'text-emerald-600', glow: 'shadow-emerald-500/10' },
-    { bg: 'bg-amber-500/15', border: 'border-amber-500/20', text: 'text-amber-600', glow: 'shadow-amber-500/10' },
+    { bg: 'bg-success/15', border: 'border-success/20', text: 'text-success', glow: 'shadow-success/10' },
+    { bg: 'bg-warning/15', border: 'border-warning/20', text: 'text-warning', glow: 'shadow-warning/10' },
+    { bg: 'bg-danger/15', border: 'border-danger/20', text: 'text-danger', glow: 'shadow-danger/10' },
 ];
 
 const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDeleteModal }: SortableClassCardProps) => {

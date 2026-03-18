@@ -206,7 +206,7 @@ export const Landing = () => {
                     </div>
                     <div className="flex gap-6">
                         <span onClick={handleWhatsAppClick} className="hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 group">
-                            <MessageCircle size={16} className="text-primary group-hover:text-green-400 transition-colors" />
+                            <MessageCircle size={16} className="text-primary group-hover:text-success transition-colors" />
                             <span className="group-hover:underline decoration-primary/50 underline-offset-4">Fale Conosco</span>
                         </span>
                         <a href="#" className="hover:text-white transition-colors hover:underline decoration-white/20 underline-offset-4">Termos</a>

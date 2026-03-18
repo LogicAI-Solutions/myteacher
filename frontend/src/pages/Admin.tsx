@@ -450,7 +450,7 @@ const Admin = () => {
                                         checked={newUserIsTrial}
                                         onChange={e => setNewUserIsTrial(e.target.checked)}
                                     />
-                                    <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-warning peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-warning"></div>
+                                    <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-warning peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-warning"></div>
                                     <span className="ml-3 text-sm font-medium text-white">🧪 Usuário de Teste (7 dias grátis)</span>
                                 </label>
                             </div>
@@ -614,7 +614,7 @@ const Admin = () => {
                                         checked={editUserIsActive}
                                         onChange={e => setEditUserIsActive(e.target.checked)}
                                     />
-                                    <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-primary peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                    <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-primary peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                     <span className="ml-3 text-sm font-medium text-white">Usuário Ativo</span>
                                 </label>
                             </div>
@@ -627,7 +627,7 @@ const Admin = () => {
                                         checked={editUserIsTrial}
                                         onChange={e => setEditUserIsTrial(e.target.checked)}
                                     />
-                                    <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-warning peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-warning"></div>
+                                    <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-warning peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-warning"></div>
                                     <span className="ml-3 text-sm font-medium text-white">🧪 Usuário de Teste (7 dias grátis)</span>
                                 </label>
                             </div>

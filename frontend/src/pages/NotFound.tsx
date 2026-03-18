@@ -23,8 +23,8 @@ export const NotFound = () => {
         <div className="min-h-screen bg-bg-dark flex items-center justify-center p-4 overflow-hidden relative selection:bg-primary/30">
             {/* Animated Background Orbs */}
             <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-primary/15 rounded-full blur-[120px] animate-pulse" />
-            <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-purple-500/5 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '3s' }} />
+            <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '2s' }} />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-secondary/5 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '3s' }} />
 
             {/* Subtle grid pattern */}
             <div className="absolute inset-0 opacity-[0.03]" style={{

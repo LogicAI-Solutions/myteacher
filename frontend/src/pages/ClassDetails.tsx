@@ -541,11 +541,11 @@ export const ClassDetails = () => {
             {toast && (
                 <div className={`fixed top-4 right-4 z-[100] px-6 py-4 rounded-xl shadow-2xl backdrop-blur-md border animate-slide-in flex items-center gap-3 ${toast.type === 'success' ? 'bg-success/20 border-success/30 text-text-main' :
                     toast.type === 'error' ? 'bg-danger/20 border-danger/30 text-text-main' :
-                        'bg-yellow-500/20 border-yellow-500/30 text-text-main'
+                        'bg-warning/20 border-warning/30 text-text-main'
                     }`}>
                     {toast.type === 'success' && <div className="p-1 bg-success rounded-full flex items-center justify-center"><Save size={14} /></div>}
                     {toast.type === 'error' && <div className="p-1 bg-danger rounded-full flex items-center justify-center"><AlertTriangle size={14} /></div>}
-                    {toast.type === 'warning' && <div className="p-1 bg-yellow-500 rounded-full flex items-center justify-center"><AlertTriangle size={14} /></div>}
+                    {toast.type === 'warning' && <div className="p-1 bg-warning rounded-full flex items-center justify-center"><AlertTriangle size={14} /></div>}
                     <div>
                         <h4 className="font-bold text-sm uppercase tracking-wide opacity-80">
                             {toast.type === 'success' ? 'Sucesso' : toast.type === 'error' ? 'Erro' : 'Atenção'}
@@ -582,8 +582,8 @@ export const ClassDetails = () => {
                             </div>
                         </div>
                         <div className="glass-card p-3 px-4 flex items-center gap-3 flex-1 lg:flex-none border border-black/5">
-                            <div className="bg-indigo-500/15 p-2 rounded-lg border border-indigo-500/20">
-                                <BookOpen size={18} className="text-indigo-400" />
+                            <div className="bg-primary/15 p-2 rounded-lg border border-primary/20">
+                                <BookOpen size={18} className="text-primary-light" />
                             </div>
                             <div>
                                 <p className="text-[10px] text-text-muted uppercase tracking-wider">Aulas</p>
@@ -617,11 +617,11 @@ export const ClassDetails = () => {
             <div className="animate-slide-up">
                 {activeTab === 'students' && (
                     <div className="glass-card p-5 sm:p-6 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-indigo-500 to-transparent"></div>
+                        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent"></div>
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-black/5 pb-4 gap-3">
                             <h2 className="text-xl font-bold flex items-center gap-3 text-text-main">
-                                <div className="bg-indigo-500/15 p-2 rounded-lg border border-indigo-500/20">
-                                    <GraduationCap size={20} className="text-indigo-400" />
+                                <div className="bg-primary/15 p-2 rounded-lg border border-primary/20">
+                                    <GraduationCap size={20} className="text-primary-light" />
                                 </div>
                                 Alunos Matriculados
                                 <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-full border border-primary/20">{students.length}</span>
@@ -635,7 +635,7 @@ export const ClassDetails = () => {
                             {students.map((s: Student) => (
                                 <div key={s.id} className="flex items-center justify-between p-3.5 rounded-xl bg-black/5 border border-black/5 hover:border-primary/20 transition-all group hover:bg-black/10">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-indigo-500/20 flex items-center justify-center border border-black/10 shrink-0">
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary-light/20 flex items-center justify-center border border-black/10 shrink-0">
                                             <span className="text-sm font-bold text-primary">{s.name.charAt(0).toUpperCase()}</span>
                                         </div>
                                         <div>
@@ -686,18 +686,18 @@ export const ClassDetails = () => {
                 {activeTab === 'attendance' && (
                     <div className="glass-card p-5 sm:p-6 relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 glass-header border-b-0 pb-4 gap-3">
-                            <h2 className="text-xl font-bold flex items-center gap-3 text-text-main">
-                                <div className="bg-primary/15 p-2 rounded-lg border border-primary/20">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 p-4 rounded-xl border border-border bg-black/5 gap-3 shadow-sm">
+                            <h2 className="text-lg font-bold flex items-center gap-3 text-text-main">
+                                <div className="bg-primary/15 p-2 rounded-lg border border-primary/20 shadow-sm">
                                     <ClipboardList size={20} className="text-primary" />
                                 </div>
                                 {editingSessionId ? 'Editando Chamada' : 'Nova Chamada'}
                             </h2>
-                            <div className="flex items-center gap-3">
-                                <button onClick={loadAllStudents} className="btn btn-outline">
+                            <div className="flex items-center gap-3 w-full sm:w-auto mt-3 sm:mt-0">
+                                <button onClick={loadAllStudents} className="btn flex-1 sm:flex-none justify-center px-4 py-2 border-[1.5px] border-primary/30 hover:border-primary/60 hover:bg-primary/10 rounded-xl transition-all text-primary font-semibold shadow-sm">
                                     <Users size={16} /> Gerenciar Alunos
                                 </button>
-                                <div className="text-sm text-text-muted bg-black/5 px-3 py-1 rounded-lg border border-black/5">
+                                <div className="text-sm whitespace-nowrap text-text-muted px-4 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--glass-bg)] shadow-sm">
                                     {new Date().toLocaleDateString()}
                                 </div>
                             </div>
@@ -862,11 +862,11 @@ export const ClassDetails = () => {
 
             {activeTab === 'payments' && (
                 <div className="glass-card p-5 sm:p-6 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-emerald-500 to-transparent"></div>
+                    <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-success to-transparent"></div>
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-black/5 pb-4 gap-3">
                         <h2 className="text-xl font-bold flex items-center gap-3 text-text-main">
-                            <div className="bg-emerald-500/15 p-2 rounded-lg border border-emerald-500/20">
-                                <DollarSign size={20} className="text-emerald-500" />
+                            <div className="bg-success/15 p-2 rounded-lg border border-success/20">
+                                <DollarSign size={20} className="text-success" />
                             </div>
                             Mensalidades
                         </h2>
@@ -891,8 +891,8 @@ export const ClassDetails = () => {
                             return (
                                 <div key={s.id} className="flex items-center justify-between p-3.5 rounded-xl bg-black/5 border border-black/5 hover:border-primary/20 transition-all group hover:bg-black/10">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/10 to-primary/10 flex items-center justify-center border border-black/5 shrink-0">
-                                            <span className="text-sm font-bold text-emerald-600">{s.name.charAt(0).toUpperCase()}</span>
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-success/10 to-primary/10 flex items-center justify-center border border-black/5 shrink-0">
+                                            <span className="text-sm font-bold text-success">{s.name.charAt(0).toUpperCase()}</span>
                                         </div>
                                         <div>
                                             <p className="font-semibold text-text-main text-sm">{s.name}</p>
@@ -901,7 +901,7 @@ export const ClassDetails = () => {
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <select
-                                            className={`p-2 px-3 rounded-lg text-xs font-bold border-none focus:ring-2 focus:ring-primary outline-none transition-colors cursor-pointer ${isPaid ? 'bg-success/20 text-success' : 'bg-yellow-500/20 text-yellow-600'}`}
+                                            className={`p-2 px-3 rounded-lg text-xs font-bold border-none focus:ring-2 focus:ring-primary outline-none transition-colors cursor-pointer ${isPaid ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'}`}
                                             value={payment.status}
                                             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateLocalPayment(s.id, 'status', e.target.value)}
                                         >
@@ -911,7 +911,7 @@ export const ClassDetails = () => {
                                         <input
                                             type="text"
                                             className={`w-28 bg-white border rounded-lg px-3 py-2 text-sm font-mono text-right transition-colors ${isPaid
-                                                ? 'border-black/10 focus:border-emerald-500 text-text-main focus:ring-2 focus:ring-emerald-500/20'
+                                                ? 'border-black/10 focus:border-success text-text-main focus:ring-2 focus:ring-success/20'
                                                 : 'border-transparent text-text-muted/30 cursor-not-allowed'
                                                 }`}
                                             value={formatCurrency(payment.amount)}
@@ -939,9 +939,9 @@ export const ClassDetails = () => {
                                 onClick={handleSavePayments}
                                 disabled={savingPayments}
                                 className={`
-                                    bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-emerald-500/25 
+                                    btn-success-gradient px-8 py-3 rounded-xl font-bold
                                     transition-all flex items-center gap-2
-                                    ${savingPayments ? 'opacity-70 cursor-wait' : 'hover:shadow-emerald-500/40 hover:-translate-y-1 active:translate-y-0'}
+                                    ${savingPayments ? 'opacity-70 cursor-wait' : ''}
                                 `}
                             >
                                 {savingPayments ? (
@@ -1232,7 +1232,7 @@ export const ClassDetails = () => {
                     <div className={`glass-modal w-full max-w-sm p-8 relative ${confirmation.type === 'danger' ? 'border-danger/20' : 'border-black/10'}`}>
                         <div className="flex flex-col items-center text-center">
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${confirmation.type === 'danger' ? 'bg-danger/20 text-danger' :
-                                confirmation.type === 'warning' ? 'bg-yellow-500/20 text-yellow-600' :
+                                confirmation.type === 'warning' ? 'bg-warning/20 text-warning' :
                                     'bg-primary/20 text-primary'
                                 }`}>
                                 <AlertTriangle size={24} />
@@ -1254,7 +1254,7 @@ export const ClassDetails = () => {
                                         setConfirmation(null);
                                     }}
                                     className={`flex-1 py-2 rounded-lg text-white font-bold shadow-lg transition-colors ${confirmation.type === 'danger' ? 'bg-danger hover:bg-danger-hover shadow-danger/20' :
-                                        confirmation.type === 'warning' ? 'bg-yellow-600 hover:bg-yellow-700 shadow-yellow-600/20' :
+                                        confirmation.type === 'warning' ? 'bg-warning hover:opacity-90 shadow-warning/20' :
                                             'bg-primary hover:bg-primary-hover shadow-primary/20'
                                         }`}
                                 >
