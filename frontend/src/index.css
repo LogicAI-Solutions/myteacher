@@ -145,14 +145,31 @@
 :root,
 .theme-dark {
   color-scheme: dark;
-  --color-primary: #6366f1;
-  --color-primary-hover: #4f46e5;
-  --color-primary-light: #818cf8;
+  --app-primary: #6366f1;
+  --app-primary-hover: #4f46e5;
+  --app-primary-light: #818cf8;
+
+  --app-bg: #0a0f1a;
+  --app-card: rgba(30, 41, 59, 0.5);
+  --app-bg-darker: #020617;
+  --app-text-main: #f8fafc;
+  --app-text-muted: #94a3b8;
+  --app-body-grad-start: #0a0f1a;
+  --app-body-grad-mid: #0f172a;
+  --app-body-grad-end: #0a0f1a;
+
+  --app-orb-1: rgba(99, 102, 241, 0.08);
+  --app-orb-2: rgba(139, 92, 246, 0.05);
+  --app-orb-3: rgba(99, 102, 241, 0.03);
+
+  --color-primary: var(--app-primary);
+  --color-primary-hover: var(--app-primary-hover);
+  --color-primary-light: var(--app-primary-light);
   --color-secondary: #a855f7;
-  --color-bg-dark: #0f172a;
-  --color-bg-card: rgba(15, 23, 42, 0.85);
-  --color-text-main: #f8fafc;
-  --color-text-muted: #94a3b8;
+  --color-bg-dark: var(--app-bg);
+  --color-bg-card: var(--app-card);
+  --color-text-main: var(--app-text-main);
+  --color-text-muted: var(--app-text-muted);
   --color-success: #22c55e;
   --color-danger: #ef4444;
   --color-warning: #f59e0b;
@@ -166,14 +183,29 @@
 
 .theme-sereno {
   color-scheme: light;
+  --app-primary: #2d5a6e;
+  --app-primary-hover: #1e3d4a;
+  --app-primary-light: #4a7c91;
+  --app-bg: #f1f5f9;
+  --app-card: rgba(255, 255, 255, 0.7);
+  --app-bg-darker: #e2e8f0;
+  --app-text-main: #1e293b;
+  --app-text-muted: #64748b;
+  --app-body-grad-start: #f8fafc;
+  --app-body-grad-mid: #eef2ff;
+  --app-body-grad-end: #f1f5f9;
+  --app-orb-1: rgba(99, 102, 241, 0.16);
+  --app-orb-2: rgba(16, 185, 129, 0.12);
+  --app-orb-3: rgba(148, 163, 184, 0.1);
+
   --color-primary: #2d5a6e;
   --color-primary-hover: #1e3d4a;
   --color-primary-light: #4a7c91;
   --color-secondary: #5e8499;
-  --color-bg-dark: #f1f5f9;
-  --color-bg-card: rgba(255, 255, 255, 0.7);
-  --color-text-main: #1e293b;
-  --color-text-muted: #64748b;
+  --color-bg-dark: var(--app-bg);
+  --color-bg-card: var(--app-card);
+  --color-text-main: var(--app-text-main);
+  --color-text-muted: var(--app-text-muted);
   --color-success: #2d6e5a;
   --color-danger: #a34b4b;
   --color-warning: #b58d3d;
@@ -186,14 +218,29 @@
 
 .theme-acolhedor {
   color-scheme: light;
+  --app-primary: #7d8c7b;
+  --app-primary-hover: #5d6b5b;
+  --app-primary-light: #9fb09c;
+  --app-bg: #fdfbf7;
+  --app-card: rgba(255, 255, 255, 0.8);
+  --app-bg-darker: #f5efe7;
+  --app-text-main: #4a3728;
+  --app-text-muted: #8c7e6d;
+  --app-body-grad-start: #fdfbf7;
+  --app-body-grad-mid: #f9f4ec;
+  --app-body-grad-end: #f6f1e8;
+  --app-orb-1: rgba(125, 140, 123, 0.14);
+  --app-orb-2: rgba(166, 125, 93, 0.1);
+  --app-orb-3: rgba(140, 126, 109, 0.08);
+
   --color-primary: #7d8c7b;
   --color-primary-hover: #5d6b5b;
   --color-primary-light: #9fb09c;
   --color-secondary: #8a9687;
-  --color-bg-dark: #fdfbf7;
-  --color-bg-card: rgba(255, 255, 255, 0.8);
-  --color-text-main: #4a3728;
-  --color-text-muted: #8c7e6d;
+  --color-bg-dark: var(--app-bg);
+  --color-bg-card: var(--app-card);
+  --color-text-main: var(--app-text-main);
+  --color-text-muted: var(--app-text-muted);
   --color-success: #5d7c5b;
   --color-danger: #9c5d5d;
   --color-warning: #a67d5d;
@@ -225,9 +272,10 @@
 
   body {
     @apply bg-bg-dark text-text-main antialiased font-sans;
-    background: radial-gradient(circle at top right, var(--color-bg-dark), #000);
+    background: linear-gradient(135deg, var(--app-body-grad-start) 0%, var(--app-body-grad-mid) 50%, var(--app-body-grad-end) 100%);
     background-attachment: fixed;
     min-height: 100vh;
+    transition: background 0.35s ease, color 0.2s ease;
   }
 
   /* Global Glass Background Pattern */
@@ -239,11 +287,12 @@
     right: 0;
     bottom: 0;
     background:
-      radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.02) 0%, transparent 70%);
+      radial-gradient(ellipse at 20% 20%, var(--app-orb-1) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, var(--app-orb-2) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, var(--app-orb-3) 0%, transparent 70%);
     pointer-events: none;
     z-index: -1;
+    transition: background 0.35s ease;
   }
 }
 
