@@ -142,3 +142,11 @@ vite.config.ts.timestamp-*
 # Python virtual environment
 .venv
 venv/
+
+# Python cache
+__pycache__
+tests/__pycache__
+backend/__pycache__
+backend/core/__pycache__
+backend/models/__pycache__
+backend/routers/__pycache__

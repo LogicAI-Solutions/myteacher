@@ -1149,7 +1149,7 @@ export const ClassDetails = () => {
                     <div className="glass-modal w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col relative">
 
                         {/* Header */}
-                        <div className="p-6 border-b border-black/5 flex justify-between items-start sticky top-0 backdrop-blur-md bg-white/50 z-10">
+                        <div className="p-6 border-b border-black/5 flex justify-between items-start sticky top-0 backdrop-blur-md bg-black/10 z-10">
                             <div>
                                 <h3 className="text-xl font-bold text-text-main mb-1">{viewingSession.description}</h3>
                                 <p className="text-text-muted text-sm flex items-center gap-2">
@@ -1197,7 +1197,7 @@ export const ClassDetails = () => {
                         </div>
 
                         {/* Footer */}
-                        <div className="p-6 border-t border-black/5 flex flex-col-reverse sm:flex-row justify-end gap-3 backdrop-blur-md bg-white/50">
+                        <div className="p-6 border-t border-black/5 flex flex-col-reverse sm:flex-row justify-end gap-3 backdrop-blur-md bg-black/10 z-10">
                             <button
                                 onClick={() => {
                                     requestConfirmation(
