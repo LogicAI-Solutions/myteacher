@@ -1,197 +1,152 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema em Atualização - TeacherApp</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Manutenção - MyTeacher</title>
     <style>
         :root {
-            --color-primary: #6366f1;
-            --color-primary-light: #818cf8;
-            --color-bg-dark: #0a0f1a;
-            --color-text-main: #f8fafc;
-            --color-text-muted: #94a3b8;
+            --app-primary: #6366f1;
+            --app-bg: #0a0f1a;
+            --app-text: #f8fafc;
+            --app-text-muted: #94a3b8;
+            --app-card: rgba(30, 41, 59, 0.5);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', system-ui, sans-serif;
-            background: linear-gradient(135deg, #0a0f1a 0%, #0f172a 50%, #0a0f1a 100%);
-            background-attachment: fixed;
-            color: var(--color-text-main);
+            background-color: var(--app-bg);
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+            color: var(--app-text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            text-align: center;
             overflow: hidden;
-            -webkit-font-smoothing: antialiased;
         }
 
-        /* Global Glass Background Pattern - same as index.css */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-              radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.08) 0%, transparent 50%),
-              radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
-              radial-gradient(ellipse at 50% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05); /* bg-white/5 */
-            backdrop-filter: blur(40px); /* backdrop-blur-2xl approx */
-            -webkit-backdrop-filter: blur(40px);
+        .container {
+            text-align: center;
+            padding: 2rem;
+            backdrop-filter: blur(16px);
+            background: var(--app-card);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 1.5rem; /* rounded-2xl */
-            padding: 3rem 2rem;
-            max-width: 500px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 480px;
             width: 90%;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                0 0 1px 0 rgba(255, 255, 255, 0.15) inset;
-            animation: slideUp 0.5s ease-out forwards;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .icon-container {
+            margin-bottom: 1.5rem;
             position: relative;
-            z-index: 10;
+            display: inline-block;
         }
 
-        .glass-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            border-radius: 1.5rem 1.5rem 0 0;
-        }
-
-        @keyframes slideUp {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .icon-wrapper {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+        .icon {
             width: 80px;
             height: 80px;
-            background: rgba(99, 102, 241, 0.1); /* primary with opacity */
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            border-radius: 50%;
-            margin-bottom: 2rem;
-            color: var(--color-primary-light);
-            box-shadow: 0 0 30px rgba(99, 102, 241, 0.3); /* glow-primary */
-            animation: float 6s ease-in-out infinite, glow 2s ease-in-out infinite alternate;
+            color: var(--app-primary);
+            animation: pulse 2s infinite;
         }
 
-        svg {
-            width: 36px;
-            height: 36px;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes glow {
-            0% { box-shadow: 0 0 20px rgba(99, 102, 241, 0.3); }
-            100% { box-shadow: 0 0 40px rgba(99, 102, 241, 0.6); }
+        @keyframes pulse {
+            0% { transform: scale(1); filter: drop-shadow(0 0 0px rgba(99, 102, 241, 0)); }
+            50% { transform: scale(1.05); filter: drop-shadow(0 0 15px rgba(99, 102, 241, 0.5)); }
+            100% { transform: scale(1); filter: drop-shadow(0 0 0px rgba(99, 102, 241, 0)); }
         }
 
         h1 {
             font-size: 1.8rem;
-            margin: 0 0 1rem 0;
+            margin-bottom: 1rem;
             font-weight: 700;
-            letter-spacing: -0.02em;
-            background: linear-gradient(to right, #818cf8, #6366f1, #c084fc); /* text-gradient approx */
+            background: linear-gradient(to right, #818cf8, #c084fc);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
-            color: transparent;
+            -webkit-text-fill-color: transparent;
         }
 
         p {
-            font-size: 1.05rem;
+            color: var(--app-text-muted);
             line-height: 1.6;
-            color: var(--color-text-muted);
-            margin: 0 0 2.5rem 0;
+            margin-bottom: 2rem;
         }
 
-        .loader-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            gap: 8px;
+        .loader {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 1rem;
         }
 
-        .dot {
-            width: 10px;
-            height: 10px;
-            background-color: var(--color-primary);
-            border-radius: 50%;
-            animation: pulse-dot 1.4s infinite ease-in-out both;
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        .loader-bar {
+            width: 30%;
+            height: 100%;
+            background: var(--app-primary);
+            animation: loading 2s infinite ease-in-out;
         }
 
-        .dot:nth-child(1) { animation-delay: -0.32s; }
-        .dot:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes pulse-dot {
-            0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
-            40% { transform: scale(1); opacity: 1; }
+        @keyframes loading {
+            0% { transform: translateX(-100%); width: 30%; }
+            50% { width: 60%; }
+            100% { transform: translateX(400%); width: 30%; }
         }
 
-        .footer {
-            margin-top: 2rem;
+        .status-text {
             font-size: 0.85rem;
-            color: rgba(148, 163, 184, 0.7);
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding-top: 1.5rem;
+            color: var(--app-primary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .retry-note {
+            font-size: 0.75rem;
+            margin-top: 1.5rem;
+            opacity: 0.5;
         }
     </style>
 </head>
 <body>
-    <div class="glass-card">
-        <div class="icon-wrapper">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+    <div class="container">
+        <div class="icon-container">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
         </div>
+        <h1>Em Manutenção</h1>
+        <p>Estamos realizando melhorias no sistema para oferecer a melhor experiência possível. Voltaremos em instantes!</p>
         
-        <h1>Sistema em Atualização</h1>
-        <p>Estamos realizando melhorias contínuas para oferecer a melhor experiência.<br>Por favor, aguarde alguns instantes.</p>
-        
-        <div class="loader-container">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
+        <div class="loader">
+            <div class="loader-bar"></div>
         </div>
+        <div class="status-text">Tentando reconectar...</div>
         
-        <div class="footer">
-            Agradecemos a sua compreensão. Esta página será atualizada automaticamente assim que o sistema retornar.
-        </div>
+        <div class="retry-note">Esta página será atualizada automaticamente assim que o sistema estiver disponível.</div>
     </div>
-    
+
     <script>
-        // Tenta recarregar a página a cada 10 segundos para verificar se o deploy terminou
-        setInterval(() => {
-            window.location.reload();
+        // Auto-reload script
+        // Tenta recarregar a página a cada 10 segundos
+        setTimeout(function() {
+            location.reload();
         }, 10000);
     </script>
 </body>
