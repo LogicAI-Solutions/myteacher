@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5273,
-    allowedHosts: ['myteacherapp.com.br', 'www.myteacherapp.com.br'],
+    allowedHosts: ['http://localhost:5273', 'myteacherapp.com.br', 'www.myteacherapp.com.br'],
     proxy: {
       '/api': {
         target: 'http://backend:8501',

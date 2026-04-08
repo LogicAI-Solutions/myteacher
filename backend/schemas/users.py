@@ -27,7 +27,7 @@ class User(UserBase):
     id: int
     is_active: bool
     is_admin: bool
-    is_trial: bool = False
+    is_trial: Optional[bool] = False
     trial_started_at: Optional[datetime] = None
 
     @computed_field
