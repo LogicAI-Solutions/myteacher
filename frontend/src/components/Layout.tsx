@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { LogOut, LayoutDashboard, Users, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, DollarSign, MessageCircle } from 'lucide-react';
+import { LogOut, LayoutDashboard, BookOpen, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, DollarSign, MessageCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { openSupportWhatsApp } from '../utils/support';
 
@@ -57,8 +57,9 @@ export const Layout = () => {
                 `}
             >
                 {/* Desktop Logo & Toggle */}
-                <div className="h-[73px] flex items-center relative px-6 border-b border-white/5">
-                    <div className={`flex items-center gap-2 font-bold text-xl transition-all duration-300 ${isSidebarCollapsed ? 'justify-center w-full' : ''}`}>
+                <div className="h-[73px] flex items-center relative border-b border-white/5">
+                    <div className={`flex items-center gap-2 font-bold text-xl transition-all duration-300 ${isSidebarCollapsed ? 'justify-center w-full px-0' : 'px-6'}`}>
+                        <GraduationCap size={24} className="shrink-0 text-primary" />
                         <span className={`whitespace-nowrap overflow-hidden transition-all duration-300 text-gradient ${isSidebarCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>
                             MyTeacherApp
                         </span>
@@ -102,7 +103,7 @@ export const Layout = () => {
                         className={`nav-link-glass ${location.pathname.includes('/students') ? 'active text-white shadow-lg' : 'text-text-muted hover:text-text-main'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                         title="Alunos"
                     >
-                        <Users size={20} className={`shrink-0 ${location.pathname.includes('/students') ? '' : ''}`} />
+                        <GraduationCap size={20} className={`shrink-0 ${location.pathname.includes('/students') ? '' : ''}`} />
                         <span className={`whitespace-nowrap transition-all duration-300 ${isSidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'}`}>Alunos</span>
                     </Link>
 
@@ -178,25 +179,25 @@ export const Layout = () => {
 
             {/* Mobile Bottom Navigation */}
             <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-header border-t border-b-0 flex items-center justify-around px-2 py-1 safe-area-bottom" style={{ paddingBottom: 'env(safe-area-inset-bottom, 8px)' }}>
-                <Link
-                    to="/dashboard"
-                    className={`flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-all duration-200 min-w-[60px] ${location.pathname === '/dashboard' ? 'text-primary' : 'text-text-muted'}`}
-                >
-                    <LayoutDashboard size={20} />
-                    <span className="text-[10px] font-medium">Início</span>
-                </Link>
-                <Link
-                    to="/dashboard/classes"
-                    className={`flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-all duration-200 min-w-[60px] ${location.pathname.includes('/classes') || location.pathname.includes('/class/') ? 'text-primary' : 'text-text-muted'}`}
-                >
-                    <GraduationCap size={20} />
-                    <span className="text-[10px] font-medium">Turmas</span>
-                </Link>
+                    <Link
+                        to="/portal/dashboard"
+                        className={`flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-all duration-200 min-w-[60px] ${location.pathname === '/dashboard' ? 'text-primary' : 'text-text-muted'}`}
+                    >
+                        <LayoutDashboard size={20} />
+                        <span className="text-[10px] font-medium">Painel</span>
+                    </Link>
+                    <Link
+                        to="/dashboard/classes"
+                        className={`flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-all duration-200 min-w-[60px] ${location.pathname.includes('/classes') || location.pathname.includes('/class/') ? 'text-primary' : 'text-text-muted'}`}
+                    >
+                        <BookOpen size={20} />
+                        <span className="text-[10px] font-medium">Turmas</span>
+                    </Link>
                 <Link
                     to="/dashboard/students"
                     className={`flex flex-col items-center gap-0.5 py-2 px-3 rounded-xl transition-all duration-200 min-w-[60px] ${location.pathname.includes('/students') ? 'text-primary' : 'text-text-muted'}`}
                 >
-                    <Users size={20} />
+                    <GraduationCap size={20} />
                     <span className="text-[10px] font-medium">Alunos</span>
                 </Link>
                 <Link
