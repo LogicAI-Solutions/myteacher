@@ -13,6 +13,14 @@ class User(Base):
     is_trial = Column(Boolean, default=False)
     trial_started_at = Column(DateTime, nullable=True)
     
+    # Role and Plan Logic
+    role = Column(String, default="autonomous_teacher")
+    school_id = Column(Integer, nullable=True)
+    stripe_customer_id = Column(String, nullable=True)
+    stripe_subscription_id = Column(String, nullable=True)
+    plan_id = Column(String, nullable=True)
+    max_classes = Column(Integer, default=10)
+    
     full_name = Column(String, nullable=True)
     birth_date = Column(Date, nullable=True)
     nickname = Column(String, nullable=True)

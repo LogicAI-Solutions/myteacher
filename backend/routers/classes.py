@@ -22,6 +22,15 @@ def reorder_classes(order_data: List[class_schemas.ClassReorder], db: Session = 
 
 @router.post("/classes/", response_model=class_schemas.Class)
 def create_class(class_: class_schemas.ClassCreate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
+    from backend.models.classes import Class as ClassModel
+    
+    current_class_count = db.query(ClassModel).filter(ClassModel.owner_id == current_user.id).count()
+    if current_user.max_classes and current_class_count >= current_user.max_classes:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail=f"Limite de turmas atingido. O seu plano permite no máximo {current_user.max_classes} turmas."
+        )
+
     return class_crud.create_class(db=db, class_=class_, user_id=current_user.id)
 
 @router.get("/classes/{class_id}", response_model=class_schemas.Class)
