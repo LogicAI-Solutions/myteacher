@@ -224,9 +224,9 @@ export const Classes = () => {
             setShowModal(false);
             setNewClass({ name: '', schedule: '' });
             fetchClasses();
-        } catch (error: unknown) {
-            alert('Error creating class');
-            showToast('Erro ao criar turma', 'error');
+        } catch (error: any) {
+            const errorMsg = error.response?.data?.detail || 'Erro ao criar turma';
+            showToast(errorMsg, 'error');
         }
     };
 

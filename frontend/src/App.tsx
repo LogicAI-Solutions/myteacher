@@ -17,6 +17,7 @@ import { StudentLogin } from './pages/StudentLogin';
 import { StudentDashboard } from './pages/StudentDashboard';
 import { Profile } from './pages/Profile';
 import { TrialExpired } from './pages/TrialExpired';
+import Pricing from './pages/Pricing';
 
 // Layouts
 import { Layout } from './components/Layout';
@@ -58,6 +59,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/pricing" element={<Pricing />} />
       <Route path="/trial-expired" element={<TrialExpired />} />
 
       {/* Student Portal Routes */}

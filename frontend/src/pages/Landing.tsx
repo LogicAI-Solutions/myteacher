@@ -54,10 +54,9 @@ export const Landing = () => {
 
                         <div className="flex flex-col sm:flex-row gap-3 pt-2 justify-center lg:justify-start">
                             <button
-                                onClick={handleWhatsAppClick}
+                                onClick={() => navigate('/pricing')}
                                 className="btn btn-primary-gradient text-base px-6 py-3 rounded-xl group shadow-lg shadow-primary/25 hover:shadow-primary/40 flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
                             >
-                                <MessageCircle size={20} />
                                 Consultar Planos
                                 <ArrowRight className="group-hover:translate-x-1 transition-transform w-4 h-4" />
                             </button>
