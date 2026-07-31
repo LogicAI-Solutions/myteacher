@@ -1,14 +1,109 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GraduationCap, ArrowRight, CheckCircle, BarChart3, Users, DollarSign, CalendarCheck, MessageCircle, Shield } from 'lucide-react';
+import { 
+    GraduationCap, ArrowRight, CheckCircle, BarChart3, Users, 
+    DollarSign, CalendarCheck, MessageCircle, Shield, LogIn, Check, X, Sparkles 
+} from 'lucide-react';
 import teacherIllustration from '../assets/teacher_login_illustration.png';
 import { openSupportWhatsApp } from '../utils/support';
+import api from '../api';
+
+export interface Plan {
+    id: number;
+    name: string;
+    description: string;
+    price: string;
+    period: string;
+    features: { text: string; included: boolean }[];
+    button_text: string;
+    popular: boolean;
+    role?: string;
+}
+
+const defaultPlans: Plan[] = [
+    {
+        id: 1,
+        name: 'Professor Autônomo',
+        description: 'Ideal para professores particulares ou com poucas turmas.',
+        price: 'R$ 49',
+        period: '/mês',
+        popular: false,
+        button_text: 'Começar Agora',
+        features: [
+            { text: 'Até 5 Turmas Ativas', included: true },
+            { text: 'Controle de Frequência & Faltas', included: true },
+            { text: 'Relatórios em PDF/Excel', included: true },
+            { text: 'Controle Financeiro Simples', included: true },
+            { text: 'Suporte via WhatsApp', included: true },
+            { text: 'Múltiplos Professores', included: false }
+        ]
+    },
+    {
+        id: 2,
+        name: 'Escola / Curso Pro',
+        description: 'Para escolas de cursos livres, idiomas e reforço escolar.',
+        price: 'R$ 129',
+        period: '/mês',
+        popular: true,
+        button_text: 'Testar 7 Dias Grátis',
+        features: [
+            { text: 'Turmas Ilimitadas', included: true },
+            { text: 'Gestão Completa de Alunos', included: true },
+            { text: 'Gestão Financeira & Mensalidades', included: true },
+            { text: 'Dashboard & Métricas Avançadas', included: true },
+            { text: 'Múltiplos Perfis de Acesso', included: true },
+            { text: 'Suporte Prioritário VIP', included: true }
+        ]
+    },
+    {
+        id: 3,
+        name: 'Enterprise / Redes',
+        description: 'Solução sob medida para grandes redes de ensino.',
+        price: 'Sob Consulta',
+        period: '',
+        popular: false,
+        button_text: 'Falar com Consultor',
+        features: [
+            { text: 'Tudo do plano Pro', included: true },
+            { text: 'Domínio Personalizado & Whitelabel', included: true },
+            { text: 'API de Integração Dedicada', included: true },
+            { text: 'Treinamento de Equipe', included: true },
+            { text: 'SLA de Atendimento Garantido', included: true },
+            { text: 'Gerente de Conta Dedicado', included: true }
+        ]
+    }
+];
 
 export const Landing = () => {
     const navigate = useNavigate();
+    const [plans, setPlans] = useState<Plan[]>([]);
+    const [loadingPlans, setLoadingPlans] = useState(true);
 
-    const handleWhatsAppClick = () => {
-        openSupportWhatsApp('Ola! Vim pelo site do MyTeacherApp e gostaria de saber mais sobre a plataforma.');
+    useEffect(() => {
+        const fetchPlans = async () => {
+            try {
+                const response = await api.get('/plans/');
+                if (Array.isArray(response.data) && response.data.length > 0) {
+                    setPlans(response.data);
+                } else {
+                    setPlans(defaultPlans);
+                }
+            } catch (error) {
+                console.error("Erro ao carregar planos:", error);
+                setPlans(defaultPlans);
+            } finally {
+                setLoadingPlans(false);
+            }
+        };
+        fetchPlans();
+    }, []);
+
+    const handleWhatsAppClick = (customMsg?: string) => {
+        openSupportWhatsApp(customMsg || 'Olá! Vim pelo site do MyTeacherApp e gostaria de saber mais sobre os planos.');
+    };
+
+    const scrollToPlans = () => {
+        document.getElementById('planos')?.scrollIntoView({ behavior: 'smooth' });
     };
 
     return (
@@ -16,18 +111,31 @@ export const Landing = () => {
             {/* Navbar */}
             <nav className="fixed top-0 w-full z-50 glass-header px-4 py-3 sm:px-6 sm:py-4 transition-all duration-300">
                 <div className="container mx-auto flex justify-between items-center max-w-6xl">
-                    <div className="flex items-center gap-2 font-bold text-lg sm:text-xl">
-                        <GraduationCap className="text-primary" size={24} />
+                    {/* Top Left: Logo */}
+                    <div className="flex items-center gap-2 font-bold text-lg sm:text-xl cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                        <GraduationCap className="text-primary" size={26} />
                         <span className="text-gradient">MyTeacherApp</span>
                     </div>
 
-                    <button
-                        onClick={handleWhatsAppClick}
-                        className="btn btn-primary text-sm px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:scale-105"
-                    >
-                        <MessageCircle size={18} />
-                        Fale Conosco
-                    </button>
+                    {/* Top Right: Entrar + Fale Conosco */}
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <button
+                            onClick={() => navigate('/login')}
+                            className="btn btn-outline text-xs sm:text-sm px-3.5 py-2 rounded-xl flex items-center gap-1.5 border border-white/10 hover:border-primary/50 hover:bg-white/10 text-white transition-all shadow-sm cursor-pointer"
+                            title="Acessar o sistema"
+                        >
+                            <LogIn size={16} className="text-primary" />
+                            <span>Entrar</span>
+                        </button>
+
+                        <button
+                            onClick={() => handleWhatsAppClick()}
+                            className="btn btn-primary text-xs sm:text-sm px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:scale-105 cursor-pointer"
+                        >
+                            <MessageCircle size={18} />
+                            <span className="hidden sm:inline">Fale Conosco</span>
+                        </button>
+                    </div>
                 </div>
             </nav>
 
@@ -54,21 +162,21 @@ export const Landing = () => {
 
                         <div className="flex flex-col sm:flex-row gap-3 pt-2 justify-center lg:justify-start">
                             <button
-                                onClick={() => navigate('/pricing')}
-                                className="btn btn-primary-gradient text-base px-6 py-3 rounded-xl group shadow-lg shadow-primary/25 hover:shadow-primary/40 flex items-center justify-center gap-2 hover:scale-[1.02] transition-all"
+                                onClick={scrollToPlans}
+                                className="btn btn-primary-gradient text-base px-6 py-3 rounded-xl group shadow-lg shadow-primary/25 hover:shadow-primary/40 flex items-center justify-center gap-2 hover:scale-[1.02] transition-all cursor-pointer"
                             >
-                                Consultar Planos
+                                Conhecer os Planos
                                 <ArrowRight className="group-hover:translate-x-1 transition-transform w-4 h-4" />
                             </button>
                             <button
                                 onClick={() => navigate('/login')}
-                                className="btn btn-outline text-base px-6 py-3 rounded-xl hover:bg-white/5 transition-colors"
+                                className="btn btn-outline text-base px-6 py-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
                             >
                                 Área do Cliente
                             </button>
                         </div>
                         <p className="text-xs text-text-muted/60 text-center lg:text-left">
-                            * Atendimento personalizado via WhatsApp.
+                            * Teste 7 dias grátis sem compromisso.
                         </p>
 
                         <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 pt-4 text-text-muted text-xs sm:text-sm font-medium opacity-80">
@@ -170,21 +278,114 @@ export const Landing = () => {
                 </div>
             </section>
 
+            {/* Dynamic Plans Section */}
+            <section id="planos" className="py-20 relative overflow-hidden bg-bg-dark">
+                <div className="orb orb-primary w-96 h-96 top-10 left-1/2 -translate-x-1/2 opacity-30"></div>
+                <div className="container mx-auto px-4 max-w-6xl relative z-10">
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary-light mb-4 backdrop-blur-md">
+                            <Sparkles size={14} className="animate-spin-slow text-primary" />
+                            Planos Flexíveis
+                        </div>
+                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+                            Escolha o Plano Ideal para seu Negócio
+                        </h2>
+                        <p className="text-text-muted max-w-2xl mx-auto text-base sm:text-lg">
+                            Transparente, sem letrinhas miúdas. Comece a transformar sua gestão hoje mesmo.
+                        </p>
+                    </div>
+
+                    {loadingPlans ? (
+                        <div className="flex justify-center items-center py-12">
+                            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+                            {plans.map((plan) => (
+                                <div
+                                    key={plan.id}
+                                    className={`glass-card p-8 rounded-3xl relative flex flex-col justify-between transition-all duration-300 hover:-translate-y-2 ${
+                                        plan.popular
+                                            ? 'border-2 border-primary shadow-2xl shadow-primary/20 bg-gradient-to-b from-primary/10 via-bg-card to-bg-card'
+                                            : 'border-white/10 hover:border-white/20'
+                                    }`}
+                                >
+                                    {plan.popular && (
+                                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-primary-hover text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                                            <Sparkles size={12} /> Mais Popular
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
+                                        <p className="text-sm text-text-muted mb-6 min-h-[40px]">{plan.description}</p>
+
+                                        <div className="flex items-baseline gap-1 mb-6 pb-6 border-b border-white/10">
+                                            <span className="text-4xl font-extrabold text-white tracking-tight">{plan.price}</span>
+                                            {plan.period && (
+                                                <span className="text-sm text-text-muted font-medium">{plan.period}</span>
+                                            )}
+                                        </div>
+
+                                        <ul className="space-y-3.5 mb-8 text-sm">
+                                            {plan.features?.map((feature, idx) => (
+                                                <li key={idx} className="flex items-center gap-3">
+                                                    {feature.included ? (
+                                                        <div className="w-5 h-5 rounded-full bg-success/20 text-success flex items-center justify-center flex-shrink-0">
+                                                            <Check size={12} />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="w-5 h-5 rounded-full bg-white/5 text-text-muted/40 flex items-center justify-center flex-shrink-0">
+                                                            <X size={12} />
+                                                        </div>
+                                                    )}
+                                                    <span className={feature.included ? 'text-text-main font-medium' : 'text-text-muted/50 line-through'}>
+                                                        {feature.text}
+                                                    </span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+
+                                    <button
+                                        onClick={() => {
+                                            if (plan.price.includes('Sob Consulta')) {
+                                                handleWhatsAppClick(`Olá! Gostaria de uma cotação para o plano ${plan.name}`);
+                                            } else {
+                                                navigate('/register', { state: { planId: plan.id, planName: plan.name } });
+                                            }
+                                        }}
+                                        className={`w-full py-3.5 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
+                                            plan.popular
+                                                ? 'bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-[1.02]'
+                                                : 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
+                                        }`}
+                                    >
+                                        <span>{plan.button_text || 'Assinar Plano'}</span>
+                                        <ArrowRight size={16} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </section>
+
             {/* Contact CTA Section */}
             <section className="py-20 relative overflow-hidden">
                 <div className="orb w-96 h-96 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary/5 blur-[100px]"></div>
                 <div className="container mx-auto px-4 max-w-4xl relative z-10 text-center">
                     <h2 className="text-3xl font-bold mb-6">Leve sua escola para o próximo nível</h2>
                     <p className="text-text-muted mb-8 text-lg">
-                        Entre em contato agora mesmo para conhecer nossos planos e agendar uma demonstração.
+                        Entre em contato agora mesmo para tirar suas dúvidas e agendar uma demonstração.
                         <br />
                         <span className="text-primary font-medium">Atendimento exclusivo via WhatsApp.</span>
                     </p>
 
                     <div className="flex flex-col items-center gap-4">
                         <button
-                            onClick={handleWhatsAppClick}
-                            className="btn btn-primary-gradient text-lg px-8 py-4 rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 transition-transform duration-300 flex items-center gap-3 group"
+                            onClick={() => handleWhatsAppClick()}
+                            className="btn btn-primary-gradient text-lg px-8 py-4 rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 transition-transform duration-300 flex items-center gap-3 group cursor-pointer"
                         >
                             <MessageCircle size={24} className="group-hover:rotate-12 transition-transform" />
                             Falar com Consultor
@@ -204,7 +405,7 @@ export const Landing = () => {
                         MyTeacherApp
                     </div>
                     <div className="flex gap-6">
-                        <span onClick={handleWhatsAppClick} className="hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 group">
+                        <span onClick={() => handleWhatsAppClick()} className="hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 group">
                             <MessageCircle size={16} className="text-primary group-hover:text-success transition-colors" />
                             <span className="group-hover:underline decoration-primary/50 underline-offset-4">Fale Conosco</span>
                         </span>
