@@ -14,8 +14,11 @@ interface UserData {
     birth_date?: string;
     nickname?: string;
 }
+import { AdminPlans } from './AdminPlans';
+import { AdminSettings } from './AdminSettings';
 
 const Admin = () => {
+    const [activeTab, setActiveTab] = useState<'users' | 'plans' | 'settings'>('users');
     const [users, setUsers] = useState<UserData[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -53,11 +56,13 @@ const Admin = () => {
     const [limit] = useState(10);
 
     useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            loadUsers();
-        }, 500);
-        return () => clearTimeout(timeoutId);
-    }, [searchTerm, page]);
+        if (activeTab === 'users') {
+            const timeoutId = setTimeout(() => {
+                loadUsers();
+            }, 500);
+            return () => clearTimeout(timeoutId);
+        }
+    }, [searchTerm, page, activeTab]);
 
     const loadUsers = async () => {
         setLoading(true);
@@ -73,14 +78,10 @@ const Admin = () => {
         }
     };
 
-
-
     const handleCreateUser = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         setSuccess('');
-
-
 
         setLoading(true);
 
@@ -157,11 +158,8 @@ const Admin = () => {
         e.preventDefault();
         if (!selectedUser) return;
 
-        // Clear previous messages
         setError('');
         setSuccess('');
-
-
 
         setLoading(true);
         try {
@@ -235,12 +233,38 @@ const Admin = () => {
 
     return (
         <div className="p-6 md:p-10 animate-fade-in relative">
-            <h1 className="text-3xl font-bold mb-8 bg-clip-text text-transparent bg-gradient-to-r from-primary-light to-primary">Painel do Administrador</h1>
+            <h1 className="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary-light to-primary">Painel do Administrador</h1>
+            
+            <div className="flex gap-4 mb-6 border-b border-white/10">
+                <button 
+                    onClick={() => setActiveTab('users')} 
+                    className={`py-2 px-4 border-b-2 transition-colors ${activeTab === 'users' ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-white'}`}
+                >
+                    Usuários
+                </button>
+                <button 
+                    onClick={() => setActiveTab('plans')} 
+                    className={`py-2 px-4 border-b-2 transition-colors ${activeTab === 'plans' ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-white'}`}
+                >
+                    Planos
+                </button>
+                <button 
+                    onClick={() => setActiveTab('settings')} 
+                    className={`py-2 px-4 border-b-2 transition-colors ${activeTab === 'settings' ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-white'}`}
+                >
+                    Configurações
+                </button>
+            </div>
 
             {error && <div className="bg-danger/10 text-danger p-3 rounded mb-4 text-sm border border-danger/20">{error}</div>}
             {success && <div className="bg-success/10 text-success p-3 rounded mb-4 text-sm border border-success/20">{success}</div>}
 
             <div className="grid grid-cols-1 gap-8">
+                {activeTab === 'settings' ? (
+                    <AdminSettings />
+                ) : activeTab === 'plans' ? (
+                    <AdminPlans />
+                ) : (
                 {/* Users List with Search and Sort */}
                 <div className="glass-card p-6">
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
@@ -378,6 +402,7 @@ const Admin = () => {
                         </button>
                     </div>
                 </div>
+                )}
             </div>
 
             {/* Create User Modal */}
