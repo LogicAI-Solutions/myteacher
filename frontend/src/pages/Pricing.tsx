@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
@@ -14,6 +14,7 @@ export interface Plan {
   button_text: string;
   popular: boolean;
   role: string;
+  max_classes: number;
   stripe_price_id?: string;
 }
 
@@ -59,7 +60,7 @@ export default function Pricing() {
         </p>
 
         <div className="isolate mx-auto mt-16 grid max-w-md grid-cols-1 gap-y-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3 lg:gap-x-8 lg:gap-y-0">
-          {plans.map((plan, planIdx) => (
+          {plans.map((plan) => (
             <div
               key={plan.id}
               className={`rounded-3xl p-8 xl:p-10 ${

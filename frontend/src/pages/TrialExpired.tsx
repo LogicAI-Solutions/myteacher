@@ -1,9 +1,31 @@
-import { Clock, MessageCircle, Lock, ArrowLeft } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Clock, MessageCircle, Lock, ArrowLeft, CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { buildSupportWhatsAppUrl } from '../utils/support';
+import api from '../api';
+import type { Plan } from './Pricing';
 
 export const TrialExpired = () => {
     const navigate = useNavigate();
+    const [plans, setPlans] = useState<Plan[]>([]);
+    const [loading, setLoading] = useState<number | null>(null);
+
+    useEffect(() => {
+        api.get('/plans/')
+            .then(({ data }) => setPlans(data.filter((p: Plan) => p.stripe_price_id)))
+            .catch(() => setPlans([]));
+    }, []);
+
+    const handleSubscribe = async (planId: number) => {
+        setLoading(planId);
+        try {
+            const { data } = await api.post('/billing/checkout', null, { params: { plan_id: planId } });
+            window.location.href = data.url;
+        } catch (error: any) {
+            alert(error?.response?.data?.detail || 'Não foi possível iniciar o pagamento.');
+            setLoading(null);
+        }
+    };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-bg-dark text-text-main p-6 relative overflow-hidden">
@@ -36,10 +58,38 @@ export const TrialExpired = () => {
                         Seu período de teste gratuito de <strong className="text-text-main">7 dias</strong> chegou ao fim.
                     </p>
                     <p className="text-text-muted mb-8 text-sm leading-relaxed">
-                        Para continuar utilizando todas as funcionalidades do sistema, entre em contato conosco para conhecer nossos planos.
+                        Para continuar utilizando todas as funcionalidades do sistema, escolha um plano.
                     </p>
 
-                    {/* CTA Button */}
+                    {/* Planos */}
+                    <div className="space-y-3 mb-4">
+                        {plans.map((plan) => (
+                            <button
+                                key={plan.id}
+                                onClick={() => handleSubscribe(plan.id)}
+                                disabled={loading !== null}
+                                className={`w-full flex items-center justify-between gap-3 py-4 px-6 rounded-xl font-bold text-white transition-all transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 ${
+                                    plan.popular
+                                        ? 'bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/25'
+                                        : 'bg-white/10 hover:bg-white/20'
+                                }`}
+                            >
+                                <span className="flex items-center gap-3">
+                                    <CreditCard size={22} />
+                                    <span className="text-left">
+                                        <span className="block">{plan.name}</span>
+                                        <span className="block text-xs font-normal text-white/70">
+                                            {plan.max_classes >= 9999 ? 'Turmas ilimitadas' : `Até ${plan.max_classes} turmas`}
+                                        </span>
+                                    </span>
+                                </span>
+                                <span className="text-lg whitespace-nowrap">
+                                    {loading === plan.id ? '...' : `${plan.price}${plan.period}`}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+
                     <a
                         href={buildSupportWhatsAppUrl('Ola! Meu periodo de teste do MyTeacher acabou e gostaria de saber sobre os planos disponiveis.')}
                         target="_blank"

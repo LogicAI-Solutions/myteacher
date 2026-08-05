@@ -265,7 +265,7 @@ const Admin = () => {
                 ) : activeTab === 'plans' ? (
                     <AdminPlans />
                 ) : (
-                {/* Users List with Search and Sort */}
+                // Users List with Search and Sort
                 <div className="glass-card p-6">
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                         <h2 className="text-xl font-bold flex items-center gap-2 text-text-main">

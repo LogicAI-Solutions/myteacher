@@ -12,3 +12,4 @@ pytest
 httpx
 python-docx
 psycopg2-binary
+stripe

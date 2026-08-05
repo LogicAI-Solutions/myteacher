@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../api';
-import { Edit, Save, X, Plus } from 'lucide-react';
-import { Plan } from './Pricing';
+import { Edit, X } from 'lucide-react';
+import type { Plan } from './Pricing';
 
 export const AdminPlans = () => {
     const [plans, setPlans] = useState<Plan[]>([]);
