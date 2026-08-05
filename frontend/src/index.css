@@ -14,10 +14,18 @@
   --color-warning: var(--color-warning);
   --color-border: var(--color-border);
 
-  --animate-fade-in: fadeIn 0.3s ease-out;
-  --animate-slide-up: slideUp 0.3s ease-out;
+  /* Desaceleração exponencial: chegadas confiantes, sem quique. */
+  --animate-fade-in: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-up: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   --animate-modal-spring: modalSpring 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-  --animate-slide-in-right: slideInRight 0.3s ease-out;
+  --animate-slide-in-right: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Feedback: estas eram usadas no app mas nunca existiram no tema, então
+     nada acontecia. Toast que chega, erro que nega, modo de reordenar ativo. */
+  --animate-slide-in: slideInRight 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-shake: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  --animate-spring-up: modalSpring 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-jiggle: jiggle 0.3s ease-in-out infinite;
   --animate-float: none;
   --animate-glow: none;
   --animate-shimmer: none;
@@ -124,6 +132,24 @@
 
     50% {
       opacity: 0.7;
+    }
+  }
+
+  @keyframes shake {
+
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+
+    20%,
+    60% {
+      transform: translateX(-5px);
+    }
+
+    40%,
+    80% {
+      transform: translateX(5px);
     }
   }
 
@@ -695,5 +721,32 @@
         transparent 100%);
     background-size: 200% 100%;
     animation: none;
+  }
+}
+/* Movimento reduzido: alternativa intencional, não um kill global.
+   Loops decorativos param; mudanças de estado continuam legíveis como fade
+   curto; spinner de carregamento sobrevive porque comunica progresso. */
+@media (prefers-reduced-motion: reduce) {
+
+  .animate-pulse,
+  .animate-bounce,
+  .animate-float,
+  .animate-pulse-soft,
+  .animate-jiggle,
+  .animate-shake {
+    animation: none !important;
+  }
+
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-in,
+  .animate-slide-in-right,
+  .animate-spring-up,
+  .glass-modal {
+    animation: fadeIn 0.12s ease-out !important;
+  }
+
+  .modal-overlay {
+    animation: none !important;
   }
 }

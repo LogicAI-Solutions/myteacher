@@ -1,4 +1,4 @@
-from pydantic import BaseModel, computed_field
+from pydantic import BaseModel, EmailStr, Field, computed_field, field_validator
 from datetime import date, datetime
 from typing import Optional
 
@@ -12,6 +12,27 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
     is_trial: Optional[bool] = False
+
+class UserRegister(BaseModel):
+    """Cadastro público. Ao contrário de UserCreate (só admin), estes dados vêm de
+    qualquer visitante, então cada campo é validado na borda."""
+    full_name: str = Field(min_length=2, max_length=120)
+    email: EmailStr
+    # Sem "@": o login aceita nickname OU email (crud.get_user_by_nickname), e proibir
+    # arroba impede que alguém registre um apelido que se passe pelo email de outro.
+    nickname: str = Field(min_length=3, max_length=40, pattern=r"^[A-Za-z0-9._-]+$")
+    password: str = Field(min_length=8, max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        return value.strip().lower()
+
+    @field_validator("full_name")
+    @classmethod
+    def strip_name(cls, value: str) -> str:
+        return " ".join(value.split())
+
 
 class UserUpdate(BaseModel):
     email: Optional[str] = None

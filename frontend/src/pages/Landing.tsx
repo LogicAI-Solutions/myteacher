@@ -20,39 +20,41 @@ export interface Plan {
     role?: string;
 }
 
+// Só aparece se a API de planos cair. Precisa espelhar os planos reais de
+// backend/core/init_db.py — anunciar preço que não existe é pior que não anunciar.
 const defaultPlans: Plan[] = [
     {
         id: 1,
-        name: 'Professor Autônomo',
-        description: 'Ideal para professores particulares ou com poucas turmas.',
-        price: 'R$ 49',
+        name: 'Essencial',
+        description: 'Para quem está começando e gerencia poucas turmas.',
+        price: 'R$ 47,90',
         period: '/mês',
         popular: false,
-        button_text: 'Começar Agora',
+        button_text: 'Começar 7 dias grátis',
         features: [
-            { text: 'Até 5 Turmas Ativas', included: true },
-            { text: 'Controle de Frequência & Faltas', included: true },
-            { text: 'Relatórios em PDF/Excel', included: true },
-            { text: 'Controle Financeiro Simples', included: true },
-            { text: 'Suporte via WhatsApp', included: true },
-            { text: 'Múltiplos Professores', included: false }
+            { text: 'Até 5 turmas', included: true },
+            { text: 'Alunos ilimitados', included: true },
+            { text: 'Gestão financeira completa', included: true },
+            { text: 'Controle de presenças e notas', included: true },
+            { text: 'Dashboard do aluno', included: true },
+            { text: 'Turmas ilimitadas', included: false }
         ]
     },
     {
         id: 2,
-        name: 'Escola / Curso Pro',
-        description: 'Para escolas de cursos livres, idiomas e reforço escolar.',
-        price: 'R$ 129',
+        name: 'Profissional',
+        description: 'Para professores com agenda cheia, sem limite de turmas.',
+        price: 'R$ 97,90',
         period: '/mês',
         popular: true,
-        button_text: 'Testar 7 Dias Grátis',
+        button_text: 'Começar 7 dias grátis',
         features: [
-            { text: 'Turmas Ilimitadas', included: true },
-            { text: 'Gestão Completa de Alunos', included: true },
-            { text: 'Gestão Financeira & Mensalidades', included: true },
-            { text: 'Dashboard & Métricas Avançadas', included: true },
-            { text: 'Múltiplos Perfis de Acesso', included: true },
-            { text: 'Suporte Prioritário VIP', included: true }
+            { text: 'Turmas ilimitadas', included: true },
+            { text: 'Alunos ilimitados', included: true },
+            { text: 'Gestão financeira completa', included: true },
+            { text: 'Controle de presenças e notas', included: true },
+            { text: 'Dashboard do aluno', included: true },
+            { text: 'Suporte prioritário', included: true }
         ]
     },
     {
@@ -142,8 +144,8 @@ export const Landing = () => {
             {/* Hero Section */}
             <header className="relative pt-24 pb-16 lg:pt-36 lg:pb-24 px-4 sm:px-6 overflow-hidden">
                 {/* Background Orbs */}
-                <div className="orb orb-primary w-64 h-64 top-20 -left-20 animate-float opacity-50"></div>
-                <div className="orb orb-purple w-96 h-96 bottom-0 -right-40 animate-pulse-soft opacity-40" style={{ animationDelay: '1s' }}></div>
+                <div className="orb orb-primary w-64 h-64 top-20 -left-20 opacity-50"></div>
+                <div className="orb orb-purple w-96 h-96 bottom-0 -right-40 opacity-40"></div>
 
                 <div className="container mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10 max-w-6xl">
                     <div className="space-y-6 animate-slide-up text-center lg:text-left">
@@ -284,7 +286,7 @@ export const Landing = () => {
                 <div className="container mx-auto px-4 max-w-6xl relative z-10">
                     <div className="text-center mb-16">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary-light mb-4 backdrop-blur-md">
-                            <Sparkles size={14} className="animate-spin-slow text-primary" />
+                            <Sparkles size={14} className="text-primary" />
                             Planos Flexíveis
                         </div>
                         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">

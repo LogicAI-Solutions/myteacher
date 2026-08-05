@@ -58,7 +58,7 @@ def create_checkout_session(
         customer=user.stripe_customer_id or None,
         customer_email=None if user.stripe_customer_id else user.email,
         success_url=f"{base_url}/dashboard?assinatura=ok",
-        cancel_url=f"{base_url}/planos",
+        cancel_url=f"{base_url}/trial-expired",
     )
     return {"url": session.url}
 

@@ -46,7 +46,7 @@ export const NotFound = () => {
                     {/* Floating icon */}
                     <div className="flex justify-center mb-8">
                         <div className="relative">
-                            <div className="h-20 w-20 bg-primary/15 rounded-2xl flex items-center justify-center text-primary border border-primary/20 shadow-lg shadow-primary/10 animate-float">
+                            <div className="h-20 w-20 bg-primary/15 rounded-2xl flex items-center justify-center text-primary border border-primary/20 shadow-lg shadow-primary/10">
                                 <Compass size={40} strokeWidth={1.5} />
                             </div>
                             <div className="absolute -top-1 -right-1 h-6 w-6 bg-bg-card rounded-full flex items-center justify-center border border-white/10">

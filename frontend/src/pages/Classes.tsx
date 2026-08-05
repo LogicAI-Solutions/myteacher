@@ -411,8 +411,22 @@ export const Classes = () => {
             )}
 
             {classes.length === 0 && !isLoading && (
-                <div className="text-center mt-12 animate-fade-in">
-                    <p className="text-text-muted text-lg">Comece criando sua primeira turma acima.</p>
+                <div className="mx-auto mt-12 max-w-md text-center animate-fade-in">
+                    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+                        <BookOpen size={30} />
+                    </div>
+                    <h2 className="mb-2 text-xl font-bold text-text-main">Crie sua primeira turma</h2>
+                    <p className="mb-6 text-sm leading-relaxed text-text-muted">
+                        A turma é o ponto de partida: é nela que você lança presenças, notas e mensalidades.
+                        Leva menos de um minuto — você só precisa do nome e do horário.
+                    </p>
+                    <button
+                        onClick={() => setShowModal(true)}
+                        className="btn-primary-gradient inline-flex items-center gap-2 rounded-xl px-6 py-3 font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                    >
+                        <Plus size={18} />
+                        Criar turma
+                    </button>
                 </div>
             )}
 

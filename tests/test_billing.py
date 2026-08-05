@@ -73,6 +73,9 @@ def test_checkout_manda_o_plano_escolhido_e_seu_price():
     # o webhook depende do metadata para aplicar o limite de turmas
     assert kwargs["metadata"] == {"plan_id": "3"}
     assert kwargs["subscription_data"] == {"metadata": {"plan_id": "3"}}
+    # Precisam bater com rotas reais de frontend/src/App.tsx, senão o usuário cai no NotFound
+    assert kwargs["success_url"].startswith("http://app/dashboard")
+    assert kwargs["cancel_url"] == "http://app/trial-expired"
 
 
 def test_webhook_aplica_limite_de_turmas_do_plano():

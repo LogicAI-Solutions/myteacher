@@ -124,7 +124,7 @@ export const Layout = () => {
                             className={`nav-link-glass ${location.pathname.includes('/admin') ? 'active text-white shadow-lg' : 'text-text-muted hover:text-text-main'} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                             title="Administração"
                         >
-                            <Settings size={20} className={`shrink-0 ${location.pathname.includes('/admin') ? 'animate-spin-slow' : ''}`} />
+                            <Settings size={20} className="shrink-0" />
                             <span className={`whitespace-nowrap transition-all duration-300 ${isSidebarCollapsed ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'}`}>Administração</span>
                         </Link>
                     )}
