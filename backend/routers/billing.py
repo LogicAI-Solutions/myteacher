@@ -44,11 +44,21 @@ def create_checkout_session(
     if plan_id and not plan:
         raise HTTPException(status_code=404, detail="Plano não encontrado")
 
+    base_url = os.getenv("FRONTEND_URL") or str(request.base_url).rstrip("/")
+
+    # Quem já assina troca de plano no portal do Stripe; abrir um checkout novo
+    # criaria uma segunda assinatura e cobraria duas vezes.
+    if user.stripe_subscription_id and user.stripe_customer_id:
+        portal = _stripe(db).billing_portal.Session.create(
+            customer=user.stripe_customer_id,
+            return_url=f"{base_url}/dashboard/profile",
+        )
+        return {"url": portal.url}
+
     price_id = (plan.stripe_price_id if plan else None) or _cfg(db, "stripe_price_id")
     if not price_id:
         raise HTTPException(status_code=503, detail="Preço da assinatura não configurado.")
 
-    base_url = os.getenv("FRONTEND_URL") or str(request.base_url).rstrip("/")
     session = _stripe(db).checkout.Session.create(
         mode="subscription",
         line_items=[{"price": price_id, "quantity": 1}],

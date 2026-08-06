@@ -233,24 +233,24 @@ const Admin = () => {
 
     return (
         <div className="p-6 md:p-10 animate-fade-in relative">
-            <h1 className="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary-light to-primary">Painel do Administrador</h1>
+            <h1 className="text-3xl font-bold mb-4 text-text-main">Painel do Administrador</h1>
             
-            <div className="flex gap-4 mb-6 border-b border-white/10">
+            <div className="flex gap-4 mb-6 border-b border-border">
                 <button 
                     onClick={() => setActiveTab('users')} 
-                    className={`py-2 px-4 border-b-2 transition-colors ${activeTab === 'users' ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-white'}`}
+                    className={`py-2 px-4 border-b-2 transition-colors ${activeTab === 'users' ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-text-main'}`}
                 >
                     Usuários
                 </button>
                 <button 
                     onClick={() => setActiveTab('plans')} 
-                    className={`py-2 px-4 border-b-2 transition-colors ${activeTab === 'plans' ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-white'}`}
+                    className={`py-2 px-4 border-b-2 transition-colors ${activeTab === 'plans' ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-text-main'}`}
                 >
                     Planos
                 </button>
                 <button 
                     onClick={() => setActiveTab('settings')} 
-                    className={`py-2 px-4 border-b-2 transition-colors ${activeTab === 'settings' ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-white'}`}
+                    className={`py-2 px-4 border-b-2 transition-colors ${activeTab === 'settings' ? 'border-primary text-primary' : 'border-transparent text-text-muted hover:text-text-main'}`}
                 >
                     Configurações
                 </button>
@@ -266,7 +266,7 @@ const Admin = () => {
                     <AdminPlans />
                 ) : (
                 // Users List with Search and Sort
-                <div className="glass-card p-6">
+                <div className="sheet sheet-p">
                     <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                         <h2 className="text-xl font-bold flex items-center gap-2 text-text-main">
                             <User size={20} className="text-primary" /> Usuários Cadastrados
@@ -278,14 +278,14 @@ const Admin = () => {
                                 <input
                                     type="text"
                                     placeholder="Buscar por nome, email..."
-                                    className="w-full pl-10 pr-4 py-2 bg-bg-dark/50 border border-white/10 rounded-lg text-text-main focus:outline-none focus:border-primary/50 transition-all placeholder:text-text-muted/50"
+                                    className="w-full pl-10 pr-4 py-2 bg-bg-dark/50 border border-border rounded-[2px] text-text-main focus:outline-none focus:border-primary/50 transition-all placeholder:text-text-muted/50"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
                             <button
                                 onClick={openCreateModal}
-                                className="bg-primary hover:bg-primary-hover text-white px-4 py-2 rounded-lg shadow-lg shadow-primary/20 transition-all flex items-center gap-2 whitespace-nowrap"
+                                className="bg-primary hover:bg-primary-hover text-[var(--on-institution)] px-4 py-2 rounded-[2px] transition-all flex items-center gap-2 whitespace-nowrap"
                             >
                                 <Plus size={18} /> <span className="hidden md:inline">Adicionar Professor</span><span className="md:hidden">Add</span>
                             </button>
@@ -293,14 +293,14 @@ const Admin = () => {
                     </div>
 
                     <div className="md:hidden flex justify-end mb-2 mt-4">
-                        <span className="text-xs font-medium text-text-muted flex items-center gap-1 bg-black/5 px-3 py-1.5 rounded-full border border-white/5">
+                        <span className="text-xs font-medium text-text-muted flex items-center gap-1 bg-[var(--wash-1)] px-3 py-1.5 rounded-[2px] border border-border">
                             Deslize para ver mais <ArrowRight size={14} />
                         </span>
                     </div>
-                    <div className="overflow-x-auto custom-scrollbar rounded-lg border border-white/5">
+                    <div className="overflow-x-auto custom-scrollbar rounded-[2px] border border-border">
                         <table className="w-full text-left border-collapse" style={{ minWidth: '800px' }}>
                             <thead>
-                                <tr className="bg-white/5 border-b border-white/10 text-text-muted text-sm uppercase tracking-wider">
+                                <tr >
                                     <th className="p-4 font-medium sticky top-0 bg-bg-card z-10 w-[25%]">
                                         <div className="flex items-center gap-2">Nome</div>
                                     </th>
@@ -317,26 +317,26 @@ const Admin = () => {
                             </thead>
                             <tbody className="text-sm">
                                 {users.map(user => (
-                                    <tr key={user.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                                    <tr key={user.id} className="border-b border-border hover:bg-[var(--wash-1)] transition-colors">
                                         <td className="p-4 font-medium text-text-main">{user.full_name || '-'}</td>
                                         <td className="p-4 text-text-muted">{user.nickname || '-'}</td>
                                         <td className="p-4 text-text-muted">{user.email}</td>
                                         <td className="p-4 text-center">
                                             {user.is_trial && (
-                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold mr-2 ${user.trial_expired
+                                                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-[2px] text-xs font-semibold mr-2 ${user.trial_expired
                                                     ? 'bg-danger/20 text-danger'
                                                     : 'bg-warning/20 text-warning'
                                                     }`}>
                                                     {user.trial_expired
                                                         ? '⏰ Expirado'
-                                                        : `🧪 Trial (${user.trial_days_remaining}d)`
+                                                        : `Trial (${user.trial_days_remaining}d)`
                                                     }
                                                 </span>
                                             )}
                                         </td>
                                         <td className="p-4 text-center">
                                             <select
-                                                className={`px-3 py-1.5 rounded-lg text-xs font-medium border-none focus:ring-2 focus:ring-primary outline-none transition-colors cursor-pointer ${user.is_active
+                                                className={`px-3 py-1.5 rounded-[2px] text-xs font-medium border-none focus:ring-2 focus:ring-primary outline-none transition-colors cursor-pointer ${user.is_active
                                                     ? 'bg-success/20 text-success'
                                                     : 'bg-text-muted/20 text-text-muted'}`}
                                                 value={user.is_active ? 'true' : 'false'}
@@ -350,21 +350,21 @@ const Admin = () => {
                                             <div className="flex justify-end gap-2">
                                                 <button
                                                     onClick={() => openEditModal(user)}
-                                                    className="p-1.5 hover:bg-primary/20 rounded-lg text-text-muted hover:text-primary transition-colors"
+                                                    className="p-1.5 hover:bg-primary/20 rounded-[2px] text-text-muted hover:text-primary transition-colors"
                                                     title="Editar"
                                                 >
                                                     <Edit size={16} />
                                                 </button>
                                                 <button
                                                     onClick={() => openResetModal(user)}
-                                                    className="p-1.5 hover:bg-warning/20 rounded-lg text-text-muted hover:text-warning transition-colors"
+                                                    className="p-1.5 hover:bg-warning/20 rounded-[2px] text-text-muted hover:text-warning transition-colors"
                                                     title="Resetar Senha"
                                                 >
                                                     <Key size={16} />
                                                 </button>
                                                 <button
                                                     onClick={() => openDeleteModal(user)}
-                                                    className="p-1.5 hover:bg-danger/20 rounded-lg text-text-muted hover:text-danger transition-colors"
+                                                    className="p-1.5 hover:bg-danger/20 rounded-[2px] text-text-muted hover:text-danger transition-colors"
                                                     title="Remover"
                                                 >
                                                     <Trash2 size={16} />
@@ -384,11 +384,11 @@ const Admin = () => {
                         </table>
                     </div>
 
-                    <div className="flex justify-between items-center p-4 border-t border-white/5 bg-black/20 mt-4 rounded-b-lg">
+                    <div className="flex justify-between items-center p-4 border-t border-border bg-[var(--wash-2)] mt-4 rounded-b-lg">
                         <button
                             onClick={() => setPage(p => Math.max(0, p - 1))}
                             disabled={page === 0}
-                            className="px-4 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm text-white transition-colors"
+                            className="px-4 py-2 bg-[var(--wash-1)] hover:bg-[var(--wash-1)] disabled:opacity-50 disabled:cursor-not-allowed rounded-[2px] text-sm text-text-main transition-colors"
                         >
                             Anterior
                         </button>
@@ -396,7 +396,7 @@ const Admin = () => {
                         <button
                             onClick={() => setPage(p => p + 1)}
                             disabled={users.length < limit}
-                            className="px-4 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-sm text-white transition-colors"
+                            className="px-4 py-2 bg-[var(--wash-1)] hover:bg-[var(--wash-1)] disabled:opacity-50 disabled:cursor-not-allowed rounded-[2px] text-sm text-text-main transition-colors"
                         >
                             Próxima
                         </button>
@@ -407,8 +407,8 @@ const Admin = () => {
 
             {/* Create User Modal */}
             {isCreateModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                    <div className="glass-card w-full max-w-md p-6 relative animate-slide-up">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--wash-2)] animate-fade-in">
+                    <div className="sheet sheet-p w-full max-w-md relative animate-slide-up">
                         <button onClick={() => setIsCreateModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-text-main">
                             <X size={20} />
                         </button>
@@ -417,39 +417,39 @@ const Admin = () => {
                         </h2>
                         <form onSubmit={handleCreateUser} className="space-y-4">
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome Completo</label>
+                                <label className="label">Nome Completo</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserName}
                                     onChange={e => setNewUserName(e.target.value)}
                                     placeholder="João da Silva"
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Data de Nascimento</label>
+                                <label className="label">Data de Nascimento</label>
                                 <input
                                     type="date"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserBirthDate}
                                     onChange={e => setNewUserBirthDate(e.target.value)}
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nickname (Apelido)</label>
+                                <label className="label">Nickname (Apelido)</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserNickname}
                                     onChange={e => setNewUserNickname(e.target.value)}
                                     placeholder="Prof. João"
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Email</label>
+                                <label className="label">Email</label>
                                 <input
                                     type="email"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserEmail}
                                     onChange={e => setNewUserEmail(e.target.value)}
                                     required
@@ -457,10 +457,10 @@ const Admin = () => {
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Senha Inicial</label>
+                                <label className="label">Senha Inicial</label>
                                 <input
                                     type="password"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newUserPassword}
                                     onChange={e => setNewUserPassword(e.target.value)}
                                     required
@@ -476,21 +476,21 @@ const Admin = () => {
                                         onChange={e => setNewUserIsTrial(e.target.checked)}
                                     />
                                     <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-warning peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-warning"></div>
-                                    <span className="ml-3 text-sm font-medium text-white">🧪 Usuário de Teste (7 dias grátis)</span>
+                                    <span className="ml-3 text-sm font-medium text-text-main">Usuário de Teste (14 dias grátis)</span>
                                 </label>
                             </div>
                             <div className="flex justify-end gap-3 mt-6">
                                 <button
                                     type="button"
                                     onClick={() => setIsCreateModalOpen(false)}
-                                    className="px-4 py-2 rounded-lg text-text-muted hover:bg-white/5 transition-colors"
+                                    className="px-4 py-2 rounded-[2px] text-text-muted hover:bg-[var(--wash-1)] transition-colors"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-6 rounded-lg shadow-lg shadow-primary/20 transition-all cursor-pointer disabled:opacity-50"
+                                    className="bg-primary hover:bg-primary-hover text-[var(--on-institution)] font-bold py-2 px-6 rounded-[2px] transition-all cursor-pointer disabled:opacity-50"
                                 >
                                     {loading ? 'Criando...' : 'Criar'}
                                 </button>
@@ -502,10 +502,10 @@ const Admin = () => {
 
             {/* Delete Confirmation Modal */}
             {isDeleteModalOpen && selectedUser && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                    <div className="glass-card w-full max-w-sm p-6 relative animate-slide-up border-danger/30">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--wash-2)] animate-fade-in">
+                    <div className="sheet sheet-p w-full max-w-sm relative animate-slide-up border-danger/30">
                         <div className="flex flex-col items-center text-center">
-                            <div className="w-12 h-12 rounded-full bg-danger/20 flex items-center justify-center mb-4 text-danger">
+                            <div className="text-danger mb-3">
                                 <AlertTriangle size={24} />
                             </div>
                             <h3 className="text-xl font-bold text-text-main mb-2">Excluir Usuário?</h3>
@@ -515,14 +515,14 @@ const Admin = () => {
                             <div className="flex gap-3 w-full">
                                 <button
                                     onClick={() => setIsDeleteModalOpen(false)}
-                                    className="flex-1 py-2 rounded-lg bg-bg-dark border border-white/10 text-white hover:bg-white/5 transition-colors"
+                                    className="flex-1 py-2 rounded-[2px] bg-bg-dark border border-border text-text-main hover:bg-[var(--wash-1)] transition-colors"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     onClick={handleDeleteUser}
                                     disabled={loading}
-                                    className="flex-1 py-2 rounded-lg bg-danger hover:bg-danger-hover text-white font-bold shadow-lg shadow-danger/20 transition-colors"
+                                    className="flex-1 py-2 rounded-[2px] bg-danger hover:bg-danger-hover text-[#fff] font-bold transition-colors"
                                 >
                                     {loading ? 'Excluindo...' : 'Sim, Excluir'}
                                 </button>
@@ -534,8 +534,8 @@ const Admin = () => {
 
             {/* Reset Password Modal */}
             {isResetModalOpen && selectedUser && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                    <div className="glass-card w-full max-w-md p-6 relative animate-slide-up">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--wash-2)] animate-fade-in">
+                    <div className="sheet sheet-p w-full max-w-md relative animate-slide-up">
                         <button onClick={() => setIsResetModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-text-main">
                             <X size={20} />
                         </button>
@@ -547,10 +547,10 @@ const Admin = () => {
                         </p>
                         <form onSubmit={handleResetPassword} className="space-y-4">
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nova Senha</label>
+                                <label className="label">Nova Senha</label>
                                 <input
                                     type="password"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newPassword}
                                     onChange={e => setNewPassword(e.target.value)}
                                     required
@@ -562,14 +562,14 @@ const Admin = () => {
                                 <button
                                     type="button"
                                     onClick={() => setIsResetModalOpen(false)}
-                                    className="px-4 py-2 rounded-lg text-text-muted hover:bg-white/5 transition-colors"
+                                    className="px-4 py-2 rounded-[2px] text-text-muted hover:bg-[var(--wash-1)] transition-colors"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-6 rounded-lg shadow-lg shadow-primary/20 transition-all cursor-pointer disabled:opacity-50"
+                                    className="bg-primary hover:bg-primary-hover text-[var(--on-institution)] font-bold py-2 px-6 rounded-[2px] transition-all cursor-pointer disabled:opacity-50"
                                 >
                                     {loading ? 'Salvar' : 'Salvar Senha'}
                                 </button>
@@ -581,9 +581,9 @@ const Admin = () => {
 
             {/* Edit User Modal */}
             {isEditModalOpen && selectedUser && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                    <div className="glass-card w-full max-w-md p-6 relative animate-slide-up">
-                        <button onClick={() => setIsEditModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-white">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--wash-2)] animate-fade-in">
+                    <div className="sheet sheet-p w-full max-w-md relative animate-slide-up">
+                        <button onClick={() => setIsEditModalOpen(false)} className="absolute top-4 right-4 text-text-muted hover:text-text-main">
                             <X size={20} />
                         </button>
                         <h2 className="text-xl font-bold mb-6 text-text-main flex items-center gap-2">
@@ -591,39 +591,39 @@ const Admin = () => {
                         </h2>
                         <form onSubmit={handleEditUser} className="space-y-4">
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome Completo</label>
+                                <label className="label">Nome Completo</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editUserName}
                                     onChange={e => setEditUserName(e.target.value)}
                                     placeholder="João da Silva"
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Data de Nascimento</label>
+                                <label className="label">Data de Nascimento</label>
                                 <input
                                     type="date"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editUserBirthDate}
                                     onChange={e => setEditUserBirthDate(e.target.value)}
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nickname (Apelido)</label>
+                                <label className="label">Nickname (Apelido)</label>
                                 <input
                                     type="text"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editUserNickname}
                                     onChange={e => setEditUserNickname(e.target.value)}
                                     placeholder="Prof. João"
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Email</label>
+                                <label className="label">Email</label>
                                 <input
                                     type="email"
-                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-bg-dark/50 border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editUserEmail}
                                     onChange={e => setEditUserEmail(e.target.value)}
                                     required
@@ -640,7 +640,7 @@ const Admin = () => {
                                         onChange={e => setEditUserIsActive(e.target.checked)}
                                     />
                                     <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-primary peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                    <span className="ml-3 text-sm font-medium text-white">Usuário Ativo</span>
+                                    <span className="ml-3 text-sm font-medium text-text-main">Usuário Ativo</span>
                                 </label>
                             </div>
 
@@ -653,7 +653,7 @@ const Admin = () => {
                                         onChange={e => setEditUserIsTrial(e.target.checked)}
                                     />
                                     <div className="w-11 h-6 bg-bg-dark rounded-full peer peer-focus:ring-2 peer-focus:ring-warning peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-warning"></div>
-                                    <span className="ml-3 text-sm font-medium text-white">🧪 Usuário de Teste (7 dias grátis)</span>
+                                    <span className="ml-3 text-sm font-medium text-text-main">Usuário de Teste (14 dias grátis)</span>
                                 </label>
                             </div>
 
@@ -661,14 +661,14 @@ const Admin = () => {
                                 <button
                                     type="button"
                                     onClick={() => setIsEditModalOpen(false)}
-                                    className="px-4 py-2 rounded-lg text-text-muted hover:bg-white/5 transition-colors"
+                                    className="px-4 py-2 rounded-[2px] text-text-muted hover:bg-[var(--wash-1)] transition-colors"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-6 rounded-lg shadow-lg shadow-primary/20 transition-all cursor-pointer disabled:opacity-50"
+                                    className="bg-primary hover:bg-primary-hover text-[var(--on-institution)] font-bold py-2 px-6 rounded-[2px] transition-all cursor-pointer disabled:opacity-50"
                                 >
                                     {loading ? 'Salvando...' : 'Salvar Alterações'}
                                 </button>

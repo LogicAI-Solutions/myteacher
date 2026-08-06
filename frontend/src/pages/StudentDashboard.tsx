@@ -3,7 +3,7 @@ import { useStudentAuth } from '../context/StudentAuthContext';
 import api from '../api';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Loading } from '../components/Loading';
-import { BookOpen, TrendingUp, Calendar, CheckCircle } from 'lucide-react';
+import { Calendar } from 'lucide-react';
 
 interface EvolutionPoint {
     date: string;
@@ -27,13 +27,9 @@ export const StudentDashboard = () => {
         const fetchData = async () => {
             if (!student) return;
             try {
-                // Fetch evolution data
                 const evolutionRes = await api.get(`/student/evolution`);
                 setEvolutionData(evolutionRes.data);
 
-                // Fetch stats (we reuse the report stats endpoint or calculate locally)
-                // Since we don't have a direct "my-stats" endpoint yet, let's calculate from evolution data or add an endpoint.
-                // The evolution endpoint returns logs.
                 const logs: EvolutionPoint[] = evolutionRes.data;
                 const total = logs.length;
                 const present = logs.filter(l => l.status === 'present').length;
@@ -46,7 +42,7 @@ export const StudentDashboard = () => {
                     avg_grade: avg
                 });
             } catch (err) {
-                console.error("Error fetching student data", err);
+                console.error('Error fetching student data', err);
             } finally {
                 setLoading(false);
             }
@@ -57,68 +53,72 @@ export const StudentDashboard = () => {
 
     if (loading) return <Loading text="Carregando seus dados..." />;
 
+    const absences = stats.total_classes - Math.round((stats.attendance_rate / 100) * stats.total_classes);
+
     return (
-        <div className="space-y-6 animate-fade-in">
-            <header className="mb-8">
-                <h1 className="text-2xl sm:text-3xl font-bold text-text-main mb-2">Olá, {student?.name.split(' ')[0]}! 👋</h1>
-                <p className="text-text-muted">Bem-vindo ao seu painel de acompanhamento.</p>
+        <div className="animate-fade-in">
+            <header>
+                <h1 className="text-2xl sm:text-3xl font-bold text-text-main">
+                    Olá, {student?.name.split(' ')[0]}
+                </h1>
+                <p className="text-text-muted mt-1.5">A sua situação nas aulas até aqui.</p>
             </header>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="glass-card p-4 sm:p-6 flex items-center gap-4 border-l-4 border-l-primary">
-                    <div className="p-3 bg-primary/20 rounded-xl text-primary">
-                        <BookOpen size={24} />
+            {/* O quadro do aluno, dividido por fios. */}
+            <section className="mt-7 sheet overflow-hidden">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-px" style={{ background: 'var(--rule)' }}>
+                    <div className="px-4 py-3.5" style={{ background: 'var(--sheet)' }}>
+                        <p className="label-print">Aulas registradas</p>
+                        <p className="mt-1.5 text-2xl font-bold text-text-main tabular">{stats.total_classes}</p>
                     </div>
-                    <div>
-                        <p className="text-text-muted text-sm font-medium uppercase tracking-wider">Aulas Totais</p>
-                        <p className="text-2xl font-bold text-text-main">{stats.total_classes}</p>
+                    <div className="px-4 py-3.5" style={{ background: 'var(--sheet)' }}>
+                        <p className="label-print">Presença</p>
+                        <p className="mt-1.5 text-2xl font-bold text-text-main tabular">
+                            {Math.round(stats.attendance_rate)}%
+                        </p>
+                        <p className="mt-0.5 text-xs text-text-muted">
+                            {absences === 0 ? 'Nenhuma falta' : `${absences} falta${absences === 1 ? '' : 's'}`}
+                        </p>
                     </div>
-                </div>
-
-                <div className="glass-card p-6 flex items-center gap-4 border-l-4 border-l-success">
-                    <div className="p-3 bg-success/20 rounded-xl text-success">
-                        <CheckCircle size={24} />
-                    </div>
-                    <div>
-                        <p className="text-text-muted text-sm font-medium uppercase tracking-wider">Presença</p>
-                        <p className="text-2xl font-bold text-text-main">{Math.round(stats.attendance_rate)}%</p>
-                    </div>
-                </div>
-
-                <div className="glass-card p-6 flex items-center gap-4 border-l-4 border-l-primary">
-                    <div className="p-3 bg-primary/20 rounded-xl text-primary-light">
-                        <TrendingUp size={24} />
-                    </div>
-                    <div>
-                        <p className="text-text-muted text-sm font-medium uppercase tracking-wider">Média Geral</p>
-                        <p className="text-2xl font-bold text-text-main">{stats.avg_grade.toFixed(1)}</p>
+                    <div className="px-4 py-3.5" style={{ background: 'var(--sheet)' }}>
+                        <p className="label-print">Média geral</p>
+                        <p className="mt-1.5 text-2xl font-bold text-text-main tabular">
+                            {stats.avg_grade.toFixed(1)}
+                        </p>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            {/* Evolution Chart */}
-            <div className="glass-card p-6 lg:p-8">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-text-main flex items-center gap-2">
-                        <TrendingUp className="text-primary" /> Sua Evolução
-                    </h2>
-                </div>
+            <section className="mt-6 sheet sheet-p">
+                <h2 className="text-lg font-semibold text-text-main">Suas notas ao longo do tempo</h2>
 
-                <div className="h-[400px] w-full">
+                <div className="h-[360px] w-full mt-5">
                     {evolutionData.length > 0 ? (
                         <ResponsiveContainer width="100%" height="100%">
-                            <LineChart data={evolutionData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                            <LineChart data={evolutionData} margin={{ top: 4, right: 8, left: -18, bottom: 0 }}>
+                                <CartesianGrid stroke="var(--color-border)" vertical={false} />
                                 <XAxis
                                     dataKey="date"
-                                    stroke="var(--color-text-muted)"
-                                    tick={{ fill: 'var(--color-text-muted)' }}
+                                    stroke="var(--color-rule-strong)"
+                                    tick={{ fill: 'var(--color-text-muted)', fontSize: 12 }}
+                                    tickLine={false}
                                     tickFormatter={(str) => new Date(str).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}
                                 />
-                                <YAxis stroke="var(--color-text-muted)" tick={{ fill: 'var(--color-text-muted)' }} domain={[0, 10]} />
+                                <YAxis
+                                    stroke="var(--color-rule-strong)"
+                                    tick={{ fill: 'var(--color-text-muted)', fontSize: 12 }}
+                                    tickLine={false}
+                                    domain={[0, 10]}
+                                />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: 'var(--color-bg-card)', borderColor: 'var(--color-border)', color: 'var(--color-text-main)', borderRadius: '12px', backdropFilter: 'blur(10px)' }}
+                                    cursor={{ stroke: 'var(--color-rule-strong)' }}
+                                    contentStyle={{
+                                        backgroundColor: 'var(--color-bg-card)',
+                                        border: '1px solid var(--color-border)',
+                                        color: 'var(--color-text-main)',
+                                        borderRadius: '2px',
+                                        fontSize: '0.875rem',
+                                    }}
                                     itemStyle={{ color: 'var(--color-text-main)' }}
                                     labelFormatter={(label) => new Date(label).toLocaleDateString('pt-BR')}
                                     formatter={(value: number) => [value, 'Nota']}
@@ -127,21 +127,24 @@ export const StudentDashboard = () => {
                                     type="monotone"
                                     dataKey="grade"
                                     stroke="var(--color-primary)"
-                                    strokeWidth={3}
-                                    dot={{ r: 4, fill: 'var(--color-primary)' }}
-                                    activeDot={{ r: 8 }}
+                                    strokeWidth={2}
+                                    dot={{ r: 3, fill: 'var(--color-primary)', strokeWidth: 0 }}
+                                    activeDot={{ r: 5 }}
                                     name="Nota"
                                 />
                             </LineChart>
                         </ResponsiveContainer>
                     ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-text-muted">
-                            <Calendar size={48} className="mb-4 opacity-50" />
-                            <p>Ainda não há dados de evolução registrados.</p>
+                        <div className="flex flex-col items-center justify-center h-full text-center">
+                            <Calendar size={32} className="text-text-muted" aria-hidden="true" />
+                            <p className="mt-3 font-semibold text-text-main">Ainda não há notas lançadas</p>
+                            <p className="mt-1 text-sm text-text-muted">
+                                Assim que o seu professor lançar as primeiras notas, elas aparecem aqui.
+                            </p>
                         </div>
                     )}
                 </div>
-            </div>
+            </section>
         </div>
     );
 };

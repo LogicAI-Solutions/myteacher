@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field, computed_field, field_validator
 from datetime import date, datetime
 from typing import Optional
+from backend.core.config import settings
 
 class UserBase(BaseModel):
     email: str
@@ -50,6 +51,8 @@ class User(UserBase):
     is_admin: bool
     is_trial: Optional[bool] = False
     trial_started_at: Optional[datetime] = None
+    plan_id: Optional[str] = None
+    max_classes: Optional[int] = None
 
     @computed_field
     @property
@@ -57,7 +60,7 @@ class User(UserBase):
         if not self.is_trial or not self.trial_started_at:
             return None
         elapsed = (datetime.utcnow() - self.trial_started_at).days
-        remaining = 7 - elapsed
+        remaining = settings.TRIAL_DAYS - elapsed
         return max(remaining, 0)
 
     @computed_field
@@ -67,7 +70,7 @@ class User(UserBase):
             return False
         if not self.trial_started_at:
             return False
-        return (datetime.utcnow() - self.trial_started_at).days >= 7
+        return (datetime.utcnow() - self.trial_started_at).days >= settings.TRIAL_DAYS
 
     class Config:
         from_attributes = True

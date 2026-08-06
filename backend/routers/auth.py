@@ -8,13 +8,14 @@ from backend.schemas import users as users_schemas
 from backend.crud import users as users_crud
 from backend.models.users import User
 from backend.core import database, security
+from backend.core.config import settings
 
 router = APIRouter()
 
 
 @router.post("/register", response_model=users_schemas.User, status_code=status.HTTP_201_CREATED)
 def register(payload: users_schemas.UserRegister, db: Session = Depends(database.get_db)):
-    """Cadastro público: cria a conta já em período de teste de 7 dias."""
+    """Cadastro público: cria a conta já em período de teste (settings.TRIAL_DAYS)."""
     # O login resolve por apelido OU email, então os dois espaços de nome
     # precisam ser checados cruzados para não criar credencial ambígua.
     taken = db.query(User).filter(
@@ -63,7 +64,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     # Verificar trial expirado
     if user.is_trial and user.trial_started_at:
         elapsed_days = (datetime.utcnow() - user.trial_started_at).days
-        if elapsed_days >= 7:
+        if elapsed_days >= settings.TRIAL_DAYS:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="TRIAL_EXPIRED",

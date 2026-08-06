@@ -49,7 +49,7 @@ def init_db(db: Session):
             "max_classes": 5,
             "max_teachers": 1,
             "popular": False,
-            "button_text": "Começar 7 dias grátis",
+            "button_text": "Começar 14 dias grátis",
             "features": [
                 {"text": "Até 5 turmas", "included": True},
                 {"text": "Alunos ilimitados", "included": True},
@@ -69,7 +69,7 @@ def init_db(db: Session):
             "max_classes": 9999,
             "max_teachers": 1,
             "popular": True,
-            "button_text": "Começar 7 dias grátis",
+            "button_text": "Começar 14 dias grátis",
             "features": [
                 {"text": "Turmas ilimitadas", "included": True},
                 {"text": "Alunos ilimitados", "included": True},

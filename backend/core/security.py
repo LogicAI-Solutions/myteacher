@@ -61,7 +61,7 @@ async def get_current_user(user = Depends(get_user_from_token)):
     # Verificar trial expirado
     if user.is_trial and user.trial_started_at:
         elapsed_days = (datetime.utcnow() - user.trial_started_at).days
-        if elapsed_days >= 7:
+        if elapsed_days >= settings.TRIAL_DAYS:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="TRIAL_EXPIRED",

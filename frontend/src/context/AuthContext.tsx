@@ -10,6 +10,8 @@ interface User {
     trial_started_at?: string;
     trial_days_remaining?: number | null;
     trial_expired?: boolean;
+    plan_id?: string | null;
+    max_classes?: number | null;
     full_name?: string;
     nickname?: string;
     avatar?: string;

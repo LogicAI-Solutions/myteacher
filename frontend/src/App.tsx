@@ -1,24 +1,27 @@
-import { type ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { StudentAuthProvider, useStudentAuth } from './context/StudentAuthContext';
 import { Loading } from './components/Loading';
-// Pages
-import { Landing } from './pages/Landing';
-import Login from './pages/Login';
-import { Dashboard } from './pages/Dashboard';
-import { Classes } from './pages/Classes';
-import { ClassDetails } from './pages/ClassDetails';
-import { Students } from './pages/Students';
-import { Payments } from './pages/Payments';
-import Admin from './pages/Admin';
-import { NotFound } from './pages/NotFound';
-import { StudentLogin } from './pages/StudentLogin';
-import { StudentDashboard } from './pages/StudentDashboard';
-import { Profile } from './pages/Profile';
-import { TrialExpired } from './pages/TrialExpired';
-import Pricing from './pages/Pricing';
-import Register from './pages/Register';
+
+// Pages — carregadas por rota. Cada página traz sua própria dependência pesada
+// (MUI no login, recharts no dashboard, html2canvas nos alunos) e nenhuma
+// precisa estar no bundle inicial.
+const Landing = lazy(() => import('./pages/Landing').then(m => ({ default: m.Landing })));
+const Login = lazy(() => import('./pages/Login'));
+const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
+const Classes = lazy(() => import('./pages/Classes').then(m => ({ default: m.Classes })));
+const ClassDetails = lazy(() => import('./pages/ClassDetails').then(m => ({ default: m.ClassDetails })));
+const Students = lazy(() => import('./pages/Students').then(m => ({ default: m.Students })));
+const Payments = lazy(() => import('./pages/Payments').then(m => ({ default: m.Payments })));
+const Admin = lazy(() => import('./pages/Admin'));
+const NotFound = lazy(() => import('./pages/NotFound').then(m => ({ default: m.NotFound })));
+const StudentLogin = lazy(() => import('./pages/StudentLogin').then(m => ({ default: m.StudentLogin })));
+const StudentDashboard = lazy(() => import('./pages/StudentDashboard').then(m => ({ default: m.StudentDashboard })));
+const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const TrialExpired = lazy(() => import('./pages/TrialExpired').then(m => ({ default: m.TrialExpired })));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const Register = lazy(() => import('./pages/Register'));
 
 // Layouts
 import { Layout } from './components/Layout';
@@ -57,7 +60,8 @@ function App() {
 
 function AppRoutes() {
   return (
-    <Routes>
+    <Suspense fallback={<Loading variant="fullscreen" text="Carregando..." />}>
+      <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/pricing" element={<Pricing />} />
@@ -91,7 +95,8 @@ function AppRoutes() {
       </Route>
 
       <Route path="*" element={<NotFound />} />
-    </Routes>
+      </Routes>
+    </Suspense>
   );
 }
 

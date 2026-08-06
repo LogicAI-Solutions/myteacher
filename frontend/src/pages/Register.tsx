@@ -4,7 +4,7 @@ import { GraduationCap, ArrowLeft, User, Mail, AtSign, Lock, Loader2, CheckCircl
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
-const TRIAL_DAYS = 7;
+const TRIAL_DAYS = 14;
 
 export const Register = () => {
     const navigate = useNavigate();
@@ -58,15 +58,15 @@ export const Register = () => {
             <div className="relative z-10 w-full max-w-md animate-fade-in">
                 <button
                     onClick={() => navigate('/')}
-                    className="mb-6 flex items-center gap-2 rounded-lg px-2 py-2 text-text-muted transition-colors hover:text-text-main focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                    className="mb-6 flex items-center gap-2 rounded-[2px] px-2 py-2 text-text-muted transition-colors hover:text-text-main focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                 >
                     <ArrowLeft size={20} /> Voltar
                 </button>
 
-                <div className="glass-card p-8 shadow-2xl">
+                <div className="sheet sheet-p">
                     <div className="text-center">
                         <div className="mb-4 flex justify-center">
-                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/30 bg-primary/20 text-primary">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-[3px] border border-primary/30 bg-primary/20 text-primary">
                                 <GraduationCap size={32} />
                             </div>
                         </div>
@@ -82,7 +82,7 @@ export const Register = () => {
                     {error && (
                         <div
                             role="alert"
-                            className="mt-6 rounded-xl border border-danger/20 bg-danger/10 p-4 text-sm text-danger"
+                            className="mt-6 rounded-[2px] border border-danger/20 bg-danger/10 p-4 text-sm text-danger"
                         >
                             {error}
                         </div>
@@ -97,7 +97,7 @@ export const Register = () => {
                                 <User size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
                                 <input
                                     id="full_name"
-                                    className="input-modern pl-12"
+                                    className="input pl-12"
                                     value={form.full_name}
                                     onChange={set('full_name')}
                                     required
@@ -118,7 +118,7 @@ export const Register = () => {
                                 <input
                                     id="email"
                                     type="email"
-                                    className="input-modern pl-12"
+                                    className="input pl-12"
                                     value={form.email}
                                     onChange={set('email')}
                                     required
@@ -136,7 +136,7 @@ export const Register = () => {
                                 <AtSign size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
                                 <input
                                     id="nickname"
-                                    className="input-modern pl-12"
+                                    className="input pl-12"
                                     value={form.nickname}
                                     onChange={set('nickname')}
                                     required
@@ -162,7 +162,7 @@ export const Register = () => {
                                 <input
                                     id="password"
                                     type="password"
-                                    className="input-modern pl-12"
+                                    className="input pl-12"
                                     value={form.password}
                                     onChange={set('password')}
                                     required
@@ -179,7 +179,7 @@ export const Register = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="btn-primary-gradient flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-bold disabled:pointer-events-none disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                            className="btn btn-primary flex w-full items-center justify-center gap-2 rounded-[2px] px-6 py-3.5 text-base font-bold disabled:pointer-events-none disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                         >
                             {loading ? (
                                 <>
