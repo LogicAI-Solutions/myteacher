@@ -246,7 +246,7 @@ export const Profile = () => {
                     ) : null}
                 </div>
 
-                <p className="text-text-muted text-sm">
+                <p className="text-text-muted text-sm text-center max-w-[60ch] mx-auto">
                     {user?.is_trial
                         ? 'Quando o teste acabar, o acesso fica bloqueado até você escolher um plano. Pode assinar agora que o teste continua até o fim.'
                         : currentPlan
@@ -264,13 +264,13 @@ export const Profile = () => {
                 {plans.length === 0 ? (
                     <p className="text-sm text-text-muted">Nenhum plano disponível para assinatura no momento.</p>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    <div className="flex flex-wrap justify-center gap-4 items-stretch">
                         {plans.map(plan => {
                             const isCurrent = String(plan.id) === user?.plan_id && !user?.is_trial;
                             return (
                                 <div
                                     key={plan.id}
-                                    className={`flex flex-col gap-3 p-4 rounded-[3px] border ${isCurrent ? 'border-primary bg-[var(--wash-1)]' : 'border-border'}`}
+                                    className={`flex flex-col gap-3 p-4 rounded-[3px] border w-full max-w-[20rem] ${isCurrent ? 'border-primary bg-[var(--wash-1)]' : 'border-border'}`}
                                 >
                                     <div className="flex items-baseline justify-between gap-2">
                                         <span className="font-bold text-text-main">{plan.name}</span>
@@ -278,10 +278,12 @@ export const Profile = () => {
                                             {plan.price}<span className="text-xs text-text-muted">{plan.period}</span>
                                         </span>
                                     </div>
-                                    <p className="text-xs text-text-muted leading-snug">
+                                    <p className="text-sm font-semibold text-text-main">
                                         {plan.max_classes >= UNLIMITED_CLASSES ? 'Turmas ilimitadas' : `Até ${plan.max_classes} turmas`}
-                                        {plan.description ? ` · ${plan.description}` : ''}
                                     </p>
+                                    {plan.description && (
+                                        <p className="text-xs text-text-muted leading-snug">{plan.description}</p>
+                                    )}
                                     <button
                                         type="button"
                                         onClick={() => handleSubscribe(plan.id)}
