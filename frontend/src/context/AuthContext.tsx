@@ -10,6 +10,8 @@ interface User {
     trial_started_at?: string;
     trial_days_remaining?: number | null;
     trial_expired?: boolean;
+    plan_id?: string | null;
+    max_classes?: number | null;
     full_name?: string;
     nickname?: string;
     avatar?: string;
@@ -73,17 +75,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 const userRes = await api.get('/users/me');
                 setUser(userRes.data);
                 setIsTrialExpired(false);
-            } catch (err) {
+            } catch (err: any) {
+                // Conta válida mas sem acesso (teste vencido ou assinatura cancelada):
+                // MANTÉM o token — o paywall precisa dele para abrir o checkout e reassinar.
+                if (err.response?.status === 403 && err.response?.data?.detail === 'TRIAL_EXPIRED') {
+                    setIsTrialExpired(true);
+                    setUser(null);
+                    return;
+                }
                 console.error("Failed to fetch user profile after login", err);
                 logout();
                 throw err;
             }
         } catch (err: any) {
-            // Verificar se é erro de trial expirado
-            if (err.response?.status === 403 && err.response?.data?.detail === 'TRIAL_EXPIRED') {
-                setIsTrialExpired(true);
-                setUser(null);
-            }
             console.error("Login failed", err);
             throw err;
         }

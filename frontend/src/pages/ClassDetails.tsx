@@ -5,6 +5,7 @@ import { Plus, Save, Calendar, Users, X, FileText, Pencil, Trash2, AlertTriangle
 import { formatPhone, unmaskPhone, formatCurrency, parseCurrency } from '../utils/masks';
 import { Loading } from '../components/Loading';
 import { ManageStudentsModal } from '../components/ManageStudentsModal';
+import { Toast } from '../components/Toast';
 
 interface Student {
     id: number;
@@ -536,24 +537,7 @@ export const ClassDetails = () => {
 
     return (
         <div>
-            {/* Toast Notification */}
-            {toast && (
-                <div className={`fixed top-4 right-4 z-[100] px-6 py-4 rounded-xl shadow-2xl backdrop-blur-md border animate-slide-in flex items-center gap-3 ${toast.type === 'success' ? 'bg-success/20 border-success/30 text-text-main' :
-                    toast.type === 'error' ? 'bg-danger/20 border-danger/30 text-text-main' :
-                        'bg-warning/20 border-warning/30 text-text-main'
-                    }`}>
-                    {toast.type === 'success' && <div className="p-1 bg-success rounded-full flex items-center justify-center"><Save size={14} /></div>}
-                    {toast.type === 'error' && <div className="p-1 bg-danger rounded-full flex items-center justify-center"><AlertTriangle size={14} /></div>}
-                    {toast.type === 'warning' && <div className="p-1 bg-warning rounded-full flex items-center justify-center"><AlertTriangle size={14} /></div>}
-                    <div>
-                        <h4 className="font-bold text-sm uppercase tracking-wide opacity-80">
-                            {toast.type === 'success' ? 'Sucesso' : toast.type === 'error' ? 'Erro' : 'Atenção'}
-                        </h4>
-                        <p className="text-sm font-medium">{toast.message}</p>
-                    </div>
-                    <button onClick={() => setToast(null)} className="ml-4 opacity-50 hover:opacity-100"><X size={16} /></button>
-                </div>
-            )}
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
             {/* Header */}
             <div className="mb-8 animate-fade-in">
@@ -564,28 +548,28 @@ export const ClassDetails = () => {
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6">
                     <div>
                         <h1 className="text-3xl font-bold text-text-main">{classData.name}</h1>
-                        <p className="text-primary flex items-center gap-2 mt-2 font-medium bg-primary/10 w-fit px-3 py-1.5 rounded-full text-sm border border-primary/20">
+                        <p className="text-primary flex items-center gap-2 mt-2 font-medium bg-primary/10 w-fit px-3 py-1.5 rounded-[2px] text-sm border border-primary/20">
                             <Calendar size={14} /> {classData.schedule}
                         </p>
                     </div>
 
                     {/* Stats Cards */}
                     <div className="flex gap-3 w-full lg:w-auto">
-                        <div className="glass-card p-3 px-4 flex items-center gap-3 flex-1 lg:flex-none border border-black/5">
-                            <div className="bg-primary/15 p-2 rounded-lg border border-primary/20">
+                        <div className="sheet sheet-p px-4 flex items-center gap-3 flex-1 lg:flex-none border border-border">
+                            <div className="bg-primary/15 p-2 rounded-[2px] border border-primary/20">
                                 <Users size={18} className="text-primary" />
                             </div>
                             <div>
-                                <p className="text-[10px] text-text-muted uppercase tracking-wider">Alunos</p>
+                                <p className="label-print">Alunos</p>
                                 <p className="text-lg font-bold text-text-main">{activeStudents.length}</p>
                             </div>
                         </div>
-                        <div className="glass-card p-3 px-4 flex items-center gap-3 flex-1 lg:flex-none border border-black/5">
-                            <div className="bg-primary/15 p-2 rounded-lg border border-primary/20">
+                        <div className="sheet sheet-p px-4 flex items-center gap-3 flex-1 lg:flex-none border border-border">
+                            <div className="bg-primary/15 p-2 rounded-[2px] border border-primary/20">
                                 <BookOpen size={18} className="text-primary-light" />
                             </div>
                             <div>
-                                <p className="text-[10px] text-text-muted uppercase tracking-wider">Aulas</p>
+                                <p className="label-print">Aulas</p>
                                 <p className="text-lg font-bold text-text-main">{sessions.length}</p>
                             </div>
                         </div>
@@ -593,7 +577,7 @@ export const ClassDetails = () => {
                 </div>
 
                 {/* Tabs */}
-                <div className="mt-6 glass p-1 rounded-xl flex gap-1 w-full md:w-fit overflow-x-auto border border-black/5">
+                <div className="mt-6 sheet p-1 rounded-[2px] flex gap-1 w-full md:w-fit overflow-x-auto border border-border">
                     {[
                         { key: 'attendance', label: 'Chamada', icon: <ClipboardList size={16} /> },
                         { key: 'history', label: 'Histórico', icon: <History size={16} /> },
@@ -601,9 +585,9 @@ export const ClassDetails = () => {
                         <button
                             key={key}
                             onClick={() => setActiveTab(key as 'attendance' | 'students' | 'history' | 'payments')}
-                            className={`px-5 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2 flex-1 md:flex-none justify-center ${activeTab === key
-                                ? 'bg-primary text-white shadow-lg shadow-primary/25'
-                                : 'text-text-muted hover:text-text-main hover:bg-black/5'
+                            className={`px-5 py-2.5 rounded-[2px] text-sm font-medium transition-all duration-200 flex items-center gap-2 flex-1 md:flex-none justify-center ${activeTab === key
+                                ? 'bg-primary text-[var(--on-institution)]'
+                                : 'text-text-muted hover:text-text-main hover:bg-[var(--wash-1)]'
                                 }`}
                         >
                             {icon}
@@ -615,26 +599,24 @@ export const ClassDetails = () => {
 
             <div className="animate-slide-up">
                 {activeTab === 'students' && (
-                    <div className="glass-card p-5 sm:p-6 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-black/5 pb-4 gap-3">
+                    <div className="sheet sheet-p relative overflow-hidden">                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-border pb-4 gap-3">
                             <h2 className="text-xl font-bold flex items-center gap-3 text-text-main">
-                                <div className="bg-primary/15 p-2 rounded-lg border border-primary/20">
+                                <div className="bg-primary/15 p-2 rounded-[2px] border border-primary/20">
                                     <GraduationCap size={20} className="text-primary-light" />
                                 </div>
                                 Alunos Matriculados
-                                <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-full border border-primary/20">{students.length}</span>
+                                <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-[2px] border border-primary/20">{students.length}</span>
                             </h2>
                             <div className="flex items-center gap-3">
                                 <button onClick={loadAllStudents} className="btn btn-outline"><Users size={16} /> Gerenciar</button>
-                                <button onClick={() => setShowCreateStudentModal(true)} className="btn btn-primary-gradient flex items-center gap-2"><Plus size={16} /> Novo Aluno</button>
+                                <button onClick={() => setShowCreateStudentModal(true)} className="btn btn-primary flex items-center gap-2"><Plus size={16} /> Novo Aluno</button>
                             </div>
                         </div>
                         <div className="space-y-2">
                             {students.map((s: Student) => (
-                                <div key={s.id} className="flex items-center justify-between p-3.5 rounded-xl bg-black/5 border border-black/5 hover:border-primary/20 transition-all group hover:bg-black/10">
+                                <div key={s.id} className="flex items-center justify-between p-3.5 rounded-[2px] bg-[var(--wash-1)] border border-border hover:border-primary/20 transition-all group hover:bg-[var(--wash-1)]">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary-light/20 flex items-center justify-center border border-black/10 shrink-0">
+                                        <div className="w-10 h-10 rounded-[2px] bg-bg-card flex items-center justify-center border border-border shrink-0">
                                             <span className="text-sm font-bold text-primary">{s.name.charAt(0).toUpperCase()}</span>
                                         </div>
                                         <div>
@@ -648,7 +630,7 @@ export const ClassDetails = () => {
                                         </div>
                                     </div>
                                     <div className="flex gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => handleGenerateReport(s.id)} className="p-2 hover:bg-primary/20 text-text-muted hover:text-primary rounded-lg transition-colors" title="Relatório">
+                                        <button onClick={() => handleGenerateReport(s.id)} className="p-2 hover:bg-primary/20 text-text-muted hover:text-primary rounded-[2px] transition-colors" title="Relatório">
                                             <FileText size={15} />
                                         </button>
                                         <button onClick={() => {
@@ -660,10 +642,10 @@ export const ClassDetails = () => {
                                                 parent_phone: s.parent_phone || '',
                                                 parent_email: s.parent_email || ''
                                             });
-                                        }} className="p-2 hover:bg-black/5 text-text-muted hover:text-text-main rounded-lg transition-colors" title="Editar">
+                                        }} className="p-2 hover:bg-[var(--wash-1)] text-text-muted hover:text-text-main rounded-[2px] transition-colors" title="Editar">
                                             <Pencil size={15} />
                                         </button>
-                                        <button onClick={() => setDeletingStudent(s)} className="p-2 hover:bg-danger/20 text-text-muted hover:text-danger rounded-lg transition-colors" title="Excluir">
+                                        <button onClick={() => setDeletingStudent(s)} className="p-2 hover:bg-danger/20 text-text-muted hover:text-danger rounded-[2px] transition-colors" title="Excluir">
                                             <Trash2 size={15} />
                                         </button>
                                     </div>
@@ -671,7 +653,7 @@ export const ClassDetails = () => {
                             ))}
                             {students.length === 0 && (
                                 <div className="p-12 text-center">
-                                    <div className="bg-black/5 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-black/5">
+                                    <div className="bg-[var(--wash-1)] w-16 h-16 rounded-[3px] flex items-center justify-center mx-auto mb-4 border border-border">
                                         <GraduationCap size={28} className="text-text-muted/50" />
                                     </div>
                                     <p className="text-text-muted text-lg font-medium">Nenhum aluno matriculado</p>
@@ -683,20 +665,18 @@ export const ClassDetails = () => {
                 )}
 
                 {activeTab === 'attendance' && (
-                    <div className="glass-card p-5 sm:p-6 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 p-4 rounded-xl border border-[var(--color-border)] bg-[var(--glass-bg)] gap-3 shadow-sm">
+                    <div className="sheet sheet-p relative overflow-hidden">                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 p-4 rounded-[2px] border border-border bg-bg-card gap-3 shadow-sm">
                             <h2 className="text-lg font-bold flex items-center gap-3 text-text-main">
-                                <div className="bg-primary/15 p-2 rounded-lg border border-primary/20 shadow-sm">
+                                <div className="bg-primary/15 p-2 rounded-[2px] border border-primary/20 shadow-sm">
                                     <ClipboardList size={20} className="text-primary" />
                                 </div>
                                 {editingSessionId ? 'Editando Chamada' : 'Nova Chamada'}
                             </h2>
                             <div className="flex items-center gap-3 w-full sm:w-auto mt-3 sm:mt-0">
-                                <button onClick={loadAllStudents} className="btn flex-1 sm:flex-none justify-center px-4 py-2 border border-primary/40 bg-primary/10 hover:border-primary/60 hover:bg-primary/20 rounded-xl transition-all text-primary font-semibold shadow-sm">
+                                <button onClick={loadAllStudents} className="btn flex-1 sm:flex-none justify-center px-4 py-2 border border-primary/40 bg-primary/10 hover:border-primary/60 hover:bg-primary/20 rounded-[2px] transition-all text-primary font-semibold shadow-sm">
                                     <Users size={16} /> Gerenciar Alunos
                                 </button>
-                                <div className="text-sm whitespace-nowrap text-text-muted px-4 py-2 rounded-xl border border-[var(--color-border)] bg-[var(--glass-bg)] shadow-sm">
+                                <div className="text-sm whitespace-nowrap text-text-muted px-4 py-2 rounded-[2px] border border-border bg-bg-card shadow-sm">
                                     {new Date().toLocaleDateString()}
                                 </div>
                             </div>
@@ -704,41 +684,41 @@ export const ClassDetails = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                             <div className="md:col-span-2 space-y-1">
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Descrição</label>
-                                <input className="glass-input" value={sessionDesc} onChange={e => setSessionDesc(e.target.value)} placeholder="Ex: Introdução à Álgebra (Aula 01)" />
+                                <label className="label">Descrição</label>
+                                <input className="input" value={sessionDesc} onChange={e => setSessionDesc(e.target.value)} placeholder="Ex: Introdução à Álgebra (Aula 01)" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Data</label>
-                                <input type="date" className="glass-input" value={sessionDate} onChange={e => setSessionDate(e.target.value)} />
+                                <label className="label">Data</label>
+                                <input type="date" className="input" value={sessionDate} onChange={e => setSessionDate(e.target.value)} />
                             </div>
                         </div>
 
                         <div className="md:hidden flex justify-end mb-2">
-                            <span className="text-xs font-medium text-text-muted flex items-center gap-1 bg-black/5 px-3 py-1.5 rounded-full border border-black/5">
+                            <span className="text-xs font-medium text-text-muted flex items-center gap-1 bg-[var(--wash-1)] px-3 py-1.5 rounded-[2px] border border-border">
                                 Deslize para ver mais <ArrowRight size={14} />
                             </span>
                         </div>
-                        <div className="overflow-hidden rounded-xl border border-black/5 bg-black/5">
+                        <div className="overflow-hidden rounded-[2px] border border-border bg-[var(--wash-1)]">
                             <div className="overflow-x-auto">
                                 <table className="w-full min-w-[900px]">
-                                    <thead className="glass-header">
+                                    <thead className="sheet-header">
                                         <tr>
-                                            <th className="text-left p-4 text-xs font-bold text-text-muted uppercase tracking-wider min-w-[200px]">Aluno</th>
-                                            <th className="text-left p-4 text-xs font-bold text-text-muted uppercase tracking-wider w-[150px]">Status</th>
-                                            <th className="text-center p-4 text-xs font-bold text-text-muted uppercase tracking-wider w-[150px]">Trabalho Entregue?</th>
-                                            <th className="text-left p-4 text-xs font-bold text-text-muted uppercase tracking-wider w-[120px]">Nota</th>
-                                            <th className="text-left p-4 text-xs font-bold text-text-muted uppercase tracking-wider min-w-[250px]">Obs</th>
+                                            <th className="text-left min-w-[200px]">Aluno</th>
+                                            <th className="text-left w-[150px]">Status</th>
+                                            <th className="text-center w-[150px]">Trabalho Entregue?</th>
+                                            <th className="text-left w-[120px]">Nota</th>
+                                            <th className="text-left min-w-[250px]">Obs</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-black/5">
+                                    <tbody className="divide-y divide-border">
                                         {[...students].filter((s: Student) => s.active !== false).sort((a: Student, b: Student) => a.name.localeCompare(b.name)).map((s: Student) => {
                                             const log = attendanceLogs[s.id] || {};
                                             return (
-                                                <tr key={s.id} className="hover:bg-black/5 transition-colors group">
+                                                <tr key={s.id} className="hover:bg-[var(--wash-1)] transition-colors group">
                                                     <td className="p-4 font-medium text-text-main">{s.name}</td>
                                                     <td className="p-4">
                                                         <select
-                                                            className={`w-full p-2 rounded-lg text-sm border-none focus:ring-2 focus:ring-primary outline-none transition-colors cursor-pointer ${log.status === 'present' ? 'bg-success/20 text-success' : 'bg-danger/20 text-danger'}`}
+                                                            className={`w-full p-2 rounded-[2px] text-sm border-none focus:ring-2 focus:ring-primary outline-none transition-colors cursor-pointer ${log.status === 'present' ? 'bg-success/20 text-success' : 'bg-danger/20 text-danger'}`}
                                                             value={log.status}
                                                             onChange={e => updateLog(s.id, 'status', e.target.value)}
                                                         >
@@ -749,9 +729,9 @@ export const ClassDetails = () => {
                                                     <td className="p-4 text-center">
                                                         <button
                                                             onClick={() => updateLog(s.id, 'essay_delivered', !log.essay_delivered)}
-                                                            className={`px-3 py-1 rounded-full text-xs font-bold ring-1 transition-all ${log.essay_delivered
+                                                            className={`px-3 py-1 rounded-[2px] text-xs font-bold ring-1 transition-all ${log.essay_delivered
                                                                 ? 'bg-primary/20 text-primary ring-primary/30 hover:bg-primary/30'
-                                                                : 'bg-black/5 text-text-muted ring-black/5 hover:bg-black/10'
+                                                                : 'bg-[var(--wash-1)] text-text-muted ring-border hover:bg-[var(--wash-1)]'
                                                                 }`}
                                                         >
                                                             {log.essay_delivered ? 'Sim' : 'Não'}
@@ -760,8 +740,8 @@ export const ClassDetails = () => {
                                                     <td className="p-4">
                                                         <input
                                                             type="number"
-                                                            className={`w-full bg-transparent border-b outline-none py-1 text-sm text-center font-mono transition-colors ${log.essay_delivered
-                                                                ? 'border-black/10 focus:border-primary text-primary placeholder-text-muted/30'
+                                                            className={`w-full bg-transparent border-b outline-none py-1 text-sm text-center tabular transition-colors ${log.essay_delivered
+                                                                ? 'border-border focus:border-primary text-primary placeholder-text-muted/30'
                                                                 : 'border-transparent text-text-muted/20 cursor-not-allowed'
                                                                 }`}
                                                             value={log.grade === undefined ? '' : log.grade}
@@ -772,7 +752,7 @@ export const ClassDetails = () => {
                                                     </td>
                                                     <td className="p-4">
                                                         <input
-                                                            className="w-full bg-transparent border-b border-black/10 focus:border-primary outline-none py-1 text-sm text-text-muted focus:text-text-main placeholder-text-muted/30 transition-colors"
+                                                            className="w-full bg-transparent border-b border-border focus:border-primary outline-none py-1 text-sm text-text-muted focus:text-text-main placeholder-text-muted/30 transition-colors"
                                                             value={log.observation || ''}
                                                             onChange={e => updateLog(s.id, 'observation', e.target.value)}
                                                             placeholder="Observação..."
@@ -791,14 +771,14 @@ export const ClassDetails = () => {
                                     onClick={handleSaveAttendance}
                                     disabled={saving}
                                     className={`
-                                        bg-gradient-to-r from-primary to-primary-hover text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-primary/25 
+                                        bg-bg-card text-text-main px-8 py-3 rounded-[2px] font-bold   
                                         transition-all flex items-center gap-2
-                                        ${saving ? 'opacity-70 cursor-wait' : 'hover:shadow-primary/40 hover:-translate-y-1 active:translate-y-0'}
+                                        ${saving ? 'opacity-70 cursor-wait' : '  '}
                                     `}
                                 >
                                     {saving ? (
                                         <>
-                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            <div className="w-5 h-5 border-2 border-border border-t-white rounded-full animate-spin" />
                                             Salvando...
                                         </>
                                     ) : (
@@ -827,10 +807,10 @@ export const ClassDetails = () => {
                             const dynamicLabel = `Aula ${String(index + 1).padStart(2, '0')}`;
                             const displayTitle = sess.description?.match(/^Aula \d+$/) ? dynamicLabel : sess.description;
                             return (
-                                <div key={sess.id} className="glass-card p-4 hover:border-primary/30 transition-all duration-300 group hover:translate-y-[-2px] hover:shadow-lg hover:shadow-primary/5">
+                                <div key={sess.id} className="sheet sheet-p sheet-link group">
                                     <div className="flex justify-between items-center">
                                         <div className="flex items-center gap-4">
-                                            <div className="bg-primary/10 w-12 h-12 rounded-xl flex items-center justify-center border border-primary/20 shrink-0">
+                                            <div className="bg-primary/10 w-12 h-12 rounded-[2px] flex items-center justify-center border border-primary/20 shrink-0">
                                                 <span className="text-primary font-bold text-sm">{String(index + 1).padStart(2, '0')}</span>
                                             </div>
                                             <div>
@@ -840,7 +820,7 @@ export const ClassDetails = () => {
                                                 </p>
                                             </div>
                                         </div>
-                                        <button onClick={() => handleViewSession(sess.id)} disabled={loadingSession} className="text-primary hover:text-white cursor-pointer transition-all px-4 py-2 bg-black/5 hover:bg-primary/20 rounded-xl text-sm flex items-center gap-2 border border-black/5 hover:border-primary/30 font-medium">
+                                        <button onClick={() => handleViewSession(sess.id)} disabled={loadingSession} className="text-primary hover:text-text-main cursor-pointer transition-all px-4 py-2 bg-[var(--wash-1)] hover:bg-primary/20 rounded-[2px] text-sm flex items-center gap-2 border border-border hover:border-primary/30 font-medium">
                                             <Eye size={16} /> Ver Detalhes
                                         </button>
                                     </div>
@@ -848,8 +828,8 @@ export const ClassDetails = () => {
                             );
                         })}
                     {sessions.length === 0 && (
-                        <div className="glass-card p-12 text-center">
-                            <div className="bg-black/5 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-black/5">
+                        <div className="sheet sheet-p text-center">
+                            <div className="bg-[var(--wash-1)] w-16 h-16 rounded-[3px] flex items-center justify-center mx-auto mb-4 border border-border">
                                 <ClipboardList size={28} className="text-text-muted/50" />
                             </div>
                             <p className="text-text-muted text-lg font-medium">Nenhuma chamada registrada</p>
@@ -860,22 +840,20 @@ export const ClassDetails = () => {
             )}
 
             {activeTab === 'payments' && (
-                <div className="glass-card p-5 sm:p-6 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-success to-transparent"></div>
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-black/5 pb-4 gap-3">
+                <div className="sheet sheet-p relative overflow-hidden">                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-border pb-4 gap-3">
                         <h2 className="text-xl font-bold flex items-center gap-3 text-text-main">
-                            <div className="bg-success/15 p-2 rounded-lg border border-success/20">
+                            <div className="bg-success/15 p-2 rounded-[2px] border border-success/20">
                                 <DollarSign size={20} className="text-success" />
                             </div>
                             Mensalidades
                         </h2>
                         <div className="flex gap-2">
-                            <select value={selectedMonth} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedMonth(Number(e.target.value))} className="bg-black/5 border border-black/10 rounded-xl px-4 py-2 text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer">
+                            <select value={selectedMonth} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedMonth(Number(e.target.value))} className="bg-[var(--wash-1)] border border-border rounded-[2px] px-4 py-2 text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer">
                                 {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
                                     <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'long' })}</option>
                                 ))}
                             </select>
-                            <select value={selectedYear} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedYear(Number(e.target.value))} className="bg-black/5 border border-black/10 rounded-xl px-4 py-2 text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer">
+                            <select value={selectedYear} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setSelectedYear(Number(e.target.value))} className="bg-[var(--wash-1)] border border-border rounded-[2px] px-4 py-2 text-text-main text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer">
                                 {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
                                     <option key={y} value={y}>{y}</option>
                                 ))}
@@ -888,9 +866,9 @@ export const ClassDetails = () => {
                             const payment = localPayments[s.id] || { status: 'PENDING', amount: 0, student_id: s.id };
                             const isPaid = payment.status === 'PAID';
                             return (
-                                <div key={s.id} className="flex items-center justify-between p-3.5 rounded-xl bg-black/5 border border-black/5 hover:border-primary/20 transition-all group hover:bg-black/10">
+                                <div key={s.id} className="flex items-center justify-between p-3.5 rounded-[2px] bg-[var(--wash-1)] border border-border hover:border-primary/20 transition-all group hover:bg-[var(--wash-1)]">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-success/10 to-primary/10 flex items-center justify-center border border-black/5 shrink-0">
+                                        <div className="w-10 h-10 rounded-[2px] bg-bg-card flex items-center justify-center border border-border shrink-0">
                                             <span className="text-sm font-bold text-success">{s.name.charAt(0).toUpperCase()}</span>
                                         </div>
                                         <div>
@@ -900,7 +878,7 @@ export const ClassDetails = () => {
                                     </div>
                                     <div className="flex items-center gap-3">
                                         <select
-                                            className={`p-2 px-3 rounded-lg text-xs font-bold border-none focus:ring-2 focus:ring-primary outline-none transition-colors cursor-pointer ${isPaid ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'}`}
+                                            className={`p-2 px-3 rounded-[2px] text-xs font-bold border-none focus:ring-2 focus:ring-primary outline-none transition-colors cursor-pointer ${isPaid ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'}`}
                                             value={payment.status}
                                             onChange={(e: React.ChangeEvent<HTMLSelectElement>) => updateLocalPayment(s.id, 'status', e.target.value)}
                                         >
@@ -909,8 +887,8 @@ export const ClassDetails = () => {
                                         </select>
                                         <input
                                             type="text"
-                                            className={`w-28 bg-white border rounded-lg px-3 py-2 text-sm font-mono text-right transition-colors ${isPaid
-                                                ? 'border-black/10 focus:border-success text-text-main focus:ring-2 focus:ring-success/20'
+                                            className={`w-28 bg-bg-card border rounded-[2px] px-3 py-2 text-sm tabular text-right transition-colors ${isPaid
+                                                ? 'border-border focus:border-success text-text-main focus:ring-2 focus:ring-success/20'
                                                 : 'border-transparent text-text-muted/30 cursor-not-allowed'
                                                 }`}
                                             value={formatCurrency(payment.amount)}
@@ -924,7 +902,7 @@ export const ClassDetails = () => {
                         })}
                         {students.length === 0 && (
                             <div className="p-12 text-center">
-                                <div className="bg-black/5 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-black/5">
+                                <div className="bg-[var(--wash-1)] w-16 h-16 rounded-[3px] flex items-center justify-center mx-auto mb-4 border border-border">
                                     <DollarSign size={28} className="text-text-muted/50" />
                                 </div>
                                 <p className="text-text-muted text-lg font-medium">Nenhum aluno para gerenciar pagamentos</p>
@@ -938,14 +916,14 @@ export const ClassDetails = () => {
                                 onClick={handleSavePayments}
                                 disabled={savingPayments}
                                 className={`
-                                    btn-success-gradient px-8 py-3 rounded-xl font-bold
+                                    btn btn-primary px-8 py-3 rounded-[2px] font-bold
                                     transition-all flex items-center gap-2
                                     ${savingPayments ? 'opacity-70 cursor-wait' : ''}
                                 `}
                             >
                                 {savingPayments ? (
                                     <>
-                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        <div className="w-5 h-5 border-2 border-border border-t-white rounded-full animate-spin" />
                                         Salvando...
                                     </>
                                 ) : (
@@ -976,15 +954,15 @@ export const ClassDetails = () => {
             {/* Create Student Modal */}
             {showCreateStudentModal && (
                 <div className="modal-overlay">
-                    <div className="glass-modal w-full max-w-md relative p-8">
+                    <div className="modal-sheet w-full max-w-md relative p-8">
                         <h3 className="text-xl mb-6 font-bold text-text-main flex items-center gap-2">
                             <Plus size={20} className="text-primary" /> Novo Aluno
                         </h3>
                         <form onSubmit={handleCreateStudent} className="space-y-4">
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome Completo</label>
+                                <label className="label">Nome Completo</label>
                                 <input
-                                    className="w-full p-3 bg-black/5 border border-black/10 rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-[var(--wash-1)] border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newStudentData.name}
                                     onChange={e => setNewStudentData({ ...newStudentData, name: e.target.value })}
                                     placeholder="Ex: João Silva"
@@ -993,9 +971,9 @@ export const ClassDetails = () => {
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Celular</label>
+                                <label className="label">Celular</label>
                                 <input
-                                    className="w-full p-3 bg-black/5 border border-black/10 rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-[var(--wash-1)] border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newStudentData.phone}
                                     onChange={e => setNewStudentData({ ...newStudentData, phone: formatPhone(e.target.value) })}
                                     maxLength={15}
@@ -1004,17 +982,17 @@ export const ClassDetails = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Responsável</label>
+                                    <label className="label">Responsável</label>
                                     <input
-                                        className="w-full p-3 bg-black/5 border border-black/10 rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                        className="w-full p-3 bg-[var(--wash-1)] border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                         value={newStudentData.parent_name}
                                         onChange={e => setNewStudentData({ ...newStudentData, parent_name: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Cel. Responsável</label>
+                                    <label className="label">Cel. Responsável</label>
                                     <input
-                                        className="w-full p-3 bg-black/5 border border-black/10 rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                        className="w-full p-3 bg-[var(--wash-1)] border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                         value={newStudentData.parent_phone}
                                         onChange={e => setNewStudentData({ ...newStudentData, parent_phone: formatPhone(e.target.value) })}
                                         maxLength={15}
@@ -1023,17 +1001,17 @@ export const ClassDetails = () => {
                                 </div>
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Email Responsável</label>
+                                <label className="label">Email Responsável</label>
                                 <input
                                     type="email"
-                                    className="w-full p-3 bg-black/5 border border-black/10 rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-[var(--wash-1)] border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={newStudentData.parent_email}
                                     onChange={e => setNewStudentData({ ...newStudentData, parent_email: e.target.value })}
                                 />
                             </div>
                             <div className="flex justify-end gap-3 mt-6">
-                                <button type="button" onClick={() => setShowCreateStudentModal(false)} className="px-4 py-2 rounded-lg text-text-muted hover:bg-black/5 transition-colors">Cancelar</button>
-                                <button type="submit" disabled={creatingStudent} className="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-6 rounded-lg shadow-lg shadow-primary/20 transition-all cursor-pointer disabled:opacity-50">
+                                <button type="button" onClick={() => setShowCreateStudentModal(false)} className="px-4 py-2 rounded-[2px] text-text-muted hover:bg-[var(--wash-1)] transition-colors">Cancelar</button>
+                                <button type="submit" disabled={creatingStudent} className="bg-primary hover:bg-primary-hover text-[var(--on-institution)] font-bold py-2 px-6 rounded-[2px] transition-all cursor-pointer disabled:opacity-50">
                                     {creatingStudent ? 'Criando...' : 'Adicionar'}
                                 </button>
                             </div>
@@ -1045,7 +1023,7 @@ export const ClassDetails = () => {
             {/* Edit Student Modal */}
             {editingStudent && (
                 <div className="modal-overlay">
-                    <div className="glass-modal w-full max-w-md relative p-8">
+                    <div className="modal-sheet w-full max-w-md relative p-8">
                         <button onClick={() => setEditingStudent(null)} className="absolute top-4 right-4 text-text-muted hover:text-text-main">
                             <X size={20} />
                         </button>
@@ -1054,9 +1032,9 @@ export const ClassDetails = () => {
                         </h3>
                         <form onSubmit={handleUpdateStudent} className="space-y-4">
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome Completo</label>
+                                <label className="label">Nome Completo</label>
                                 <input
-                                    className="w-full p-3 bg-black/5 border border-black/10 rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-[var(--wash-1)] border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editStudentData.name}
                                     onChange={e => setEditStudentData({ ...editStudentData, name: e.target.value })}
                                     required
@@ -1064,9 +1042,9 @@ export const ClassDetails = () => {
                                 />
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Celular</label>
+                                <label className="label">Celular</label>
                                 <input
-                                    className="w-full p-3 bg-black/5 border border-black/10 rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-[var(--wash-1)] border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editStudentData.phone}
                                     onChange={e => setEditStudentData({ ...editStudentData, phone: formatPhone(e.target.value) })}
                                     maxLength={15}
@@ -1075,17 +1053,17 @@ export const ClassDetails = () => {
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Responsável</label>
+                                    <label className="label">Responsável</label>
                                     <input
-                                        className="w-full p-3 bg-black/5 border border-black/10 rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                        className="w-full p-3 bg-[var(--wash-1)] border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                         value={editStudentData.parent_name}
                                         onChange={e => setEditStudentData({ ...editStudentData, parent_name: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Cel. Responsável</label>
+                                    <label className="label">Cel. Responsável</label>
                                     <input
-                                        className="w-full p-3 bg-black/5 border border-black/10 rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                        className="w-full p-3 bg-[var(--wash-1)] border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                         value={editStudentData.parent_phone}
                                         onChange={e => setEditStudentData({ ...editStudentData, parent_phone: formatPhone(e.target.value) })}
                                         maxLength={15}
@@ -1094,17 +1072,17 @@ export const ClassDetails = () => {
                                 </div>
                             </div>
                             <div>
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Email Responsável</label>
+                                <label className="label">Email Responsável</label>
                                 <input
                                     type="email"
-                                    className="w-full p-3 bg-black/5 border border-black/10 rounded-lg text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                    className="w-full p-3 bg-[var(--wash-1)] border border-border rounded-[2px] text-text-main focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                                     value={editStudentData.parent_email}
                                     onChange={e => setEditStudentData({ ...editStudentData, parent_email: e.target.value })}
                                 />
                             </div>
                             <div className="flex justify-end gap-3 mt-6">
-                                <button type="button" onClick={() => setEditingStudent(null)} className="px-4 py-2 rounded-lg text-text-muted hover:bg-black/5 transition-colors">Cancelar</button>
-                                <button type="submit" className="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-6 rounded-lg shadow-lg shadow-primary/20 transition-all cursor-pointer">
+                                <button type="button" onClick={() => setEditingStudent(null)} className="px-4 py-2 rounded-[2px] text-text-muted hover:bg-[var(--wash-1)] transition-colors">Cancelar</button>
+                                <button type="submit" className="bg-primary hover:bg-primary-hover text-[var(--on-institution)] font-bold py-2 px-6 rounded-[2px] transition-all cursor-pointer">
                                     Salvar
                                 </button>
                             </div>
@@ -1115,9 +1093,9 @@ export const ClassDetails = () => {
 
             {deletingStudent && (
                 <div className="modal-overlay">
-                    <div className="glass-modal w-full max-w-sm p-8 relative border-danger/20">
+                    <div className="modal-sheet w-full max-w-sm p-8 relative border-danger/20">
                         <div className="flex flex-col items-center text-center">
-                            <div className="w-12 h-12 rounded-full bg-danger/20 flex items-center justify-center mb-4 text-danger">
+                            <div className="text-danger mb-3">
                                 <AlertTriangle size={24} />
                             </div>
                             <h3 className="text-xl font-bold text-text-main mb-2">Excluir Aluno?</h3>
@@ -1127,13 +1105,13 @@ export const ClassDetails = () => {
                             <div className="flex gap-3 w-full">
                                 <button
                                     onClick={() => setDeletingStudent(null)}
-                                    className="flex-1 py-2 rounded-lg bg-black/5 border border-black/10 text-text-main hover:bg-black/10 transition-colors"
+                                    className="flex-1 py-2 rounded-[2px] bg-[var(--wash-1)] border border-border text-text-main hover:bg-[var(--wash-1)] transition-colors"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     onClick={handleDeleteStudent}
-                                    className="flex-1 py-2 rounded-lg bg-danger hover:bg-danger-hover text-white font-bold shadow-lg shadow-danger/20 transition-colors"
+                                    className="flex-1 py-2 rounded-[2px] bg-danger hover:bg-danger-hover text-[#fff] font-bold transition-colors"
                                 >
                                     Sim, Excluir
                                 </button>
@@ -1146,17 +1124,17 @@ export const ClassDetails = () => {
             {/* Session Details Modal */}
             {viewingSession && (
                 <div className="modal-overlay">
-                    <div className="glass-modal w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col relative">
+                    <div className="modal-sheet w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col relative">
 
                         {/* Header */}
-                        <div className="p-6 border-b border-black/5 flex justify-between items-start sticky top-0 backdrop-blur-md bg-black/10 z-10">
+                        <div className="p-6 border-b border-border flex justify-between items-start sticky top-0 bg-[var(--wash-1)] z-10">
                             <div>
                                 <h3 className="text-xl font-bold text-text-main mb-1">{viewingSession.description}</h3>
                                 <p className="text-text-muted text-sm flex items-center gap-2">
                                     <Calendar size={14} /> {viewingSession.date}
                                 </p>
                             </div>
-                            <button onClick={() => setViewingSession(null)} className="text-text-muted hover:text-text-main transition-colors p-1 rounded-full hover:bg-black/5">
+                            <button onClick={() => setViewingSession(null)} className="text-text-muted hover:text-text-main transition-colors p-1 rounded-full hover:bg-[var(--wash-1)]">
                                 <X size={20} />
                             </button>
                         </div>
@@ -1165,14 +1143,14 @@ export const ClassDetails = () => {
                         <div className="p-6 overflow-y-auto overflow-x-auto flex-1">
                             <table className="w-full text-sm text-left">
                                 <thead>
-                                    <tr className="border-b border-black/5">
+                                    <tr className="border-b border-border">
                                         <th className="py-3 px-2 text-text-muted font-medium">Aluno</th>
                                         <th className="py-3 px-2 text-text-muted font-medium">Status</th>
                                         <th className="py-3 px-2 text-text-muted font-medium">Nota</th>
                                         <th className="py-3 px-2 text-text-muted font-medium">Observação</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-black/5">
+                                <tbody className="divide-y divide-border">
                                     {viewingSession.logs
                                         .sort((a: AttendanceLog, b: AttendanceLog) => {
                                             const nameA = a.student?.name || getStudentName(a.student_id);
@@ -1180,10 +1158,10 @@ export const ClassDetails = () => {
                                             return nameA.localeCompare(nameB);
                                         })
                                         .map((log: AttendanceLog) => (
-                                            <tr key={log.id} className="hover:bg-black/5 transition-colors">
+                                            <tr key={log.id} className="hover:bg-[var(--wash-1)] transition-colors">
                                                 <td className="py-3 px-2 font-medium text-text-main">{log.student?.name || getStudentName(log.student_id)}</td>
                                                 <td className="py-3 px-2">
-                                                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${log.status === 'present' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
+                                                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] text-xs font-medium ${log.status === 'present' ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>
                                                         <span className={`w-1.5 h-1.5 rounded-full ${log.status === 'present' ? 'bg-success' : 'bg-danger'}`}></span>
                                                         {log.status === 'present' ? 'Presente' : 'Ausente'}
                                                     </span>
@@ -1197,7 +1175,7 @@ export const ClassDetails = () => {
                         </div>
 
                         {/* Footer */}
-                        <div className="p-6 border-t border-black/5 flex flex-col-reverse sm:flex-row justify-end gap-3 backdrop-blur-md bg-black/10 z-10">
+                        <div className="p-6 border-t border-border flex flex-col-reverse sm:flex-row justify-end gap-3 bg-[var(--wash-1)] z-10">
                             <button
                                 onClick={() => {
                                     requestConfirmation(
@@ -1207,17 +1185,17 @@ export const ClassDetails = () => {
                                         'danger'
                                     );
                                 }}
-                                className="px-4 py-2 rounded-lg text-xs font-medium text-danger hover:bg-danger/10 transition-colors flex items-center justify-center gap-2"
+                                className="px-4 py-2 rounded-[2px] text-xs font-medium text-danger hover:bg-danger/10 transition-colors flex items-center justify-center gap-2"
                             >
                                 <Trash2 size={16} /> Excluir
                             </button>
                             <button
                                 onClick={() => handleEditSession(viewingSession)}
-                                className="px-4 py-2 rounded-lg text-xs font-medium text-text-muted hover:text-text-main hover:bg-black/5 transition-colors border border-transparent hover:border-black/10 flex items-center justify-center gap-2"
+                                className="px-4 py-2 rounded-[2px] text-xs font-medium text-text-muted hover:text-text-main hover:bg-[var(--wash-1)] transition-colors border border-transparent hover:border-border flex items-center justify-center gap-2"
                             >
                                 <Pencil size={16} /> Editar
                             </button>
-                            <button onClick={() => handleGenerateSessionReport(viewingSession.id)} className="px-4 py-2 rounded-lg text-xs font-medium bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2">
+                            <button onClick={() => handleGenerateSessionReport(viewingSession.id)} className="px-4 py-2 rounded-[2px] text-xs font-medium bg-primary hover:bg-primary-hover text-[var(--on-institution)] transition-all flex items-center justify-center gap-2">
                                 <Download size={16} /> Relatório
                             </button>
                         </div>
@@ -1228,7 +1206,7 @@ export const ClassDetails = () => {
             {/* Confirmation Modal */}
             {confirmation && confirmation.isOpen && (
                 <div className="modal-overlay z-[100]">
-                    <div className={`glass-modal w-full max-w-sm p-8 relative ${confirmation.type === 'danger' ? 'border-danger/20' : 'border-black/10'}`}>
+                    <div className={`modal-sheet w-full max-w-sm p-8 relative ${confirmation.type === 'danger' ? 'border-danger/20' : 'border-border'}`}>
                         <div className="flex flex-col items-center text-center">
                             <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-4 ${confirmation.type === 'danger' ? 'bg-danger/20 text-danger' :
                                 confirmation.type === 'warning' ? 'bg-warning/20 text-warning' :
@@ -1243,7 +1221,7 @@ export const ClassDetails = () => {
                             <div className="flex gap-3 w-full">
                                 <button
                                     onClick={() => setConfirmation(null)}
-                                    className="flex-1 py-2 rounded-lg bg-black/5 border border-black/10 text-text-main hover:bg-black/10 transition-colors"
+                                    className="flex-1 py-2 rounded-[2px] bg-[var(--wash-1)] border border-border text-text-main hover:bg-[var(--wash-1)] transition-colors"
                                 >
                                     Cancelar
                                 </button>
@@ -1252,9 +1230,9 @@ export const ClassDetails = () => {
                                         confirmation.onConfirm();
                                         setConfirmation(null);
                                     }}
-                                    className={`flex-1 py-2 rounded-lg text-white font-bold shadow-lg transition-colors ${confirmation.type === 'danger' ? 'bg-danger hover:bg-danger-hover shadow-danger/20' :
-                                        confirmation.type === 'warning' ? 'bg-warning hover:opacity-90 shadow-warning/20' :
-                                            'bg-primary hover:bg-primary-hover shadow-primary/20'
+                                    className={`flex-1 py-2 rounded-[2px] text-text-main font-bold  transition-colors ${confirmation.type === 'danger' ? 'bg-danger hover:bg-danger-hover ' :
+                                        confirmation.type === 'warning' ? 'bg-warning hover:opacity-90 ' :
+                                            'bg-primary hover:bg-primary-hover '
                                         }`}
                                 >
                                     Confirmar

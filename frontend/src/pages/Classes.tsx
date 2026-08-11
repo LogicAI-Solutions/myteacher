@@ -41,10 +41,10 @@ interface SortableClassCardProps {
 
 // Palette of accent colors for cards
 const cardAccents = [
-    { bg: 'bg-primary/15', border: 'border-primary/20', text: 'text-primary', glow: 'shadow-primary/10' },
-    { bg: 'bg-success/15', border: 'border-success/20', text: 'text-success', glow: 'shadow-success/10' },
-    { bg: 'bg-warning/15', border: 'border-warning/20', text: 'text-warning', glow: 'shadow-warning/10' },
-    { bg: 'bg-danger/15', border: 'border-danger/20', text: 'text-danger', glow: 'shadow-danger/10' },
+    { bg: 'bg-primary/15', border: 'border-primary/20', text: 'text-primary', glow: '' },
+    { bg: 'bg-success/15', border: 'border-success/20', text: 'text-success', glow: '' },
+    { bg: 'bg-warning/15', border: 'border-warning/20', text: 'text-warning', glow: '' },
+    { bg: 'bg-danger/15', border: 'border-danger/20', text: 'text-danger', glow: '' },
 ];
 
 const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDeleteModal }: SortableClassCardProps) => {
@@ -69,10 +69,7 @@ const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDelet
 
     const cardContent = (
         <>
-            {/* Top gradient accent line */}
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-            <div className="p-6">
+            {/* Top gradient accent line */}            <div className="p-6">
                 {/* Header: Icon + Actions */}
                 <div className="flex justify-between items-start mb-4">
                     <div className="flex items-start gap-3">
@@ -86,16 +83,16 @@ const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDelet
                                 <GripVertical size={20} />
                             </div>
                         )}
-                        <div className={`p-2.5 rounded-xl ${accent.bg} ${accent.border} border shadow-lg ${accent.glow}`}>
+                        <div className={`p-2.5 rounded-[2px] ${accent.bg} ${accent.border} border  ${accent.glow}`}>
                             <BookOpen size={22} className={accent.text} />
                         </div>
                     </div>
                     {!isReorderMode && (
-                        <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-1 group-hover:translate-y-0">
-                            <button onClick={(e) => openEditModal(e, cls)} className="bg-black/5 backdrop-blur-sm p-2 rounded-lg hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-200 border border-black/5 hover:border-primary/30">
+                        <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                            <button onClick={(e) => openEditModal(e, cls)} className="bg-[var(--wash-1)] p-2 rounded-[2px] hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-200 border border-border hover:border-primary/30">
                                 <Pencil size={15} />
                             </button>
-                            <button onClick={(e) => openDeleteModal(e, cls)} className="bg-black/5 backdrop-blur-sm p-2 rounded-lg hover:bg-danger/20 text-text-muted hover:text-danger transition-all duration-200 border border-black/5 hover:border-danger/30">
+                            <button onClick={(e) => openDeleteModal(e, cls)} className="bg-[var(--wash-1)] p-2 rounded-[2px] hover:bg-danger/20 text-text-muted hover:text-danger transition-all duration-200 border border-border hover:border-danger/30">
                                 <Trash size={15} />
                             </button>
                         </div>
@@ -113,7 +110,7 @@ const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDelet
                 </p>
 
                 {/* Bottom stats bar */}
-                <div className="flex items-center gap-4 pt-3 border-t border-black/5">
+                <div className="flex items-center gap-4 pt-3 border-t border-border">
                     <div className="flex items-center gap-1.5 text-xs text-text-muted">
                         <Users size={13} className={accent.text} />
                         <span>{cls.student_count ?? '—'} alunos</span>
@@ -132,7 +129,7 @@ const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDelet
             <div
                 ref={setNodeRef}
                 style={style}
-                className={`glass-card group transition-all duration-300 relative overflow-hidden ${isDragging ? 'ring-2 ring-primary shadow-xl shadow-primary/20 scale-[1.02]' : 'hover:translate-y-[-4px]'}`}
+                className={`sheet sheet-p group transition-colors duration-150 relative overflow-hidden ${isDragging ? 'ring-2 ring-primary scale-[1.02]' : ''}`}
             >
                 {cardContent}
             </div>
@@ -144,7 +141,7 @@ const SortableClassCard = ({ cls, index, isReorderMode, openEditModal, openDelet
             ref={setNodeRef}
             style={style}
             to={`/dashboard/class/${cls.id}`}
-            className={`glass-card group hover:translate-y-[-4px] hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 block no-underline text-inherit relative overflow-hidden animate-slide-up ${isReorderMode ? 'animate-jiggle cursor-grab active:cursor-grabbing pointer-events-none' : ''}`}
+            className={`sheet sheet-p sheet-link group transition-colors duration-150 block no-underline text-inherit relative overflow-hidden animate-slide-up ${isReorderMode ? 'animate-jiggle cursor-grab active:cursor-grabbing pointer-events-none' : ''}`}
         >
             {cardContent}
         </Link>
@@ -327,7 +324,7 @@ export const Classes = () => {
                         {!isReorderMode ? (
                             <button
                                 onClick={startReorderMode}
-                                className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 bg-black/5 text-text-muted hover:bg-black/10 hover:text-text-main border border-black/5 w-full sm:w-auto justify-center"
+                                className="flex items-center gap-2 px-4 py-2 rounded-[2px] font-medium transition-colors duration-150 bg-[var(--wash-1)] text-text-muted hover:bg-[var(--wash-1)] hover:text-text-main border border-border w-full sm:w-auto justify-center"
                             >
                                 <ArrowUpDown size={18} />
                                 Reorganizar
@@ -336,20 +333,20 @@ export const Classes = () => {
                             <>
                                 <button
                                     onClick={handleSortAlphabetically}
-                                    className="flex items-center gap-2 px-4 py-2 rounded-xl font-medium transition-all duration-300 bg-black/5 text-text-muted hover:bg-black/10 hover:text-text-main border border-black/10 flex-1 sm:flex-none justify-center"
+                                    className="flex items-center gap-2 px-4 py-2 rounded-[2px] font-medium transition-colors duration-150 bg-[var(--wash-1)] text-text-muted hover:bg-[var(--wash-1)] hover:text-text-main border border-border flex-1 sm:flex-none justify-center"
                                 >
                                     <ArrowUpDown size={18} />
                                     Ordenar (A-Z)
                                 </button>
                                 <button
                                     onClick={handleCancelReorder}
-                                    className="px-4 py-2 rounded-xl font-medium transition-all duration-300 bg-black/5 text-text-muted hover:bg-black/10 hover:text-danger border border-black/10 flex-1 sm:flex-none justify-center"
+                                    className="px-4 py-2 rounded-[2px] font-medium transition-colors duration-150 bg-[var(--wash-1)] text-text-muted hover:bg-[var(--wash-1)] hover:text-danger border border-border flex-1 sm:flex-none justify-center"
                                 >
                                     Cancelar
                                 </button>
                                 <button
                                     onClick={handleSaveOrder}
-                                    className="px-4 py-2 rounded-xl font-medium transition-all duration-300 bg-primary text-white shadow-lg shadow-primary/30 w-full sm:w-auto justify-center"
+                                    className="px-4 py-2 rounded-[2px] font-medium transition-colors duration-150 bg-primary text-[var(--on-institution)] w-full sm:w-auto justify-center"
                                 >
                                     Salvar Ordem
                                 </button>
@@ -366,7 +363,7 @@ export const Classes = () => {
             ) : (
                 <div className="animate-fade-in space-y-8">
                     {isReorderMode && (
-                        <div className="bg-primary/10 border border-primary/30 rounded-xl p-4 text-center">
+                        <div className="bg-primary/10 border border-primary/30 rounded-[2px] p-4 text-center">
                             <p className="text-primary text-sm">
                                 <GripVertical size={16} className="inline-block mr-2 -mt-0.5" />
                                 Arraste os cards para reorganizar suas turmas
@@ -395,10 +392,10 @@ export const Classes = () => {
                                 {!isReorderMode && (
                                     <button
                                         onClick={() => setShowModal(true)}
-                                        className="glass-card flex flex-col items-center justify-center gap-4 group hover:bg-black/5 transition-all duration-300 border-dashed border-2 border-black/10 hover:border-primary/40 cursor-pointer min-h-[200px] animate-slide-up"
+                                        className="sheet sheet-p flex flex-col items-center justify-center gap-4 group hover:bg-[var(--wash-1)] transition-colors duration-150 border-dashed border-2 border-border hover:border-primary/40 cursor-pointer min-h-[200px] animate-slide-up"
                                         style={{ animationDelay: `${classes.length * 80}ms` }}
                                     >
-                                        <div className="bg-primary/10 p-4 rounded-2xl group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300 border border-primary/20 shadow-lg shadow-primary/5">
+                                        <div className="bg-primary/10 p-4 rounded-[3px] group- group-hover:bg-primary/20 transition-colors duration-150 border border-primary/20">
                                             <Plus size={28} className="text-primary" />
                                         </div>
                                         <span className="font-medium text-text-muted group-hover:text-text-main transition-colors text-sm">Criar Nova Turma</span>
@@ -411,37 +408,49 @@ export const Classes = () => {
             )}
 
             {classes.length === 0 && !isLoading && (
-                <div className="text-center mt-12 animate-fade-in">
-                    <p className="text-text-muted text-lg">Comece criando sua primeira turma acima.</p>
+                <div className="mx-auto mt-12 max-w-md text-center animate-fade-in">
+                    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[3px] border border-primary/20 bg-primary/10 text-primary">
+                        <BookOpen size={30} />
+                    </div>
+                    <h2 className="mb-2 text-xl font-bold text-text-main">Crie sua primeira turma</h2>
+                    <p className="mb-6 text-sm leading-relaxed text-text-muted">
+                        A turma é o ponto de partida: é nela que você lança presenças, notas e mensalidades.
+                        Leva menos de um minuto — você só precisa do nome e do horário.
+                    </p>
+                    <button
+                        onClick={() => setShowModal(true)}
+                        className="btn btn-primary inline-flex items-center gap-2 rounded-[2px] px-6 py-3 font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                    >
+                        <Plus size={18} />
+                        Criar turma
+                    </button>
                 </div>
             )}
 
             {/* Create Class Modal */}
             {showModal && (
                 <div className="modal-overlay animate-fade-in">
-                    <div className="glass-modal w-full max-w-md p-8 animate-slide-up relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0"></div>
-                        <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-xl hover:bg-black/5 transition-all">
+                    <div className="modal-sheet w-full max-w-md p-8 animate-slide-up relative overflow-hidden">                        <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-[2px] hover:bg-[var(--wash-1)] transition-all">
                             <X size={20} />
                         </button>
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/20">
+                            <div className="p-2.5 rounded-[2px] bg-primary/15 border border-primary/20">
                                 <Plus size={20} className="text-primary" />
                             </div>
                             <h3 className="text-2xl font-bold text-text-main">Nova Turma</h3>
                         </div>
                         <form onSubmit={handleCreateClass} className="flex flex-col gap-5">
                             <div className="space-y-1">
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome da Turma</label>
-                                <input className="glass-input" value={newClass.name} onChange={e => setNewClass({ ...newClass, name: e.target.value })} required placeholder="Ex: Matemática Avançada" />
+                                <label className="label">Nome da Turma</label>
+                                <input className="input" value={newClass.name} onChange={e => setNewClass({ ...newClass, name: e.target.value })} required placeholder="Ex: Matemática Avançada" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Horário</label>
-                                <input className="glass-input" value={newClass.schedule} onChange={e => setNewClass({ ...newClass, schedule: e.target.value })} required placeholder="Ex: Segundas e Quartas, 19h" />
+                                <label className="label">Horário</label>
+                                <input className="input" value={newClass.schedule} onChange={e => setNewClass({ ...newClass, schedule: e.target.value })} required placeholder="Ex: Segundas e Quartas, 19h" />
                             </div>
                             <div className="flex justify-end gap-3 mt-2">
-                                <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 text-text-muted hover:text-text-main hover:bg-black/5 rounded-xl transition-all font-medium">Cancelar</button>
-                                <button type="submit" className="btn-primary-gradient px-6 py-2.5 text-white rounded-xl font-medium shadow-lg shadow-primary/20">Criar Turma</button>
+                                <button type="button" onClick={() => setShowModal(false)} className="px-5 py-2.5 text-text-muted hover:text-text-main hover:bg-[var(--wash-1)] rounded-[2px] transition-all font-medium">Cancelar</button>
+                                <button type="submit" className="btn btn-primary px-6 py-2.5 text-text-main rounded-[2px] font-medium">Criar Turma</button>
                             </div>
                         </form>
                     </div>
@@ -451,29 +460,27 @@ export const Classes = () => {
             {/* Edit Class Modal */}
             {editingClass && (
                 <div className="modal-overlay animate-fade-in">
-                    <div className="glass-modal w-full max-w-md p-8 animate-slide-up relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary/0 via-primary to-primary/0"></div>
-                        <button onClick={() => setEditingClass(null)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-xl hover:bg-black/5 transition-all">
+                    <div className="modal-sheet w-full max-w-md p-8 animate-slide-up relative overflow-hidden">                        <button onClick={() => setEditingClass(null)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-[2px] hover:bg-[var(--wash-1)] transition-all">
                             <X size={20} />
                         </button>
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2.5 rounded-xl bg-primary/15 border border-primary/20">
+                            <div className="p-2.5 rounded-[2px] bg-primary/15 border border-primary/20">
                                 <Pencil size={20} className="text-primary" />
                             </div>
                             <h3 className="text-2xl font-bold text-text-main">Editar Turma</h3>
                         </div>
                         <form onSubmit={handleUpdateClass} className="flex flex-col gap-5">
                             <div className="space-y-1">
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Nome da Turma</label>
-                                <input className="glass-input" value={editClassName} onChange={e => setEditClassName(e.target.value)} required />
+                                <label className="label">Nome da Turma</label>
+                                <input className="input" value={editClassName} onChange={e => setEditClassName(e.target.value)} required />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-medium text-text-muted uppercase tracking-wider ml-1">Horário</label>
-                                <input className="glass-input" value={editClassSchedule} onChange={e => setEditClassSchedule(e.target.value)} required />
+                                <label className="label">Horário</label>
+                                <input className="input" value={editClassSchedule} onChange={e => setEditClassSchedule(e.target.value)} required />
                             </div>
                             <div className="flex justify-end gap-3 mt-2">
-                                <button type="button" onClick={() => setEditingClass(null)} className="px-5 py-2.5 text-text-muted hover:text-text-main hover:bg-black/5 rounded-xl transition-all font-medium">Cancelar</button>
-                                <button type="submit" className="btn-primary-gradient px-6 py-2.5 text-white rounded-xl font-medium shadow-lg shadow-primary/20">Salvar</button>
+                                <button type="button" onClick={() => setEditingClass(null)} className="px-5 py-2.5 text-text-muted hover:text-text-main hover:bg-[var(--wash-1)] rounded-[2px] transition-all font-medium">Cancelar</button>
+                                <button type="submit" className="btn btn-primary px-6 py-2.5 text-text-main rounded-[2px] font-medium">Salvar</button>
                             </div>
                         </form>
                     </div>
@@ -483,10 +490,8 @@ export const Classes = () => {
             {/* Delete Class Modal */}
             {deletingClass && (
                 <div className="modal-overlay animate-fade-in">
-                    <div className="glass-modal w-full max-w-sm p-6 relative animate-slide-up overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-danger/0 via-danger to-danger/0"></div>
-                        <div className="flex flex-col items-center text-center pt-2">
-                            <div className="w-14 h-14 rounded-2xl bg-danger/20 flex items-center justify-center mb-4 text-danger border border-danger/30 shadow-lg shadow-danger/10">
+                    <div className="modal-sheet w-full max-w-sm p-6 relative animate-slide-up overflow-hidden">                        <div className="flex flex-col items-center text-center pt-2">
+                            <div className="text-danger mb-3">
                                 <AlertTriangle size={28} />
                             </div>
                             <h3 className="text-xl font-bold text-text-main mb-2">Excluir Turma?</h3>
@@ -494,8 +499,8 @@ export const Classes = () => {
                                 Tem certeza que deseja excluir <strong className="text-text-main">{deletingClass.name}</strong>? Esta ação removerá todos os alunos e chamadas associados.
                             </p>
                             <div className="flex gap-3 w-full">
-                                <button onClick={() => setDeletingClass(null)} className="flex-1 py-2.5 text-text-muted hover:bg-black/5 hover:text-text-main transition-all rounded-xl font-medium border border-transparent hover:border-black/10">Cancelar</button>
-                                <button onClick={handleDeleteClass} className="flex-1 py-2.5 bg-danger/90 hover:bg-danger text-white rounded-xl shadow-lg shadow-danger/30 transition-all font-medium">Excluir</button>
+                                <button onClick={() => setDeletingClass(null)} className="flex-1 py-2.5 text-text-muted hover:bg-[var(--wash-1)] hover:text-text-main transition-all rounded-[2px] font-medium border border-transparent hover:border-border">Cancelar</button>
+                                <button onClick={handleDeleteClass} className="flex-1 py-2.5 bg-danger/90 hover:bg-danger text-[#fff] rounded-[2px] transition-all font-medium">Excluir</button>
                             </div>
                         </div>
                     </div>

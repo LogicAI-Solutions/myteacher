@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import api from '../api';
-import { DollarSign, CheckCircle, AlertCircle, Search, ArrowUp, ArrowDown } from 'lucide-react';
+import { DollarSign, Search, ArrowUp, ArrowDown } from 'lucide-react';
 import { formatCurrency, parseCurrency } from '../utils/masks';
 import { Loading } from '../components/Loading';
+import { Toast } from '../components/Toast';
 
 interface Student {
     id: number;
@@ -219,128 +220,90 @@ export const Payments = () => {
 
     return (
         <div className="animate-fade-in relative">
-            {toast && (
-                <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-2xl shadow-2xl animate-slide-in text-white font-medium backdrop-blur-xl border ${toast.type === 'success' ? 'bg-success/90 border-success/50' : 'bg-danger/90 border-danger/50'}`}>
-                    {toast.msg}
-                </div>
-            )}
+            {toast && <Toast message={toast.msg} type={toast.type} onClose={() => setToast(null)} />}
 
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-2 sm:gap-4">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-5 gap-4">
                 <div>
-                    <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-text-main flex items-center gap-1.5 sm:gap-2">
-                        <DollarSign className="text-success" size={20} /> Financeiro
-                    </h1>
-                    <p className="text-text-muted mt-0.5 text-xs sm:text-sm">Controle de mensalidades.</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-text-main">Financeiro</h1>
+                    <p className="text-text-muted mt-1.5 text-sm">
+                        Mensalidades de {new Date(0, selectedMonth - 1).toLocaleString('pt-BR', { month: 'long' })} de {selectedYear}.
+                    </p>
                 </div>
 
-                {/* Filters */}
-                <div className="flex items-center gap-2 glass p-2 rounded-2xl">
-                    <select
-                        value={filterStatus}
-                        onChange={e => setFilterStatus(e.target.value as 'all' | 'PAID' | 'PENDING')}
-                        style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
-                        className="rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none border"
-                    >
-                        <option value="all">Todos os Status</option>
-                        <option value="PAID">Pagos</option>
-                        <option value="PENDING">Pendentes</option>
-                    </select>
+                <div className="flex flex-wrap items-end gap-2">
+                    <label className="flex flex-col gap-1">
+                        <span className="label-print">Situação</span>
+                        <select
+                            value={filterStatus}
+                            onChange={e => setFilterStatus(e.target.value as 'all' | 'PAID' | 'PENDING')}
+                            className="input py-1.5 text-sm"
+                        >
+                            <option value="all">Todas</option>
+                            <option value="PAID">Pagas</option>
+                            <option value="PENDING">Pendentes</option>
+                        </select>
+                    </label>
 
-                    <div className="w-[1px] h-6 bg-white/10 mx-1"></div>
+                    <label className="flex flex-col gap-1">
+                        <span className="label-print">Mês</span>
+                        <select value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="input py-1.5 text-sm">
+                            {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                                <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'long' })}</option>
+                            ))}
+                        </select>
+                    </label>
 
-                    <select style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }} value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))} className="border rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none">
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-                            <option key={m} value={m}>{new Date(0, m - 1).toLocaleString('pt-BR', { month: 'short' })}</option>
-                        ))}
-                    </select>
-                    <select style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }} value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="border rounded-lg py-1.5 px-2 text-xs text-text-main focus:outline-none">
-                        {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
-                            <option key={y} value={y}>{y}</option>
-                        ))}
-                    </select>
-                    <button
-                        onClick={handleExportReport}
-                        className="flex items-center gap-1.5 px-3 py-1.5 btn-outline text-success rounded-lg transition-all text-xs"
-                        title="Exportar Relatório"
-                    >
-                        <DollarSign size={14} />
+                    <label className="flex flex-col gap-1">
+                        <span className="label-print">Ano</span>
+                        <select value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))} className="input py-1.5 text-sm">
+                            {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map(y => (
+                                <option key={y} value={y}>{y}</option>
+                            ))}
+                        </select>
+                    </label>
+
+                    <button onClick={handleExportReport} className="btn btn-outline" title="Exportar relatório do mês">
+                        <DollarSign size={15} />
                         <span className="hidden sm:inline">Exportar</span>
                     </button>
                 </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4 mb-4 sm:mb-6">
-                <div className="stat-card p-3 sm:p-4 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary border border-primary/30">
-                            <DollarSign size={16} className="sm:hidden" />
-                            <DollarSign size={20} className="hidden sm:block" />
-                        </div>
-                        <span className="text-text-muted text-xs sm:text-sm font-medium hidden sm:inline">Total Alunos</span>
+            {/* O quadro do mês: números do registro divididos por fios. */}
+            <div className="sheet overflow-hidden mb-5">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-px" style={{ background: 'var(--rule)' }}>
+                    <div className="px-4 py-3.5" style={{ background: 'var(--sheet)' }}>
+                        <p className="label-print">Alunos no mês</p>
+                        <p className="mt-1.5 text-2xl font-bold text-text-main tabular">{totalStudentsCount}</p>
                     </div>
-                    <p className="text-xl sm:text-2xl md:text-3xl font-bold text-text-main">{totalStudentsCount}</p>
-                    <p className="text-xs text-primary mt-0.5 sm:mt-1 font-medium truncate">Alunos</p>
-                </div>
-
-                <div className="stat-card p-3 sm:p-4 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-success/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-success/20 flex items-center justify-center text-success border border-success/30">
-                            <CheckCircle size={16} className="sm:hidden" />
-                            <CheckCircle size={20} className="hidden sm:block" />
-                        </div>
-                        <span className="text-text-muted text-xs sm:text-sm font-medium hidden sm:inline">Pagos</span>
+                    <div className="px-4 py-3.5" style={{ background: 'var(--sheet)' }}>
+                        <p className="label-print">Quitadas</p>
+                        <p className="mt-1.5 text-2xl font-bold tabular" style={{ color: 'var(--color-success)' }}>{actualPaidCount}</p>
                     </div>
-                    <p className="text-xl sm:text-2xl md:text-3xl font-bold text-text-main">{actualPaidCount}</p>
-                    <p className="text-xs text-success mt-0.5 sm:mt-1 font-medium truncate">Pagos</p>
-                </div>
-
-                <div className="stat-card p-3 sm:p-4 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-warning/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-warning/20 flex items-center justify-center text-warning border border-warning/30">
-                            <AlertCircle size={16} className="sm:hidden" />
-                            <AlertCircle size={20} className="hidden sm:block" />
-                        </div>
-                        <span className="text-text-muted text-xs sm:text-sm font-medium hidden sm:inline">Pendentes</span>
+                    <div className="px-4 py-3.5" style={{ background: 'var(--sheet)' }}>
+                        <p className="label-print">A receber</p>
+                        <p className="mt-1.5 text-2xl font-bold tabular" style={{ color: pendingCount > 0 ? 'var(--ochre)' : 'var(--ink-muted)' }}>
+                            {pendingCount}
+                        </p>
                     </div>
-                    <p className="text-xl sm:text-2xl md:text-3xl font-bold text-text-main">{pendingCount}</p>
-                    <p className="text-xs text-warning mt-0.5 sm:mt-1 font-medium truncate">Pendentes</p>
-                </div>
-
-                <div className="stat-card p-3 sm:p-4 relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-success/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
-                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-success/20 flex items-center justify-center text-success border border-success/30">
-                            <DollarSign size={16} className="sm:hidden" />
-                            <DollarSign size={20} className="hidden sm:block" />
-                        </div>
-                        <span className="text-text-muted text-xs sm:text-sm font-medium hidden sm:inline">Total Recebido</span>
+                    <div className="px-4 py-3.5" style={{ background: 'var(--sheet)' }}>
+                        <p className="label-print">Total recebido</p>
+                        <p className="mt-1.5 text-2xl font-bold text-text-main tabular">{formatCurrency(totalReceived)}</p>
                     </div>
-                    <p className="text-lg sm:text-xl md:text-2xl font-bold text-text-main">{formatCurrency(totalReceived)}</p>
-                    <p className="text-xs text-success mt-0.5 sm:mt-1 font-medium truncate">Recebido</p>
                 </div>
             </div>
 
-            {/* Search Bar */}
-            <div className={`transition-all duration-500 mb-6 sticky top-0 z-10 ${search.length > 0 ? '-translate-y-2 opacity-95' : ''}`}>
-                <div className="relative group max-w-2xl mx-auto">
-                    <div className="absolute inset-0 bg-primary/10 rounded-2xl blur-xl group-hover:bg-primary/20 transition-all duration-500"></div>
-                    <div className="relative glass rounded-2xl flex items-center p-1">
-                        <div className="pl-4 pr-3 text-text-muted group-focus-within:text-primary transition-colors">
-                            <Search size={24} />
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="Buscar aluno por nome..."
-                            className="w-full bg-transparent border-none text-text-main text-lg placeholder-text-muted/50 focus:ring-0 focus:outline-none py-3"
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                        />
-                    </div>
-                </div>
+            {/* Busca */}
+            <div className="relative mb-5">
+                <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" aria-hidden="true" />
+                <input
+                    type="search"
+                    placeholder="Buscar aluno pelo nome"
+                    aria-label="Buscar aluno pelo nome"
+                    className="input pl-10"
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
+                />
             </div>
 
             {/* Mobile Cards */}
@@ -354,14 +317,15 @@ export const Payments = () => {
                     const payment = localPayments[student.id] || { status: 'PENDING', amount: 0, student_id: student.id };
                     const isPaid = payment.status === 'PAID';
                     return (
-                        <div key={student.id} className="glass-card p-4">
+                        <div key={student.id} className="sheet sheet-p">
                             <div className="flex items-center justify-between mb-3">
                                 <div className="min-w-0">
                                     <p className="font-semibold text-text-main text-sm truncate">{student.name}</p>
                                     <p className="text-xs text-text-muted">{student.parent_name || 'Sem responsável'}</p>
                                 </div>
                                 <select
-                                    className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition-all cursor-pointer backdrop-blur-sm ${isPaid ? 'bg-success/10 text-success border-success/30' : 'bg-warning/10 text-warning border-warning/30'}`}
+                                    aria-label={`Situação da mensalidade de ${student.name}`}
+                                    className={`stamp cursor-pointer ${isPaid ? 'stamp-paid' : 'stamp-pending'}`}
                                     value={payment.status}
                                     onChange={e => updateLocalPayment(student.id, 'status', e.target.value)}
                                 >
@@ -369,11 +333,12 @@ export const Payments = () => {
                                     <option value="PAID">Pago</option>
                                 </select>
                             </div>
-                            <div className="flex items-center justify-between">
-                                <span className="text-xs text-text-muted">{student.school_year || ''} {student.class_type ? `• ${student.class_type}` : ''}</span>
+                            <div className="flex items-center justify-between gap-3">
+                                <span className="text-xs text-text-muted truncate">{student.school_year || ''} {student.class_type ? `• ${student.class_type}` : ''}</span>
                                 <input
                                     type="text"
-                                    className="w-28 bg-transparent border-b border-border outline-none py-1 text-sm font-mono text-right focus:border-primary text-text-main"
+                                    aria-label={`Valor da mensalidade de ${student.name}`}
+                                    className="w-28 bg-transparent border-b border-rule-strong outline-none py-1 text-sm text-right focus:border-primary text-text-main tabular font-medium"
                                     value={formatCurrency(payment.amount)}
                                     onChange={e => updateLocalPayment(student.id, 'amount', parseCurrency(e.target.value))}
                                     placeholder="R$ 0"
@@ -383,80 +348,75 @@ export const Payments = () => {
                     );
                 })}
                 {students.length === 0 && !loading && (
-                    <div className="glass-card p-8 text-center">
-                        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-success/10 flex items-center justify-center border border-success/20">
-                            <DollarSign size={28} className="text-success/50" />
-                        </div>
-                        <p className="text-text-muted text-sm">Nenhum aluno encontrado.</p>
+                    <div className="sheet sheet-p text-center">
+                        <p className="text-text-main font-semibold">Nenhum aluno encontrado</p>
+                        <p className="text-text-muted text-sm mt-1.5">
+                            {search ? 'Tente outro nome ou limpe a busca.' : 'Cadastre alunos para lançar as mensalidades do mês.'}
+                        </p>
                     </div>
                 )}
             </div>
 
             {/* Mobile Save + Pagination */}
             <div className="md:hidden space-y-3 mb-4">
-                <button onClick={handleSavePayments} disabled={saving} className={`btn-success-gradient w-full px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 text-sm ${saving ? 'opacity-70 cursor-wait' : ''}`}>
-                    {saving ? 'Salvando...' : <><DollarSign size={16} /> Salvar Alterações</>}
+                <button onClick={handleSavePayments} disabled={saving} className="btn btn-primary w-full py-3 justify-center">
+                    {saving ? 'Salvando...' : <><DollarSign size={16} /> Salvar alterações</>}
                 </button>
-                <div className="flex justify-between items-center glass-card p-3">
-                    <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} className="px-3 py-1.5 btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-xs">Anterior</button>
-                    <span className="text-text-muted text-xs">Pág. {page + 1} de {Math.max(1, Math.ceil(totalStudents / limit))}</span>
-                    <button onClick={() => setPage(p => p + 1)} disabled={(page + 1) * limit >= totalStudents} className="px-3 py-1.5 btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-lg text-xs">Próxima</button>
+                <div className="flex justify-between items-center sheet p-2.5">
+                    <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} className="btn btn-outline text-xs">Anterior</button>
+                    <span className="text-text-muted text-xs tabular">Pág. {page + 1} de {Math.max(1, Math.ceil(totalStudents / limit))}</span>
+                    <button onClick={() => setPage(p => p + 1)} disabled={(page + 1) * limit >= totalStudents} className="btn btn-outline text-xs">Próxima</button>
                 </div>
             </div>
-            <div className="hidden md:flex glass-card !p-0 overflow-hidden relative h-[500px] flex-col">
+
+            <div className="hidden md:flex sheet overflow-hidden relative h-[500px] flex-col">
                 {(loading || saving) && (
-                    <div className="absolute inset-0 z-50 flex items-center justify-center bg-bg-dark/50 backdrop-blur-sm">
-                        <Loading text={saving ? "Salvando alterações..." : "Carregando financeiro..."} />
+                    <div className="absolute inset-0 z-50 flex items-center justify-center" style={{ background: 'color-mix(in srgb, var(--sheet) 78%, transparent)' }}>
+                        <Loading text={saving ? 'Salvando alterações...' : 'Carregando financeiro...'} />
                     </div>
                 )}
-                <div className="p-4 glass-header border-b-0 flex items-center justify-between shrink-0">
-                    <h3 className="font-bold text-text-main">Relatório de {selectedMonth}/{selectedYear}</h3>
-                    <button
-                        onClick={handleSavePayments}
-                        disabled={saving}
-                        className={`
-                             btn-success-gradient px-6 py-2 rounded-xl font-bold flex items-center gap-2 text-sm
-                             ${saving ? 'opacity-70 cursor-wait' : ''}
-                        `}
-                    >
-                        {saving ? 'Salvando...' : <><DollarSign size={16} /> Salvar Alterações</>}
+                <div className="px-4 py-3 rule-b flex items-center justify-between shrink-0" style={{ background: 'var(--desk)' }}>
+                    <h2 className="label-print">
+                        Folha de {new Date(0, selectedMonth - 1).toLocaleString('pt-BR', { month: 'long' })} de {selectedYear}
+                    </h2>
+                    <button onClick={handleSavePayments} disabled={saving} className="btn btn-primary">
+                        {saving ? 'Salvando...' : <><DollarSign size={15} /> Salvar alterações</>}
                     </button>
                 </div>
-                <div className="overflow-x-auto flex-1 overflow-y-auto custom-scrollbar">
-                    <table className="w-full border-collapse" style={{ minWidth: '900px' }}>
-                        <thead className="glass-header sticky top-0 z-10 [&_th:first-child]:rounded-none [&_th:last-child]:rounded-none">
+                <div className="overflow-x-auto flex-1 overflow-y-auto">
+                    <table style={{ minWidth: '900px' }}>
+                        <thead className="sticky top-0 z-10">
                             <tr>
-                                <th
-                                    className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider cursor-pointer hover:text-text-main transition-colors group select-none flex items-center gap-1"
-                                    onClick={() => setSortDesc(!sortDesc)}
-                                >
-                                    Aluno
-                                    {sortDesc ? <ArrowDown size={14} className="text-primary" /> : <ArrowUp size={14} className="text-primary" />}
+                                <th>
+                                    <button
+                                        onClick={() => setSortDesc(!sortDesc)}
+                                        className="flex items-center gap-1 bg-transparent border-none p-0 cursor-pointer uppercase tracking-[0.07em] text-[0.6875rem] font-semibold text-text-muted hover:text-text-main transition-colors"
+                                    >
+                                        Aluno
+                                        {sortDesc ? <ArrowDown size={13} className="text-primary" /> : <ArrowUp size={13} className="text-primary" />}
+                                    </button>
                                 </th>
-                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider whitespace-nowrap min-w-[150px]">Responsável</th>
-                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider whitespace-nowrap min-w-[120px]">Ano</th>
-                                <th className="text-left p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider whitespace-nowrap min-w-[120px]">Tipo</th>
-                                <th className="text-center p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider w-[90px] sm:w-[140px]">Status</th>
-                                <th className="text-right p-2 sm:p-4 text-xs font-bold text-text-muted uppercase tracking-wider w-[80px] sm:w-[140px]">Valor</th>
+                                <th className="whitespace-nowrap min-w-[150px]">Responsável</th>
+                                <th className="whitespace-nowrap min-w-[110px]">Ano</th>
+                                <th className="whitespace-nowrap min-w-[110px]">Tipo</th>
+                                <th className="w-[150px]">Situação</th>
+                                <th className="w-[140px] text-right">Valor</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody>
                             {students.map(student => {
                                 const payment = localPayments[student.id] || { status: 'PENDING', amount: 0, student_id: student.id };
                                 const isPaid = payment.status === 'PAID';
                                 return (
-                                    <tr key={student.id} className="hover:bg-white/5 transition-colors group">
-                                        <td className="p-2 sm:p-4">
-                                            <div className="font-medium text-text-main text-xs sm:text-sm truncate max-w-[100px] sm:max-w-none">{student.name}</div>
-                                        </td>
-                                        <td className="p-2 sm:p-4 whitespace-nowrap">
-                                            <div className="text-sm text-text-muted truncate max-w-[150px]">{student.parent_name || '-'}</div>
-                                        </td>
-                                        <td className="p-2 sm:p-4 text-left text-sm text-text-muted whitespace-nowrap">{student.school_year || '-'}</td>
-                                        <td className="p-2 sm:p-4 text-left text-sm text-text-muted whitespace-nowrap">{student.class_type || '-'}</td>
-                                        <td className="p-2 sm:p-4">
+                                    <tr key={student.id}>
+                                        <td className="font-medium text-sm">{student.name}</td>
+                                        <td className="text-sm text-text-muted whitespace-nowrap">{student.parent_name || '—'}</td>
+                                        <td className="text-sm text-text-muted whitespace-nowrap">{student.school_year || '—'}</td>
+                                        <td className="text-sm text-text-muted whitespace-nowrap">{student.class_type || '—'}</td>
+                                        <td>
                                             <select
-                                                className={`w-full px-2 py-1 sm:p-2 rounded-xl text-xs sm:text-sm border focus:ring-2 focus:ring-primary/40 outline-none transition-all cursor-pointer backdrop-blur-sm ${isPaid ? 'bg-success/10 text-success border-success/30' : 'bg-warning/10 text-warning border-warning/30'}`}
+                                                aria-label={`Situação da mensalidade de ${student.name}`}
+                                                className={`stamp cursor-pointer ${isPaid ? 'stamp-paid' : 'stamp-pending'}`}
                                                 value={payment.status}
                                                 onChange={e => updateLocalPayment(student.id, 'status', e.target.value)}
                                             >
@@ -464,10 +424,11 @@ export const Payments = () => {
                                                 <option value="PAID">Pago</option>
                                             </select>
                                         </td>
-                                        <td className="p-2 sm:p-4">
+                                        <td>
                                             <input
                                                 type="text"
-                                                className="w-full bg-transparent border-b border-black/10 outline-none py-1 text-xs sm:text-sm font-mono transition-all text-right focus:border-primary text-text-main"
+                                                aria-label={`Valor da mensalidade de ${student.name}`}
+                                                className="w-full bg-transparent border-b border-rule-strong outline-none py-1 text-sm text-right focus:border-primary text-text-main tabular font-medium"
                                                 value={formatCurrency(payment.amount)}
                                                 onChange={e => updateLocalPayment(student.id, 'amount', parseCurrency(e.target.value))}
                                                 placeholder="R$ 0"
@@ -477,18 +438,25 @@ export const Payments = () => {
                                 );
                             })}
                             {students.length === 0 && !loading && (
-                                <tr><td colSpan={6} className="p-8 text-center text-text-muted">Nenhum aluno encontrado.</td></tr>
+                                <tr>
+                                    <td colSpan={6} className="py-10 text-center">
+                                        <p className="text-text-main font-semibold">Nenhum aluno encontrado</p>
+                                        <p className="text-text-muted text-sm mt-1.5">
+                                            {search ? 'Tente outro nome ou limpe a busca.' : 'Cadastre alunos para lançar as mensalidades do mês.'}
+                                        </p>
+                                    </td>
+                                </tr>
                             )}
                         </tbody>
                     </table>
                 </div>
 
                 {/* Pagination Controls */}
-                <div className="flex justify-between items-center p-4 glass-header border-b-0 border-t mt-auto shrink-0">
+                <div className="flex justify-between items-center px-4 py-3 rule-t mt-auto shrink-0" style={{ background: 'var(--desk)' }}>
                     <button
                         onClick={() => setPage(p => Math.max(0, p - 1))}
                         disabled={page === 0}
-                        className="px-4 py-2 btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm"
+                        className="px-4 py-2 btn btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-[2px] text-sm"
                     >
                         Anterior
                     </button>
@@ -498,7 +466,7 @@ export const Payments = () => {
                     <button
                         onClick={() => setPage(p => p + 1)}
                         disabled={(page + 1) * limit >= totalStudents}
-                        className="px-4 py-2 btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-sm"
+                        className="px-4 py-2 btn btn-outline disabled:opacity-50 disabled:cursor-not-allowed rounded-[2px] text-sm"
                     >
                         Próxima
                     </button>

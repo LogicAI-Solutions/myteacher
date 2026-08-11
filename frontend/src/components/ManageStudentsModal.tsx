@@ -32,10 +32,10 @@ export const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ isOpen
 
     return (
         <div className="modal-overlay">
-            <div className="glass-modal w-full max-w-md flex flex-col max-h-[85vh] animate-slide-up relative overflow-hidden">
+            <div className="modal-sheet w-full max-w-md flex flex-col max-h-[85vh] animate-slide-up relative overflow-hidden">
                 {/* Header */}
-                <div className="p-6 border-b border-white/5 z-10">
-                    <button onClick={onClose} className="absolute top-4 right-4 text-text-muted hover:text-text-main transition-colors p-2 rounded-xl hover:bg-white/5">
+                <div className="p-6 border-b border-border z-10">
+                    <button onClick={onClose} className="absolute top-4 right-4 text-text-muted hover:text-text-main transition-colors p-2 rounded-[2px] hover:bg-[var(--wash-1)]">
                         <X size={20} />
                     </button>
 
@@ -52,7 +52,7 @@ export const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ isOpen
                         <input
                             type="text"
                             placeholder="Buscar aluno..."
-                            className="glass-input pl-10"
+                            className="input pl-10"
                             value={searchTerm}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                             autoFocus
@@ -63,11 +63,11 @@ export const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ isOpen
                         {filteredStudents.map((s: Student) => {
                             const isEnrolled = enrolledStudentIds.includes(s.id);
                             return (
-                                <div key={s.id} className={`p-4 rounded-xl border flex justify-between items-center transition-all duration-300 group ${isEnrolled ? 'bg-primary/10 border-primary/30' : 'bg-white/5 border-white/5 hover:border-white/10'}`}>
+                                <div key={s.id} className={`p-4 rounded-[2px] border flex justify-between items-center transition-colors duration-150 group ${isEnrolled ? 'bg-primary/10 border-primary/30' : 'bg-[var(--wash-1)] border-border hover:border-border'}`}>
                                     <div className="flex flex-col gap-0.5">
                                         <span className={`font-semibold text-base ${isEnrolled ? 'text-text-main' : 'text-text-muted group-hover:text-text-main transition-colors'}`}>{s.name}</span>
                                         {isEnrolled && (
-                                            <span className="text-[10px] uppercase tracking-widest text-primary font-bold flex items-center gap-1">
+                                            <span className="label-print text-primary flex items-center gap-1">
                                                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" /> Matriculado
                                             </span>
                                         )}
@@ -76,7 +76,7 @@ export const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ isOpen
                                     {isEnrolled ? (
                                         <button
                                             onClick={() => onUnenroll(s.id)}
-                                            className="px-3 py-1.5 rounded-lg bg-danger/10 text-danger hover:bg-danger/20 transition-all text-xs font-bold flex items-center gap-1.5 border border-danger/10"
+                                            className="px-3 py-1.5 rounded-[2px] bg-danger/10 text-danger hover:bg-danger/20 transition-all text-xs font-bold flex items-center gap-1.5 border border-danger/10"
                                             title="Remover da turma"
                                         >
                                             <X size={14} /> <span className="hidden sm:inline">Remover</span>
@@ -84,7 +84,7 @@ export const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ isOpen
                                     ) : (
                                         <button
                                             onClick={() => onEnroll(s.id)}
-                                            className="px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-all text-xs font-bold flex items-center gap-1.5 border border-primary/10"
+                                            className="px-3 py-1.5 rounded-[2px] bg-primary/10 text-primary hover:bg-primary/20 transition-all text-xs font-bold flex items-center gap-1.5 border border-primary/10"
                                             title="Adicionar à turma"
                                         >
                                             <Plus size={14} /> <span className="hidden sm:inline">Adicionar</span>
@@ -94,7 +94,7 @@ export const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ isOpen
                             );
                         })}
                         {filteredStudents.length === 0 && (
-                            <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-white/5 rounded-xl text-center flex-1">
+                            <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-border rounded-[2px] text-center flex-1">
                                 <Users size={32} className="text-text-muted mb-3 opacity-30" />
                                 <p className="text-text-muted font-medium">{searchTerm ? 'Nenhum aluno encontrado.' : 'Nenhum aluno disponível.'}</p>
                                 <p className="text-xs text-text-muted/60 mt-1">Tente buscar por outro nome.</p>
@@ -104,8 +104,8 @@ export const ManageStudentsModal: React.FC<ManageStudentsModalProps> = ({ isOpen
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-white/5 flex justify-end">
-                    <button onClick={onClose} className="px-6 py-2 rounded-xl text-sm text-text-muted hover:bg-white/5 transition-all font-medium">
+                <div className="p-4 border-t border-border flex justify-end">
+                    <button onClick={onClose} className="px-6 py-2 rounded-[2px] text-sm text-text-muted hover:bg-[var(--wash-1)] transition-all font-medium">
                         Fechar
                     </button>
                 </div>

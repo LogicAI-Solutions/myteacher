@@ -35,74 +35,59 @@ def init_db(db: Session):
 
     # Seed plans
     from backend.models.plans import Plan as PlanModel
-    
-    if db.query(PlanModel).count() == 0:
-        print("Seeding initial plans...")
-        plans_data = [
-            {
-                "name": "Professor Autônomo",
-                "description": "Para professores independentes que gerenciam seus próprios alunos e recebimentos.",
-                "price": "R$ 49",
-                "period": "/mês",
-                "features": [
-                    {"text": "Até 10 turmas", "included": True},
-                    {"text": "Gestão financeira completa", "included": True},
-                    {"text": "Controle de presenças e notas", "included": True},
-                    {"text": "Dashboard do aluno", "included": True},
-                    {"text": "Múltiplos professores", "included": False},
-                    {"text": "Permissões por perfil", "included": False},
-                ],
-                "button_text": "Começar como Autônomo",
-                "popular": False,
-                "role": "autonomous_teacher",
-                "max_classes": 10,
-                "max_teachers": 1,
-            },
-            {
-                "name": "Escola - Básico",
-                "description": "Para pequenas escolas ou estúdios com sua própria equipe de professores.",
-                "price": "R$ 149",
-                "period": "/mês",
-                "features": [
-                    {"text": "Até 10 turmas", "included": True},
-                    {"text": "Gestão financeira centralizada", "included": True},
-                    {"text": "Controle de presenças e notas", "included": True},
-                    {"text": "Dashboard do aluno", "included": True},
-                    {"text": "Múltiplos professores", "included": True},
-                    {"text": "Professores não veem financeiro", "included": True},
-                ],
-                "button_text": "Assinar Plano Escola",
-                "popular": True,
-                "role": "school_admin",
-                "max_classes": 10,
-                "max_teachers": 5,
-            },
-            {
-                "name": "Escola - Pro",
-                "description": "Para escolas em crescimento que precisam de capacidade ilimitada.",
-                "price": "R$ 299",
-                "period": "/mês",
-                "features": [
-                    {"text": "Turmas ilimitadas", "included": True},
-                    {"text": "Gestão financeira centralizada", "included": True},
-                    {"text": "Controle de presenças e notas", "included": True},
-                    {"text": "Dashboard do aluno", "included": True},
-                    {"text": "Professores ilimitados", "included": True},
-                    {"text": "Professores não veem financeiro", "included": True},
-                ],
-                "button_text": "Assinar Plano Pro",
-                "popular": False,
-                "role": "school_admin_pro",
-                "max_classes": 9999,
-                "max_teachers": 9999,
-            }
-        ]
-        
-        for plan_dict in plans_data:
-            db.add(PlanModel(**plan_dict))
-        
-        db.commit()
-        print("Initial plans seeded successfully")
+
+    # Planos de assinatura ligados ao Stripe. Upsert por nome: roda sempre, para
+    # que bancos já populados também recebam os preços novos.
+    for plan_dict in [
+        {
+            "name": "Essencial",
+            "description": "Para quem está começando e gerencia poucas turmas.",
+            "price": "R$ 47,90",
+            "period": "/mês",
+            # Em produção defina STRIPE_PRICE_* no .env com os prices do modo live;
+            # este upsert roda a cada boot e sobrescreveria valores editados no admin.
+            "stripe_price_id": os.getenv("STRIPE_PRICE_ESSENCIAL") or "price_1U18QjJtQF0i2t0DQ2RBNFHZ",
+            "role": "autonomous_teacher",
+            "max_classes": 5,
+            "max_teachers": 1,
+            "popular": False,
+            "button_text": "Começar 14 dias grátis",
+            "features": [
+                {"text": "Até 5 turmas", "included": True},
+                {"text": "Alunos ilimitados", "included": True},
+                {"text": "Gestão financeira completa", "included": True},
+                {"text": "Controle de presenças e notas", "included": True},
+                {"text": "Dashboard do aluno", "included": True},
+                {"text": "Turmas ilimitadas", "included": False},
+            ],
+        },
+        {
+            "name": "Profissional",
+            "description": "Para professores com agenda cheia, sem limite de turmas.",
+            "price": "R$ 97,90",
+            "period": "/mês",
+            "stripe_price_id": os.getenv("STRIPE_PRICE_PROFISSIONAL") or "price_1U18BBJtQF0i2t0DhY0GBiLT",
+            "role": "autonomous_teacher",
+            "max_classes": 9999,
+            "max_teachers": 1,
+            "popular": True,
+            "button_text": "Começar 14 dias grátis",
+            "features": [
+                {"text": "Turmas ilimitadas", "included": True},
+                {"text": "Alunos ilimitados", "included": True},
+                {"text": "Gestão financeira completa", "included": True},
+                {"text": "Controle de presenças e notas", "included": True},
+                {"text": "Dashboard do aluno", "included": True},
+                {"text": "Suporte prioritário", "included": True},
+            ],
+        },
+    ]:
+        db_plan = db.query(PlanModel).filter(PlanModel.name == plan_dict["name"]).first() or PlanModel()
+        for key, value in plan_dict.items():
+            setattr(db_plan, key, value)
+        db.add(db_plan)
+    db.commit()
+    print("Stripe plans (Essencial/Profissional) synced")
 
     # Seed config
     from backend.models.config import AppConfig as AppConfigModel
@@ -113,6 +98,8 @@ def init_db(db: Session):
             {"key": "stripe_public_key", "value": ""},
             {"key": "stripe_secret_key", "value": ""},
             {"key": "stripe_webhook_secret", "value": ""},
+            # Fallback quando o checkout vem sem plano; env vence (ver _cfg em routers/billing.py)
+            {"key": "stripe_price_id", "value": os.getenv("STRIPE_PRICE_ID") or "price_1U18BBJtQF0i2t0DhY0GBiLT"},
         ]
         for cfg in configs_data:
             db.add(AppConfigModel(**cfg))

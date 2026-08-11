@@ -1,4 +1,4 @@
-import { X, AlertTriangle, CheckCircle } from 'lucide-react';
+import { X, AlertTriangle, CheckCircle, AlertCircle } from 'lucide-react';
 import React from 'react';
 
 export type ToastType = 'success' | 'error' | 'warning';
@@ -9,22 +9,48 @@ interface ToastProps {
     onClose: () => void;
 }
 
+const TITLE: Record<ToastType, string> = {
+    success: 'Feito',
+    error: 'Não deu certo',
+    warning: 'Atenção',
+};
+
+const STAMP: Record<ToastType, string> = {
+    success: 'stamp-paid',
+    error: 'stamp-late',
+    warning: 'stamp-pending',
+};
+
+const ICON = {
+    success: CheckCircle,
+    error: AlertCircle,
+    warning: AlertTriangle,
+};
+
+/** Um bilhete que chega e assenta sobre o documento. */
 export const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
+    const Icon = ICON[type];
+
     return (
-        <div className={`fixed top-4 right-4 z-[100] px-6 py-4 rounded-xl shadow-2xl backdrop-blur-md border animate-slide-in flex items-center gap-3 ${type === 'success' ? 'bg-success/20 border-success/30 text-white' :
-            type === 'error' ? 'bg-danger/20 border-danger/30 text-white' :
-                'bg-warning/20 border-warning/30 text-white'
-            }`}>
-            {type === 'success' && <div className="p-1 bg-success rounded-full flex items-center justify-center"><CheckCircle size={14} /></div>}
-            {type === 'error' && <div className="p-1 bg-danger rounded-full flex items-center justify-center"><AlertTriangle size={14} /></div>}
-            {type === 'warning' && <div className="p-1 bg-warning rounded-full flex items-center justify-center"><AlertTriangle size={14} /></div>}
-            <div>
-                <h4 className="font-bold text-sm uppercase tracking-wide opacity-80">
-                    {type === 'success' ? 'Sucesso' : type === 'error' ? 'Erro' : 'Atenção'}
-                </h4>
-                <p className="text-sm font-medium">{message}</p>
+        <div
+            role="status"
+            aria-live="polite"
+            className="fixed top-4 right-4 z-[100] max-w-sm animate-slide-in sheet raised flex items-start gap-3 p-3.5 pr-2.5"
+        >
+            <Icon size={18} className={`mt-0.5 shrink-0 ${type === 'success' ? 'text-success' : type === 'error' ? 'text-danger' : 'text-warning'}`} />
+
+            <div className="min-w-0 flex-1">
+                <span className={`stamp ${STAMP[type]}`}>{TITLE[type]}</span>
+                <p className="mt-1.5 text-sm text-text-main leading-snug">{message}</p>
             </div>
-            <button onClick={onClose} className="ml-4 opacity-50 hover:opacity-100"><X size={16} /></button>
+
+            <button
+                onClick={onClose}
+                aria-label="Fechar aviso"
+                className="shrink-0 p-1.5 rounded-[2px] text-text-muted hover:text-text-main hover:bg-[var(--wash-2)] transition-colors duration-150"
+            >
+                <X size={15} />
+            </button>
         </div>
     );
 };
