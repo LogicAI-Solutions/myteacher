@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-    GraduationCap, ArrowRight, CheckCircle, BarChart3, Users, 
-    DollarSign, CalendarCheck, MessageCircle, Shield, LogIn, Check, X, Sparkles 
+import {
+    GraduationCap, ArrowRight, BarChart3, Users,
+    DollarSign, CalendarCheck, MessageCircle, Shield, LogIn, Check, X
 } from 'lucide-react';
-import teacherIllustration from '../assets/teacher_login_illustration.png';
 import { openSupportWhatsApp } from '../utils/support';
+import { RegisterStrip, type RegisterStripMonth } from '../components/RegisterStrip';
 import api from '../api';
 
 export interface Plan {
@@ -20,39 +20,41 @@ export interface Plan {
     role?: string;
 }
 
+// Só aparece se a API de planos cair. Precisa espelhar os planos reais de
+// backend/core/init_db.py — anunciar preço que não existe é pior que não anunciar.
 const defaultPlans: Plan[] = [
     {
         id: 1,
-        name: 'Professor Autônomo',
-        description: 'Ideal para professores particulares ou com poucas turmas.',
-        price: 'R$ 49',
+        name: 'Essencial',
+        description: 'Para quem está começando e gerencia poucas turmas.',
+        price: 'R$ 47,90',
         period: '/mês',
         popular: false,
-        button_text: 'Começar Agora',
+        button_text: 'Começar 14 dias grátis',
         features: [
-            { text: 'Até 5 Turmas Ativas', included: true },
-            { text: 'Controle de Frequência & Faltas', included: true },
-            { text: 'Relatórios em PDF/Excel', included: true },
-            { text: 'Controle Financeiro Simples', included: true },
-            { text: 'Suporte via WhatsApp', included: true },
-            { text: 'Múltiplos Professores', included: false }
+            { text: 'Até 5 turmas', included: true },
+            { text: 'Alunos ilimitados', included: true },
+            { text: 'Gestão financeira completa', included: true },
+            { text: 'Controle de presenças e notas', included: true },
+            { text: 'Dashboard do aluno', included: true },
+            { text: 'Turmas ilimitadas', included: false }
         ]
     },
     {
         id: 2,
-        name: 'Escola / Curso Pro',
-        description: 'Para escolas de cursos livres, idiomas e reforço escolar.',
-        price: 'R$ 129',
+        name: 'Profissional',
+        description: 'Para professores com agenda cheia, sem limite de turmas.',
+        price: 'R$ 97,90',
         period: '/mês',
         popular: true,
-        button_text: 'Testar 7 Dias Grátis',
+        button_text: 'Começar 14 dias grátis',
         features: [
-            { text: 'Turmas Ilimitadas', included: true },
-            { text: 'Gestão Completa de Alunos', included: true },
-            { text: 'Gestão Financeira & Mensalidades', included: true },
-            { text: 'Dashboard & Métricas Avançadas', included: true },
-            { text: 'Múltiplos Perfis de Acesso', included: true },
-            { text: 'Suporte Prioritário VIP', included: true }
+            { text: 'Turmas ilimitadas', included: true },
+            { text: 'Alunos ilimitados', included: true },
+            { text: 'Gestão financeira completa', included: true },
+            { text: 'Controle de presenças e notas', included: true },
+            { text: 'Dashboard do aluno', included: true },
+            { text: 'Suporte prioritário', included: true }
         ]
     },
     {
@@ -74,6 +76,26 @@ const defaultPlans: Plan[] = [
     }
 ];
 
+// Exemplo autoral: a folha que o professor vê depois de um bimestre de uso.
+// Nomes e situações são ilustrativos, não dados de cliente.
+const SAMPLE_ROWS: { name: string; attendance: boolean[]; months: RegisterStripMonth[] }[] = [
+    {
+        name: 'Marina Albuquerque',
+        attendance: [true, true, true, true, true, true, true, true, true, true, true, true],
+        months: [{ label: 'Mar', status: 'paid' }, { label: 'Abr', status: 'paid' }, { label: 'Mai', status: 'paid' }],
+    },
+    {
+        name: 'Joaquim Ferreira',
+        attendance: [true, true, false, true, true, true, false, true, true, true, true, true],
+        months: [{ label: 'Mar', status: 'paid' }, { label: 'Abr', status: 'paid' }, { label: 'Mai', status: 'pending' }],
+    },
+    {
+        name: 'Rita Nascimento',
+        attendance: [true, false, false, true, false, false, true, false, false, true, false, false],
+        months: [{ label: 'Mar', status: 'paid' }, { label: 'Abr', status: 'late' }, { label: 'Mai', status: 'late' }],
+    },
+];
+
 export const Landing = () => {
     const navigate = useNavigate();
     const [plans, setPlans] = useState<Plan[]>([]);
@@ -89,7 +111,7 @@ export const Landing = () => {
                     setPlans(defaultPlans);
                 }
             } catch (error) {
-                console.error("Erro ao carregar planos:", error);
+                console.error('Erro ao carregar planos:', error);
                 setPlans(defaultPlans);
             } finally {
                 setLoadingPlans(false);
@@ -107,245 +129,181 @@ export const Landing = () => {
     };
 
     return (
-        <div className="min-h-screen bg-bg-dark text-text-main overflow-x-hidden font-sans selection:bg-primary/30">
-            {/* Navbar */}
-            <nav className="fixed top-0 w-full z-50 glass-header px-4 py-3 sm:px-6 sm:py-4 transition-all duration-300">
+        <div className="min-h-screen bg-bg-dark text-text-main font-sans">
+            <nav className="fixed top-0 w-full z-50 sheet-header px-4 py-3 sm:px-6">
                 <div className="container mx-auto flex justify-between items-center max-w-6xl">
-                    {/* Top Left: Logo */}
-                    <div className="flex items-center gap-2 font-bold text-lg sm:text-xl cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-                        <GraduationCap className="text-primary" size={26} />
-                        <span className="text-gradient">MyTeacherApp</span>
-                    </div>
+                    <button
+                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                        className="flex items-center gap-2 font-bold text-lg sm:text-xl cursor-pointer bg-transparent border-none text-text-main p-0"
+                    >
+                        <GraduationCap className="text-primary" size={24} />
+                        <span>MyTeacherApp</span>
+                    </button>
 
-                    {/* Top Right: Entrar + Fale Conosco */}
                     <div className="flex items-center gap-2 sm:gap-3">
-                        <button
-                            onClick={() => navigate('/login')}
-                            className="btn btn-outline text-xs sm:text-sm px-3.5 py-2 rounded-xl flex items-center gap-1.5 border border-white/10 hover:border-primary/50 hover:bg-white/10 text-white transition-all shadow-sm cursor-pointer"
-                            title="Acessar o sistema"
-                        >
-                            <LogIn size={16} className="text-primary" />
+                        <button onClick={() => navigate('/login')} className="btn btn-ghost" title="Acessar o sistema">
+                            <LogIn size={16} />
                             <span>Entrar</span>
                         </button>
-
-                        <button
-                            onClick={() => handleWhatsAppClick()}
-                            className="btn btn-primary text-xs sm:text-sm px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all hover:scale-105 cursor-pointer"
-                        >
-                            <MessageCircle size={18} />
-                            <span className="hidden sm:inline">Fale Conosco</span>
+                        <button onClick={() => handleWhatsAppClick()} className="btn btn-primary">
+                            <MessageCircle size={16} />
+                            <span className="hidden sm:inline">Falar com a gente</span>
+                            <span className="sm:hidden">Contato</span>
                         </button>
                     </div>
                 </div>
             </nav>
 
-            {/* Hero Section */}
-            <header className="relative pt-24 pb-16 lg:pt-36 lg:pb-24 px-4 sm:px-6 overflow-hidden">
-                {/* Background Orbs */}
-                <div className="orb orb-primary w-64 h-64 top-20 -left-20 animate-float opacity-50"></div>
-                <div className="orb orb-purple w-96 h-96 bottom-0 -right-40 animate-pulse-soft opacity-40" style={{ animationDelay: '1s' }}></div>
+            {/* Primeira dobra: a tese. O produto é o registro, e o registro
+                responde as duas perguntas de uma vez. */}
+            <header className="pt-28 pb-16 lg:pt-36 lg:pb-24 px-4 sm:px-6">
+                <div className="container mx-auto grid lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-16 items-center max-w-6xl">
+                    <div className="animate-slide-up">
+                        <p className="label-print">Para o professor que dá aula por conta própria</p>
 
-                <div className="container mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center relative z-10 max-w-6xl">
-                    <div className="space-y-6 animate-slide-up text-center lg:text-left">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-primary-light backdrop-blur-sm mx-auto lg:mx-0 hover:bg-white/10 transition-colors">
-                            <span className="flex h-1.5 w-1.5 rounded-full bg-success animate-pulse"></span>
-                            Sistema de Gestão Escolar Completo
-                        </div>
-
-                        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
-                            Organize sua Escola com <br /><span className="text-gradient">Eficiência Total</span>
+                        <h1 className="mt-4 text-4xl sm:text-5xl lg:text-[3.25rem] font-bold leading-[1.08] tracking-tight">
+                            Quem faltou e quem pagou, na mesma linha.
                         </h1>
 
-                        <p className="text-base sm:text-lg text-text-muted leading-relaxed max-w-lg mx-auto lg:mx-0">
-                            Controle de frequência, gestão financeira e acompanhamento de alunos em uma única plataforma. Simples, rápido e seguro.
+                        <p className="mt-5 text-base sm:text-lg text-text-muted leading-relaxed max-w-[46ch]">
+                            O MyTeacherApp junta a chamada e a mensalidade no mesmo registro do aluno.
+                            Você para de conferir caderno contra planilha para saber como o mês fechou.
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-3 pt-2 justify-center lg:justify-start">
-                            <button
-                                onClick={scrollToPlans}
-                                className="btn btn-primary-gradient text-base px-6 py-3 rounded-xl group shadow-lg shadow-primary/25 hover:shadow-primary/40 flex items-center justify-center gap-2 hover:scale-[1.02] transition-all cursor-pointer"
-                            >
-                                Conhecer os Planos
-                                <ArrowRight className="group-hover:translate-x-1 transition-transform w-4 h-4" />
+                        <div className="mt-7 flex flex-col sm:flex-row gap-3">
+                            <button onClick={scrollToPlans} className="btn btn-primary text-base px-5 py-2.5 group">
+                                Ver os planos
+                                <ArrowRight className="group-hover:translate-x-0.5 transition-transform w-4 h-4" />
                             </button>
-                            <button
-                                onClick={() => navigate('/login')}
-                                className="btn btn-outline text-base px-6 py-3 rounded-xl hover:bg-white/5 transition-colors cursor-pointer"
-                            >
-                                Área do Cliente
+                            <button onClick={() => navigate('/login')} className="btn btn-outline text-base px-5 py-2.5">
+                                Já sou cliente
                             </button>
                         </div>
-                        <p className="text-xs text-text-muted/60 text-center lg:text-left">
-                            * Teste 7 dias grátis sem compromisso.
-                        </p>
 
-                        <div className="flex flex-wrap justify-center lg:justify-start gap-4 sm:gap-6 pt-4 text-text-muted text-xs sm:text-sm font-medium opacity-80">
-                            <div className="flex items-center gap-1.5 hover:text-white transition-colors cursor-default">
-                                <CheckCircle size={16} className="text-primary" /> Multi-plataforma
-                            </div>
-                            <div className="flex items-center gap-1.5 hover:text-white transition-colors cursor-default">
-                                <DollarSign size={16} className="text-primary" /> Controle Financeiro
-                            </div>
-                            <div className="flex items-center gap-1.5 hover:text-white transition-colors cursor-default">
-                                <Shield size={16} className="text-primary" /> Dados Seguros
-                            </div>
-                        </div>
+                        <p className="mt-4 text-sm text-text-muted">14 dias grátis. Sem cartão para começar.</p>
                     </div>
 
-                    <div className="relative animate-fade-in mt-8 lg:mt-0">
-                        <div className="glass-card p-4 rounded-2xl relative z-10 border-white/10 hover:scale-[1.01] transition-transform duration-500 shadow-2xl shadow-black/50">
-                            <div className="relative rounded-xl overflow-hidden shadow-inner bg-bg-card">
-                                <img
-                                    src={teacherIllustration}
-                                    alt="Dashboard Preview"
-                                    className="w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity duration-500"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-bg-dark/90 via-transparent to-transparent pointer-events-none"></div>
+                    {/* A prova: a folha de verdade, com a gramática de verdade. */}
+                    <div className="animate-fade-in">
+                        <div className="sheet overflow-hidden">
+                            <div className="flex items-baseline justify-between gap-3 px-4 sm:px-5 py-3 rule-b" style={{ background: 'var(--desk)' }}>
+                                <span className="label-print">Turma de Inglês B2 — 1º bimestre</span>
+                                <span className="label-print">Exemplo</span>
+                            </div>
 
-                                {/* Floating Stats */}
-                                <div className="absolute bottom-4 left-4 right-4 flex gap-3">
-                                    <div className="glass p-3 rounded-lg flex-1 flex items-center gap-3 border border-white/5 hover:bg-white/10 transition-colors">
-                                        <div className="bg-primary/20 p-2 rounded-md text-primary-light">
-                                            <Users size={20} />
+                            <ul className="px-4 sm:px-5">
+                                {SAMPLE_ROWS.map((row, i) => (
+                                    <li key={row.name} className={`py-3.5 ${i > 0 ? 'rule-t' : ''}`}>
+                                        <p className="text-sm font-semibold text-text-main">{row.name}</p>
+                                        <div className="mt-1.5">
+                                            <RegisterStrip attendance={row.attendance} months={row.months} />
                                         </div>
-                                        <div>
-                                            <p className="text-[10px] text-text-muted uppercase tracking-wider">Alunos Ativos</p>
-                                            <p className="text-lg font-bold text-white">1,240</p>
-                                        </div>
-                                    </div>
-                                    <div className="glass p-3 rounded-lg flex-1 flex items-center gap-3 border border-white/5 hover:bg-white/10 transition-colors">
-                                        <div className="bg-success/20 p-2 rounded-md text-success">
-                                            <BarChart3 size={20} />
-                                        </div>
-                                        <div>
-                                            <p className="text-[10px] text-text-muted uppercase tracking-wider">Frequência</p>
-                                            <p className="text-lg font-bold text-white">98%</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <div className="px-4 sm:px-5 py-3 rule-t text-xs text-text-muted leading-relaxed" style={{ background: 'var(--desk)' }}>
+                                A linha reta é aula sem falta. Cada traço é uma ausência.
+                                O carimbo embaixo é a mensalidade do mês.
                             </div>
                         </div>
                     </div>
                 </div>
             </header>
 
-            {/* Key Features Section */}
-            <section className="py-16 bg-bg-darker border-y border-white/5 relative">
-                <div className="container mx-auto px-4 max-w-6xl relative z-10">
-                    <div className="text-center mb-12">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary mb-4">
-                            <BarChart3 size={14} />
-                            Funcionalidades Completas
-                        </div>
-                        <h2 className="text-2xl sm:text-3xl font-bold mb-3">Tudo para sua Gestão</h2>
-                        <p className="text-text-muted max-w-2xl mx-auto text-sm sm:text-base">
-                            Ferramentas essenciais para simplificar o dia a dia da secretaria e dos professores.
-                        </p>
-                    </div>
+            <section className="py-16 lg:py-20 px-4 sm:px-6 rule-t" style={{ background: 'var(--desk-sunk)' }}>
+                <div className="container mx-auto max-w-6xl">
+                    <h2 className="text-2xl sm:text-3xl font-bold">O que entra no registro</h2>
+                    <p className="mt-2 text-text-muted max-w-[60ch]">
+                        Tudo que hoje está espalhado entre o caderno, a planilha e o grupo do WhatsApp.
+                    </p>
 
-                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <FeatureCard
-                            icon={<CalendarCheck />}
-                            title="Controle de Frequência"
-                            description="Registro de chamadas rápido e fácil, com relatórios detalhados de presença e faltas por aluno e turma."
-                        />
-                        <FeatureCard
-                            icon={<DollarSign />}
-                            title="Gestão Financeira"
-                            description="Acompanhe pagamentos de mensalidades, gere boletos e visualize o fluxo de caixa em tempo real."
-                        />
-                        <FeatureCard
-                            icon={<Users />}
-                            title="Gestão de Alunos"
-                            description="Cadastro completo de alunos e responsáveis, histórico escolar e documentos em um só lugar."
-                        />
-                        <FeatureCard
-                            icon={<GraduationCap />}
-                            title="Turmas e Grades"
-                            description="Organização de grades horárias, disciplinas e distribuição de professores por turma."
-                        />
-                        <FeatureCard
-                            icon={<BarChart3 />}
-                            title="Relatórios Gerenciais"
-                            description="Dashboards interativos com métricas de desempenho acadêmico e saúde financeira."
-                        />
-                        <FeatureCard
-                            icon={<Shield />}
-                            title="Acesso Seguro"
-                            description="Perfis de acesso diferenciados para administradores, professores e secretaria."
-                        />
+                    <div className="mt-8 sheet overflow-hidden">
+                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-px" style={{ background: 'var(--rule)' }}>
+                            <FeatureCell
+                                icon={<CalendarCheck />}
+                                title="Chamada"
+                                description="Marque presença turma por turma e veja o histórico de faltas de cada aluno sem abrir outra tela."
+                            />
+                            <FeatureCell
+                                icon={<DollarSign />}
+                                title="Mensalidades"
+                                description="Registre o que entrou, veja o que falta entrar e saiba de quem, antes do mês virar."
+                            />
+                            <FeatureCell
+                                icon={<Users />}
+                                title="Cadastro de alunos"
+                                description="Dados do aluno e do responsável, matrícula por turma e situação ativa ou inativa."
+                            />
+                            <FeatureCell
+                                icon={<GraduationCap />}
+                                title="Turmas"
+                                description="Disciplina, valor da mensalidade e a lista de quem está matriculado em cada uma."
+                            />
+                            <FeatureCell
+                                icon={<BarChart3 />}
+                                title="Fechamento do mês"
+                                description="Quantas mensalidades foram quitadas e quantas ainda faltam, na abertura do painel."
+                            />
+                            <FeatureCell
+                                icon={<Shield />}
+                                title="Portal do aluno"
+                                description="Cada aluno acessa e vê apenas a própria situação, com login separado do seu."
+                            />
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Dynamic Plans Section */}
-            <section id="planos" className="py-20 relative overflow-hidden bg-bg-dark">
-                <div className="orb orb-primary w-96 h-96 top-10 left-1/2 -translate-x-1/2 opacity-30"></div>
-                <div className="container mx-auto px-4 max-w-6xl relative z-10">
-                    <div className="text-center mb-16">
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-xs font-semibold text-primary-light mb-4 backdrop-blur-md">
-                            <Sparkles size={14} className="animate-spin-slow text-primary" />
-                            Planos Flexíveis
-                        </div>
-                        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
-                            Escolha o Plano Ideal para seu Negócio
-                        </h2>
-                        <p className="text-text-muted max-w-2xl mx-auto text-base sm:text-lg">
-                            Transparente, sem letrinhas miúdas. Comece a transformar sua gestão hoje mesmo.
+            <section id="planos" className="py-16 lg:py-24 px-4 sm:px-6">
+                <div className="container mx-auto max-w-6xl">
+                    <div className="max-w-[52ch] mx-auto text-center">
+                        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold">Planos</h2>
+                        <p className="mt-2 text-text-muted text-base sm:text-lg">
+                            Quatorze dias grátis em qualquer plano pago. Cancele quando quiser.
                         </p>
                     </div>
 
+                    {/* Flex centralizado em vez de grid: com dois planos a grade de 3
+                        colunas deixava um vão à direita e jogava tudo para a esquerda. */}
                     {loadingPlans ? (
-                        <div className="flex justify-center items-center py-12">
-                            <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        <div className="flex justify-center items-center py-16">
+                            <div
+                                className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"
+                                role="status"
+                                aria-label="Carregando planos"
+                            />
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-                            {plans.map((plan) => (
-                                <div
-                                    key={plan.id}
-                                    className={`glass-card p-8 rounded-3xl relative flex flex-col justify-between transition-all duration-300 hover:-translate-y-2 ${
-                                        plan.popular
-                                            ? 'border-2 border-primary shadow-2xl shadow-primary/20 bg-gradient-to-b from-primary/10 via-bg-card to-bg-card'
-                                            : 'border-white/10 hover:border-white/20'
-                                    }`}
-                                >
-                                    {plan.popular && (
-                                        <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-primary-hover text-white text-xs font-bold uppercase tracking-wider px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
-                                            <Sparkles size={12} /> Mais Popular
-                                        </div>
-                                    )}
-
-                                    <div>
-                                        <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
-                                        <p className="text-sm text-text-muted mb-6 min-h-[40px]">{plan.description}</p>
-
-                                        <div className="flex items-baseline gap-1 mb-6 pb-6 border-b border-white/10">
-                                            <span className="text-4xl font-extrabold text-white tracking-tight">{plan.price}</span>
-                                            {plan.period && (
-                                                <span className="text-sm text-text-muted font-medium">{plan.period}</span>
-                                            )}
-                                        </div>
-
-                                        <ul className="space-y-3.5 mb-8 text-sm">
-                                            {plan.features?.map((feature, idx) => (
-                                                <li key={idx} className="flex items-center gap-3">
-                                                    {feature.included ? (
-                                                        <div className="w-5 h-5 rounded-full bg-success/20 text-success flex items-center justify-center flex-shrink-0">
-                                                            <Check size={12} />
-                                                        </div>
-                                                    ) : (
-                                                        <div className="w-5 h-5 rounded-full bg-white/5 text-text-muted/40 flex items-center justify-center flex-shrink-0">
-                                                            <X size={12} />
-                                                        </div>
-                                                    )}
-                                                    <span className={feature.included ? 'text-text-main font-medium' : 'text-text-muted/50 line-through'}>
-                                                        {feature.text}
-                                                    </span>
-                                                </li>
-                                            ))}
-                                        </ul>
+                        <div className="mt-10 flex flex-wrap justify-center gap-5 items-stretch">
+                            {plans.map(plan => (
+                                <div key={plan.id} className={`sheet flex flex-col p-6 w-full max-w-[22rem] ${plan.popular ? 'border-primary' : ''}`}>
+                                    <div className="flex items-baseline justify-between gap-2">
+                                        <h3 className="text-lg font-bold text-text-main">{plan.name}</h3>
+                                        {plan.popular && <span className="stamp stamp-paid">Mais escolhido</span>}
                                     </div>
+
+                                    <p className="mt-2 text-sm text-text-muted min-h-[2.75rem]">{plan.description}</p>
+
+                                    <p className="mt-5 pb-5 rule-b flex items-baseline gap-1">
+                                        <span className="text-3xl font-bold text-text-main tracking-tight tabular">{plan.price}</span>
+                                        {plan.period && <span className="text-sm text-text-muted">{plan.period}</span>}
+                                    </p>
+
+                                    <ul className="mt-5 space-y-2.5 text-sm flex-1">
+                                        {plan.features?.map((feature, idx) => (
+                                            <li key={idx} className="flex items-start gap-2.5">
+                                                {feature.included ? (
+                                                    <Check size={15} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+                                                ) : (
+                                                    <X size={15} className="mt-0.5 shrink-0 text-text-muted opacity-50" aria-hidden="true" />
+                                                )}
+                                                <span className={feature.included ? 'text-text-main' : 'text-text-muted line-through'}>
+                                                    {feature.text}
+                                                </span>
+                                            </li>
+                                        ))}
+                                    </ul>
 
                                     <button
                                         onClick={() => {
@@ -355,14 +313,10 @@ export const Landing = () => {
                                                 navigate('/register', { state: { planId: plan.id, planName: plan.name } });
                                             }
                                         }}
-                                        className={`w-full py-3.5 px-6 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 cursor-pointer ${
-                                            plan.popular
-                                                ? 'bg-primary hover:bg-primary-hover text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:scale-[1.02]'
-                                                : 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
-                                        }`}
+                                        className={`btn w-full mt-6 py-2.5 ${plan.popular ? 'btn-primary' : 'btn-outline'}`}
                                     >
-                                        <span>{plan.button_text || 'Assinar Plano'}</span>
-                                        <ArrowRight size={16} />
+                                        <span>{plan.button_text || 'Assinar plano'}</span>
+                                        <ArrowRight size={15} />
                                     </button>
                                 </div>
                             ))}
@@ -371,61 +325,50 @@ export const Landing = () => {
                 </div>
             </section>
 
-            {/* Contact CTA Section */}
-            <section className="py-20 relative overflow-hidden">
-                <div className="orb w-96 h-96 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-primary/5 blur-[100px]"></div>
-                <div className="container mx-auto px-4 max-w-4xl relative z-10 text-center">
-                    <h2 className="text-3xl font-bold mb-6">Leve sua escola para o próximo nível</h2>
-                    <p className="text-text-muted mb-8 text-lg">
-                        Entre em contato agora mesmo para tirar suas dúvidas e agendar uma demonstração.
-                        <br />
-                        <span className="text-primary font-medium">Atendimento exclusivo via WhatsApp.</span>
-                    </p>
-
-                    <div className="flex flex-col items-center gap-4">
-                        <button
-                            onClick={() => handleWhatsAppClick()}
-                            className="btn btn-primary-gradient text-lg px-8 py-4 rounded-2xl shadow-xl shadow-primary/30 hover:scale-105 transition-transform duration-300 flex items-center gap-3 group cursor-pointer"
-                        >
-                            <MessageCircle size={24} className="group-hover:rotate-12 transition-transform" />
-                            Falar com Consultor
-                        </button>
-                        <p className="text-xs text-text-muted/50 mt-4">
-                            MyTeacherApp • Soluções Educacionais
+            <section className="py-16 px-4 sm:px-6 rule-t" style={{ background: 'var(--desk-sunk)' }}>
+                <div className="container mx-auto max-w-6xl flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                    <div className="max-w-[46ch]">
+                        <h2 className="text-xl sm:text-2xl font-bold">Quer ver funcionando antes de assinar?</h2>
+                        <p className="mt-2 text-text-muted">
+                            Falamos com você pelo WhatsApp e mostramos o sistema com a sua própria turma.
                         </p>
                     </div>
+                    <button onClick={() => handleWhatsAppClick()} className="btn btn-primary text-base px-5 py-2.5 shrink-0 self-start sm:self-auto">
+                        <MessageCircle size={18} />
+                        Falar com a gente
+                    </button>
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="py-8 border-t border-white/5 text-center text-text-muted text-sm bg-bg-dark relative z-10">
-                <div className="container mx-auto px-4 max-w-6xl flex flex-col md:flex-row justify-between items-center gap-6">
-                    <div className="flex items-center gap-2 font-bold text-lg opacity-80 hover:opacity-100 transition-opacity">
-                        <GraduationCap className="text-primary" size={20} />
+            <footer className="py-8 px-4 sm:px-6 rule-t">
+                <div className="container mx-auto max-w-6xl flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-text-muted">
+                    <div className="flex items-center gap-2 font-bold text-text-main">
+                        <GraduationCap className="text-primary" size={18} />
                         MyTeacherApp
                     </div>
-                    <div className="flex gap-6">
-                        <span onClick={() => handleWhatsAppClick()} className="hover:text-white transition-colors cursor-pointer flex items-center gap-1.5 group">
-                            <MessageCircle size={16} className="text-primary group-hover:text-success transition-colors" />
-                            <span className="group-hover:underline decoration-primary/50 underline-offset-4">Fale Conosco</span>
-                        </span>
-                        <a href="#" className="hover:text-white transition-colors hover:underline decoration-white/20 underline-offset-4">Termos</a>
-                        <a href="#" className="hover:text-white transition-colors hover:underline decoration-white/20 underline-offset-4">Privacidade</a>
+                    <div className="flex gap-5">
+                        <button
+                            onClick={() => handleWhatsAppClick()}
+                            className="bg-transparent border-none p-0 text-text-muted hover:text-primary cursor-pointer transition-colors"
+                        >
+                            Fale conosco
+                        </button>
+                        <a href="#" className="text-text-muted hover:text-primary transition-colors no-underline">Termos</a>
+                        <a href="#" className="text-text-muted hover:text-primary transition-colors no-underline">Privacidade</a>
                     </div>
-                    <p>&copy; {new Date().getFullYear()} LogicIA Solutions.</p>
+                    <p>&copy; {new Date().getFullYear()} LogicIA Solutions</p>
                 </div>
             </footer>
         </div>
     );
 };
 
-// Helper Components
-const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
-    <div className="glass-card p-6 hover:bg-white/5 transition-all group cursor-default hover:-translate-y-1 duration-300 border border-white/5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5">
-        <div className="mb-4 p-3 rounded-xl bg-primary/10 w-fit text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-300 shadow-inner">
-            {React.cloneElement(icon as React.ReactElement<any>, { size: 24 })}
+const FeatureCell = ({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) => (
+    <div className="p-5 sm:p-6" style={{ background: 'var(--sheet)' }}>
+        <div className="text-primary">
+            {React.cloneElement(icon as React.ReactElement<any>, { size: 20 })}
         </div>
-        <h3 className="text-lg font-bold mb-2 text-white group-hover:text-primary-light transition-colors">{title}</h3>
-        <p className="text-text-muted text-sm leading-relaxed">{description}</p>
+        <h3 className="mt-3 text-base font-semibold text-text-main">{title}</h3>
+        <p className="mt-1.5 text-sm text-text-muted leading-relaxed">{description}</p>
     </div>
 );

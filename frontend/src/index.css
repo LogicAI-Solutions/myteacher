@@ -1,12 +1,31 @@
 @import "tailwindcss";
 
+/* ============================================================================
+   MyTeacherApp — "O Registro Escolar"
+   O sistema visual é papel e tinta. A tela é uma folha sobre uma mesa, a
+   estrutura é feita de fios de 1px, e o estado chega como carimbo.
+   Contrato completo em DESIGN.md. Não reintroduzir vidro, orbe, gradiente de
+   texto nem sombra colorida sem deslocamento.
+   ========================================================================= */
+
 @theme {
+  /* Papel e tinta */
+  --color-sheet: var(--color-sheet);
+  --color-desk: var(--color-desk);
+  --color-ink: var(--color-ink);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-ink-faint: var(--color-ink-faint);
+  --color-rule: var(--color-rule);
+  --color-rule-strong: var(--color-rule-strong);
+
+  /* Nomes herdados: mantidos para não quebrar utilitários já espalhados. */
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);
   --color-primary-light: var(--color-primary-light);
   --color-secondary: var(--color-secondary);
   --color-bg-dark: var(--color-bg-dark);
   --color-bg-card: var(--color-bg-card);
+  --color-bg-darker: var(--color-bg-darker);
   --color-text-main: var(--color-text-main);
   --color-text-muted: var(--color-text-muted);
   --color-success: var(--color-success);
@@ -14,13 +33,23 @@
   --color-warning: var(--color-warning);
   --color-border: var(--color-border);
 
-  --animate-fade-in: fadeIn 0.3s ease-out;
-  --animate-slide-up: slideUp 0.3s ease-out;
-  --animate-modal-spring: modalSpring 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-  --animate-slide-in-right: slideInRight 0.3s ease-out;
-  --animate-float: none;
-  --animate-glow: none;
-  --animate-shimmer: none;
+  --font-sans: Archivo, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --radius-field: 2px;
+  --radius-sheet: 3px;
+
+  /* Desaceleração exponencial: chegadas confiantes, sem quique. */
+  --animate-fade-in: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-up: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-modal-spring: modalSettle 0.34s cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-slide-in-right: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-in: slideInRight 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-shake: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  --animate-spring-up: modalSettle 0.34s cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-jiggle: jiggle 0.3s ease-in-out infinite;
+
+  /* O único momento autoral do sistema: o carimbo assentando. */
+  --animate-stamp: stampSettle 0.28s cubic-bezier(0.32, 0.72, 0, 1);
 
   @keyframes fadeIn {
     0% {
@@ -35,7 +64,7 @@
   @keyframes slideUp {
     0% {
       opacity: 0;
-      transform: translateY(20px);
+      transform: translateY(12px);
     }
 
     100% {
@@ -44,15 +73,12 @@
     }
   }
 
-  @keyframes modalSpring {
+  /* Uma folha que é colocada sobre a mesa: desce e para. Sem quique, sem
+     escala exagerada — papel não pula. */
+  @keyframes modalSettle {
     0% {
       opacity: 0;
-      transform: translateY(40px) scale(0.95);
-    }
-
-    60% {
-      opacity: 1;
-      transform: translateY(-4px) scale(1.01);
+      transform: translateY(16px) scale(0.99);
     }
 
     100% {
@@ -64,66 +90,57 @@
   @keyframes overlayFadeIn {
     0% {
       opacity: 0;
-      backdrop-filter: blur(0px);
     }
 
     100% {
       opacity: 1;
-      backdrop-filter: blur(20px) saturate(180%);
     }
   }
 
   @keyframes slideInRight {
     0% {
-      transform: translateX(100%);
+      opacity: 0;
+      transform: translateX(16px);
     }
 
     100% {
+      opacity: 1;
       transform: translateX(0);
     }
   }
 
-  @keyframes float {
-
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-
-    50% {
-      transform: translateY(-20px);
-    }
-  }
-
-  @keyframes glow {
+  /* A borracha desce um pouco forte e assenta. */
+  @keyframes stampSettle {
     0% {
-      box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+      opacity: 0;
+      transform: scale(1.14);
     }
 
-    100% {
-      box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
-    }
-  }
-
-  @keyframes shimmer {
-    0% {
-      background-position: -200% 0;
-    }
-
-    100% {
-      background-position: 200% 0;
-    }
-  }
-
-  @keyframes pulse-soft {
-
-    0%,
-    100% {
+    60% {
       opacity: 1;
     }
 
-    50% {
-      opacity: 0.7;
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  @keyframes shake {
+
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+
+    20%,
+    60% {
+      transform: translateX(-5px);
+    }
+
+    40%,
+    80% {
+      transform: translateX(5px);
     }
   }
 
@@ -142,119 +159,180 @@
   }
 }
 
+/* ============================================================================
+   TEMAS
+   Três renderizações de um mundo só. O padrão é claro porque o cenário de uso
+   confirmado é notebook em sessões de trabalho, não celular em sala.
+   Invariante em todos: --desk é sempre mais escuro que --sheet.
+   ========================================================================= */
+
+/* Registro — papel bond. O padrão. */
 :root,
-.theme-dark {
+.theme-registro {
+  color-scheme: light;
+
+  --sheet: #ffffff;
+  --desk: #eef4f9;
+  --desk-sunk: #e1ecf4;
+  --ink: #001D39;
+  --ink-muted: #46617c;
+  --ink-faint: #63788e;
+  --rule: #d7e5ef;
+  --rule-strong: #b6cee0;
+
+  --institution: #0A4174;
+  --institution-pressed: #001D39;
+  --institution-light: #49769F;
+  --ochre: #8a6216;
+  --margin-red: #a33124;
+
+  /* Tinta lavada: o fundo de hover e de zebra sai da própria tinta, nunca de
+     um cinza avulso, para que os três temas se comportem igual. */
+  --wash-1: rgba(0, 29, 57, 0.03);
+  --wash-2: rgba(0, 29, 57, 0.06);
+  --scrim: rgba(0, 29, 57, 0.32);
+
+  --shadow-raised: 0 1px 2px rgba(0, 29, 57, .06), 0 8px 24px -6px rgba(0, 29, 57, .14);
+  --shadow-overlay: 0 2px 4px rgba(0, 29, 57, .08), 0 24px 48px -12px rgba(0, 29, 57, .24);
+
+  --color-sheet: var(--sheet);
+  --color-desk: var(--desk);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+
+  --color-primary: var(--institution);
+  --color-primary-hover: var(--institution-pressed);
+  --color-primary-light: var(--institution-light);
+  --color-secondary: var(--institution-light);
+  --color-bg-dark: var(--desk);
+  --color-bg-card: var(--sheet);
+  --color-bg-darker: var(--desk-sunk);
+  --color-text-main: var(--ink);
+  --color-text-muted: var(--ink-muted);
+  --color-success: #237a57;
+  --color-warning: var(--ochre);
+  --color-danger: var(--margin-red);
+  --color-border: var(--rule);
+}
+
+/* Almaço — a folha pautada envelhecida. Papel mais quente para sessões longas
+   no fim do dia; a tinta e o carimbo não mudam. */
+.theme-almaco {
+  color-scheme: light;
+
+  --sheet: #f7fbfd;
+  --desk: #dfeaf1;
+  --desk-sunk: #cfdfe9;
+  --ink: #001D39;
+  --ink-muted: #3f5b74;
+  --ink-faint: #5c7488;
+  --rule: #c9dce7;
+  --rule-strong: #a7c3d4;
+
+  --institution: #0A4174;
+  --institution-pressed: #001D39;
+  --institution-light: #49769F;
+  --ochre: #8a6216;
+  --margin-red: #a33124;
+
+  --wash-1: rgba(0, 29, 57, 0.035);
+  --wash-2: rgba(0, 29, 57, 0.07);
+  --scrim: rgba(0, 29, 57, 0.32);
+
+  --shadow-raised: 0 1px 2px rgba(0, 29, 57, .06), 0 8px 24px -6px rgba(0, 29, 57, .14);
+  --shadow-overlay: 0 2px 4px rgba(0, 29, 57, .08), 0 24px 48px -12px rgba(0, 29, 57, .24);
+
+  --color-sheet: var(--sheet);
+  --color-desk: var(--desk);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+
+  --color-primary: var(--institution);
+  --color-primary-hover: var(--institution-pressed);
+  --color-primary-light: var(--institution-light);
+  --color-secondary: var(--institution-light);
+  --color-bg-dark: var(--desk);
+  --color-bg-card: var(--sheet);
+  --color-bg-darker: var(--desk-sunk);
+  --color-text-main: var(--ink);
+  --color-text-muted: var(--ink-muted);
+  --color-success: #237a57;
+  --color-warning: var(--ochre);
+  --color-danger: var(--margin-red);
+  --color-border: var(--rule);
+}
+
+/* Ardósia — o quadro-negro. Tinta vira giz e os acentos sobem de luminosidade
+   o bastante para passar AA sobre a lousa. */
+.theme-ardosia {
   color-scheme: dark;
-  --app-primary: #6366f1;
-  --app-primary-hover: #4f46e5;
-  --app-primary-light: #818cf8;
 
-  --app-bg: #0a0f1a;
-  --app-card: rgba(30, 41, 59, 0.5);
-  --app-bg-darker: #020617;
-  --app-text-main: #f8fafc;
-  --app-text-muted: #94a3b8;
-  --app-body-grad-start: #0a0f1a;
-  --app-body-grad-mid: #0f172a;
-  --app-body-grad-end: #0a0f1a;
+  --sheet: #0b2c4f;
+  --desk: #001D39;
+  --desk-sunk: #001428;
+  --ink: #e7f3fa;
+  --ink-muted: #a3c3d8;
+  --ink-faint: #85a8c1;
+  --rule: #123c65;
+  --rule-strong: #1f5280;
 
-  --app-orb-1: rgba(99, 102, 241, 0.08);
-  --app-orb-2: rgba(139, 92, 246, 0.05);
-  --app-orb-3: rgba(99, 102, 241, 0.03);
+  --institution: #7BBDE8;
+  --institution-pressed: #8DD8E9;
+  --institution-light: #8DD8E9;
+  --ochre: #d9a441;
+  --margin-red: #e08476;
 
-  --color-primary: var(--app-primary);
-  --color-primary-hover: var(--app-primary-hover);
-  --color-primary-light: var(--app-primary-light);
-  --color-secondary: #a855f7;
-  --color-bg-dark: var(--app-bg);
-  --color-bg-card: var(--app-card);
-  --color-text-main: var(--app-text-main);
-  --color-text-muted: var(--app-text-muted);
-  --color-success: #22c55e;
-  --color-danger: #ef4444;
-  --color-warning: #f59e0b;
-  --color-border: rgba(255, 255, 255, 0.05);
+  --wash-1: rgba(141, 216, 233, 0.05);
+  --wash-2: rgba(141, 216, 233, 0.1);
+  --scrim: rgba(0, 12, 24, 0.62);
 
-  --radius: 0.75rem;
-  --glass-bg: rgba(15, 23, 42, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.05);
-  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --shadow-raised: 0 1px 2px rgba(0, 0, 0, .34), 0 8px 24px -6px rgba(0, 0, 0, .48);
+  --shadow-overlay: 0 2px 4px rgba(0, 0, 0, .4), 0 24px 48px -12px rgba(0, 0, 0, .6);
+
+  --color-sheet: var(--sheet);
+  --color-desk: var(--desk);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-rule: var(--rule);
+  --color-rule-strong: var(--rule-strong);
+
+  --color-primary: var(--institution);
+  --color-primary-hover: var(--institution-pressed);
+  --color-primary-light: var(--institution-light);
+  --color-secondary: var(--institution-light);
+  --color-bg-dark: var(--desk);
+  --color-bg-card: var(--sheet);
+  --color-bg-darker: var(--desk-sunk);
+  --color-text-main: var(--ink);
+  --color-text-muted: var(--ink-muted);
+  --color-success: #72d6a0;
+  --color-warning: var(--ochre);
+  --color-danger: var(--margin-red);
+  --color-border: var(--rule);
 }
 
-.theme-sereno {
-  color-scheme: light;
-  --app-primary: #2d5a6e;
-  --app-primary-hover: #1e3d4a;
-  --app-primary-light: #4a7c91;
-  --app-bg: #f1f5f9;
-  --app-card: rgba(255, 255, 255, 0.7);
-  --app-bg-darker: #e2e8f0;
-  --app-text-main: #1e293b;
-  --app-text-muted: #64748b;
-  --app-body-grad-start: #f8fafc;
-  --app-body-grad-mid: #eef2ff;
-  --app-body-grad-end: #f1f5f9;
-  --app-orb-1: rgba(99, 102, 241, 0.16);
-  --app-orb-2: rgba(16, 185, 129, 0.12);
-  --app-orb-3: rgba(148, 163, 184, 0.1);
-
-  --color-primary: #2d5a6e;
-  --color-primary-hover: #1e3d4a;
-  --color-primary-light: #4a7c91;
-  --color-secondary: #5e8499;
-  --color-bg-dark: var(--app-bg);
-  --color-bg-card: var(--app-card);
-  --color-text-main: var(--app-text-main);
-  --color-text-muted: var(--app-text-muted);
-  --color-success: #2d6e5a;
-  --color-danger: #a34b4b;
-  --color-warning: #b58d3d;
-  --color-border: rgba(0, 0, 0, 0.05);
-
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --glass-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
+/* Sobre o azul institucional o texto é a folha; no tema escuro, o texto usa
+   tinta escura para manter contraste sobre o acento mais luminoso. */
+:root,
+.theme-registro,
+.theme-almaco {
+  --on-institution: #ffffff;
 }
 
-.theme-acolhedor {
-  color-scheme: light;
-  --app-primary: #7d8c7b;
-  --app-primary-hover: #5d6b5b;
-  --app-primary-light: #9fb09c;
-  --app-bg: #fdfbf7;
-  --app-card: rgba(255, 255, 255, 0.8);
-  --app-bg-darker: #f5efe7;
-  --app-text-main: #4a3728;
-  --app-text-muted: #8c7e6d;
-  --app-body-grad-start: #fdfbf7;
-  --app-body-grad-mid: #f9f4ec;
-  --app-body-grad-end: #f6f1e8;
-  --app-orb-1: rgba(125, 140, 123, 0.14);
-  --app-orb-2: rgba(166, 125, 93, 0.1);
-  --app-orb-3: rgba(140, 126, 109, 0.08);
-
-  --color-primary: #7d8c7b;
-  --color-primary-hover: #5d6b5b;
-  --color-primary-light: #9fb09c;
-  --color-secondary: #8a9687;
-  --color-bg-dark: var(--app-bg);
-  --color-bg-card: var(--app-card);
-  --color-text-main: var(--app-text-main);
-  --color-text-muted: var(--app-text-muted);
-  --color-success: #5d7c5b;
-  --color-danger: #9c5d5d;
-  --color-warning: #a67d5d;
-  --color-border: rgba(0, 0, 0, 0.05);
-
-  --glass-bg: rgba(255, 255, 255, 0.8);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --glass-shadow: 0 8px 32px rgba(135, 99, 31, 0.05);
+.theme-ardosia {
+  --on-institution: #001D39;
 }
 
 @layer base {
   html {
     font-size: 14px;
-    /* Base menor para mobile */
   }
 
   @media (min-width: 640px) {
@@ -266,84 +344,260 @@
   @media (min-width: 768px) {
     html {
       font-size: 16px;
-      /* Volta ao normal em tablet+ */
     }
   }
 
   body {
-    @apply bg-bg-dark text-text-main antialiased font-sans;
-    background: linear-gradient(135deg, var(--app-body-grad-start) 0%, var(--app-body-grad-mid) 50%, var(--app-body-grad-end) 100%);
-    background-attachment: fixed;
+    @apply antialiased font-sans;
+    background: var(--desk);
+    color: var(--ink);
     min-height: 100vh;
-    transition: background 0.35s ease, color 0.2s ease;
+    transition: background 0.25s ease, color 0.2s ease;
   }
 
-  /* Global Glass Background Pattern */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background:
-      radial-gradient(ellipse at 20% 20%, var(--app-orb-1) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 80%, var(--app-orb-2) 0%, transparent 50%),
-      radial-gradient(ellipse at 50% 50%, var(--app-orb-3) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: -1;
-    transition: background 0.35s ease;
+  /* Algarismos que descem em coluna precisam alinhar dígito com dígito. */
+  table,
+  .tabular,
+  input[type="number"],
+  input[type="date"],
+  input[type="time"] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* O foco de teclado nunca some. */
+  :focus-visible {
+    outline: 2px solid var(--institution);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--institution) 22%, transparent);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+    letter-spacing: -0.01em;
   }
 }
 
 @layer components {
+
+  /* --- A folha: o contêiner de conteúdo -------------------------------- */
+
+  .sheet {
+    background: var(--sheet);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sheet);
+  }
+
+  .sheet-p {
+    @apply p-4 sm:p-5 md:p-6;
+  }
+
+  /* Só a folha que responde ao ponteiro porque leva a algum lugar. */
+  .sheet-link {
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .sheet-link:hover {
+    border-color: var(--rule-strong);
+    box-shadow: var(--shadow-raised);
+  }
+
+  /* --- Fios ------------------------------------------------------------ */
+
+  .rule-t {
+    border-top: 1px solid var(--rule);
+  }
+
+  .rule-b {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  /* --- Rótulo impresso -------------------------------------------------- */
+
+  .label-print {
+    @apply block text-[0.6875rem] font-medium uppercase;
+    letter-spacing: 0.07em;
+    color: var(--ink-muted);
+  }
+
+  /* --- Botões ----------------------------------------------------------- */
+
   .btn {
-    @apply inline-flex items-center justify-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl font-medium transition-all duration-300 border-none text-xs sm:text-sm gap-1.5 sm:gap-2 cursor-pointer;
-    backdrop-filter: blur(10px);
+    @apply inline-flex items-center justify-center gap-2 font-semibold cursor-pointer;
+    @apply px-3 py-2 sm:px-4 text-sm;
+    border-radius: var(--radius-field);
+    border: 1px solid transparent;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    background: var(--desk-sunk);
+    border-color: var(--rule);
+    color: var(--ink-faint);
+    cursor: not-allowed;
   }
 
   .btn-primary {
-    @apply bg-primary/90 text-white hover:bg-primary-hover shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0;
+    background: var(--institution);
+    color: var(--on-institution);
   }
 
-  .btn-danger {
-    @apply bg-danger/90 text-white hover:opacity-90 shadow-lg shadow-danger/25 hover:shadow-danger/40;
+  .btn-primary:hover:not(:disabled) {
+    background: var(--institution-pressed);
   }
 
   .btn-outline {
-    @apply border text-text-main backdrop-blur-md;
-    background: var(--glass-bg);
-    border-color: var(--color-border);
+    background: var(--sheet);
+    border-color: var(--rule-strong);
+    color: var(--ink);
   }
 
-  .btn-outline:hover {
-    background: var(--glass-bg);
-    border-color: var(--color-primary);
+  .btn-outline:hover:not(:disabled) {
+    border-color: var(--institution);
+    background: var(--wash-1);
   }
 
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink-muted);
+  }
+
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--wash-2);
+    color: var(--ink);
+  }
+
+  .btn-danger {
+    background: var(--margin-red);
+    color: #fff;
+  }
+
+  /* Passos da rampa tonal do Vermelho da Margem (.impeccable/design.json). */
+  .btn-danger:hover:not(:disabled) {
+    background: #7a251b;
+  }
+
+  .theme-ardosia .btn-danger:hover:not(:disabled) {
+    background: #c24736;
+  }
+
+  .theme-ardosia .btn-danger {
+    color: #33100c;
+  }
+
+  /* --- Campo com rótulo impresso ---------------------------------------- */
+
+  .field {
+    @apply relative block w-full;
+    background: var(--sheet);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-field);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  /* A espessura dobra por dentro, então o layout não move no foco. */
+  .field:focus-within {
+    border-color: var(--institution);
+    box-shadow: inset 0 0 0 1px var(--institution);
+  }
+
+  .field-invalid,
+  .field-invalid:focus-within {
+    border-color: var(--margin-red);
+    box-shadow: inset 0 0 0 1px var(--margin-red);
+  }
+
+  .field > .label-print {
+    @apply absolute top-1.5 left-3 pointer-events-none;
+  }
+
+  .field > input,
+  .field > select,
+  .field > textarea {
+    @apply w-full bg-transparent border-none outline-none;
+    @apply pt-[1.55rem] pb-2 px-3 text-[0.9375rem];
+    color: var(--ink);
+  }
+
+  .field > textarea {
+    @apply resize-y min-h-24;
+  }
+
+  .field :is(input, select, textarea):disabled {
+    color: var(--ink-faint);
+    cursor: not-allowed;
+  }
+
+  /* Campo sem rótulo interno (busca, filtro em barra). */
   .input {
-    @apply w-full p-3 rounded-xl text-text-main mt-1 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all duration-300 backdrop-blur-sm placeholder:text-text-muted/50;
-    background: var(--glass-bg);
-    border: 1px solid var(--color-border);
+    @apply w-full px-3 py-2 text-[0.9375rem];
+    background: var(--sheet);
+    color: var(--ink);
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius-field);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  .input:focus {
+    @apply outline-none;
+    border-color: var(--institution);
+    box-shadow: inset 0 0 0 1px var(--institution);
+  }
+
+  .input::placeholder,
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: var(--ink-faint);
   }
 
   .label {
-    @apply block text-sm text-text-muted mb-1 font-medium;
+    @apply block text-[0.6875rem] font-medium uppercase mb-1.5;
+    letter-spacing: 0.07em;
+    color: var(--ink-muted);
   }
 
-  .card {
-    @apply backdrop-blur-xl rounded-2xl p-6 shadow-xl;
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    box-shadow:
-      0 4px 24px -1px rgba(0, 0, 0, 0.3),
-      0 0 1px 0 var(--glass-border) inset;
+  /* --- Carimbo de estado ------------------------------------------------ */
+
+  .stamp {
+    @apply inline-flex items-center gap-1 text-[0.6875rem] font-semibold uppercase;
+    letter-spacing: 0.07em;
+    padding: 3px 8px;
+    border-radius: var(--radius-field);
+    border: 1px solid currentColor;
+    background: color-mix(in srgb, currentColor 9%, transparent);
+    white-space: nowrap;
   }
+
+  .stamp-paid {
+    color: var(--color-success);
+  }
+
+  .stamp-pending {
+    color: var(--ochre);
+  }
+
+  .stamp-late {
+    color: var(--margin-red);
+  }
+
+  .stamp-idle {
+    color: var(--ink-muted);
+  }
+
+  /* --- Tabela ----------------------------------------------------------- */
 
   .table-container {
-    @apply overflow-x-auto w-full rounded-2xl backdrop-blur-xl;
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
+    @apply overflow-x-auto w-full;
+    background: var(--sheet);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sheet);
   }
 
   table {
@@ -352,348 +606,239 @@
 
   th,
   td {
-    @apply p-3 text-left border-b;
-    border-color: var(--color-border);
+    @apply px-3 py-2.5 text-left;
+    border-bottom: 1px solid var(--rule);
   }
 
   th {
-    @apply text-text-main font-semibold text-sm;
-    background: var(--glass-bg);
+    @apply text-[0.6875rem] font-semibold uppercase;
+    letter-spacing: 0.07em;
+    color: var(--ink-muted);
+    background: var(--desk);
+    border-bottom: 1px solid var(--rule-strong);
   }
 
-  th:first-child {
-    @apply rounded-tl-xl;
+  td {
+    color: var(--ink);
   }
 
-  th:last-child {
-    @apply rounded-tr-xl;
+  tbody tr:last-child td {
+    border-bottom: 0;
   }
 
-  tr:last-child td {
-    @apply border-b-0;
+  tbody tr:hover td {
+    background: var(--wash-1);
   }
 
-  tr:hover td {
-    background: var(--glass-bg);
+  .col-num {
+    @apply text-right font-medium;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --- Navegação -------------------------------------------------------- */
+
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 text-[0.9375rem] font-medium;
+    border-radius: var(--radius-field);
+    color: var(--ink-muted);
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+
+  .nav-item:hover:not(.active) {
+    background: var(--wash-2);
+    color: var(--ink);
+  }
+
+  .nav-item.active {
+    background: var(--institution);
+    color: var(--on-institution);
+  }
+
+  .tab {
+    @apply px-3 py-2 text-sm font-semibold;
+    border-radius: var(--radius-field);
+    color: var(--ink-muted);
+    transition: background-color 150ms ease, color 150ms ease;
+  }
+
+  .tab:hover:not(.active) {
+    background: var(--wash-2);
+    color: var(--ink);
+  }
+
+  .tab.active {
+    background: var(--institution);
+    color: var(--on-institution);
+  }
+
+  /* --- Casca da aplicação ------------------------------------------------ */
+
+  /* A sidebar e o cabeçalho são folha, separados do conteúdo por um fio. Não
+     flutuam sobre nada, então não têm sombra nem desfoque. */
+  .sheet-sidebar {
+    background: var(--sheet);
+    border-right: 1px solid var(--rule);
+  }
+
+  .sheet-header {
+    background: var(--sheet);
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .sheet-footer-nav {
+    background: var(--sheet);
+    border-top: 1px solid var(--rule);
   }
 }
 
 @layer utilities {
-  .glass {
-    @apply backdrop-blur-2xl shadow-lg;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    box-shadow:
-      var(--glass-shadow),
-      0 0 1px 0 var(--glass-border) inset;
+
+  /* --- Sobreposição ----------------------------------------------------- */
+
+  /* A cortina é o único lugar do sistema onde desfoque é aceitável: ele
+     separa o modal do documento, não decora nada. */
+  .modal-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
+    background: var(--scrim);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    animation: overlayFadeIn 0.2s ease-out;
   }
 
-  .glass-card {
-    @apply backdrop-blur-2xl shadow-lg rounded-2xl p-3 sm:p-4 md:p-6;
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    box-shadow:
-      var(--glass-shadow),
-      0 0 1px 0 var(--glass-border) inset;
-    transition: all 0.3s ease;
+  .modal-sheet {
+    background: var(--sheet);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius-sheet);
+    box-shadow: var(--shadow-overlay);
+    animation: modalSettle 0.34s cubic-bezier(0.32, 0.72, 0, 1);
   }
 
-  .glass-card:hover {
-    border-color: var(--color-primary);
-    box-shadow:
-      0 16px 48px rgba(0, 0, 0, 0.6),
-      0 0 1px 0 var(--glass-border) inset;
+  .raised {
+    box-shadow: var(--shadow-raised);
   }
 
-  .glass-sidebar {
-    @apply backdrop-blur-2xl border-r;
-    background: var(--color-bg-card);
-    border-color: var(--color-border);
+  .tooltip-sheet {
+    @apply px-3 py-2 text-sm;
+    background: var(--ink);
+    color: var(--sheet);
+    border-radius: var(--radius-field);
+    box-shadow: var(--shadow-raised);
   }
 
-  .glass-header {
-    @apply backdrop-blur-2xl border-b;
-    background: var(--color-bg-card);
-    border-color: var(--color-border);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-  }
+  /* --- Select ----------------------------------------------------------- */
 
-  .glass-modal {
-    @apply border shadow-2xl rounded-3xl;
-    background: var(--color-bg-card);
-    border-color: var(--color-border);
-    backdrop-filter: blur(60px) saturate(180%);
-    -webkit-backdrop-filter: blur(60px) saturate(180%);
-    box-shadow:
-      0 30px 60px -12px rgba(0, 0, 0, 0.6),
-      0 0 0 1px var(--glass-border) inset;
-    animation: modalSpring 0.4s cubic-bezier(0.32, 0.72, 0, 1);
-  }
-
-  .glass-input {
-    @apply w-full p-3 rounded-xl text-text-main focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all duration-300 backdrop-blur-sm placeholder:text-text-muted/40;
-    background: var(--glass-bg);
-    border: 1px solid var(--color-border);
-  }
-
-  .theme-dark input[type="date"]::-webkit-calendar-picker-indicator,
-  .theme-dark input[type="time"]::-webkit-calendar-picker-indicator {
-    filter: invert(1);
-    opacity: 0.7;
-    cursor: pointer;
-  }
-
-  .theme-dark input[type="date"]::-webkit-calendar-picker-indicator:hover,
-  .theme-dark input[type="time"]::-webkit-calendar-picker-indicator:hover {
-    opacity: 1;
-  }
-
-  .glass-input:hover {
-    border-color: var(--color-primary);
-  }
-
-  /* Global Select & Option Styles - Theme Adaptive */
   select,
-  select.glass-input,
   select.input {
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235c635e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px !important;
+    background-position: right 10px center;
+    padding-right: 32px;
+  }
+
+  .theme-ardosia select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239aa39c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   }
 
   select option {
-    background-color: var(--color-bg-dark);
-    color: var(--color-text-main);
-    padding: 8px 12px;
+    background-color: var(--sheet);
+    color: var(--ink);
   }
 
-  select option:hover,
-  select option:checked {
-    background-color: var(--color-primary);
-    color: white;
+  .theme-ardosia input[type="date"]::-webkit-calendar-picker-indicator,
+  .theme-ardosia input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.7;
+    cursor: pointer;
   }
 
-  .glass-button {
-    @apply px-6 py-3 rounded-xl font-medium transition-all duration-300 backdrop-blur-sm text-white;
-    @apply bg-gradient-to-br from-primary/70 to-primary-hover/70 shadow-md shadow-primary/20;
-  }
+  /* --- Barra de rolagem -------------------------------------------------- */
 
-  .glass-button:hover {
-    @apply -translate-y-[1px] shadow-lg shadow-primary/30;
-  }
-
-  .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-light via-primary to-secondary;
-  }
-
-  .border-glow {
-    position: relative;
-  }
-
-  .border-glow::before {
-    content: '';
-    position: absolute;
-    inset: -1px;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(135deg, var(--color-primary-light), var(--color-secondary), var(--color-primary));
-    opacity: 0.5;
-    -webkit-mask:
-      linear-gradient(white 0 0) content-box,
-      linear-gradient(white 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    pointer-events: none;
-  }
-
-  .glow-primary {
-    box-shadow: 0 0 30px color-mix(in srgb, var(--color-primary) 30%, transparent);
-  }
-
-  .glow-success {
-    box-shadow: 0 0 30px color-mix(in srgb, var(--color-success) 30%, transparent);
-  }
-
-  .glow-danger {
-    box-shadow: 0 0 30px color-mix(in srgb, var(--color-danger) 30%, transparent);
-  }
-
-  /* Floating orbs for background decoration */
-  .orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.5;
-    animation: none;
-    pointer-events: none;
-  }
-
-  .orb-primary {
-    background: color-mix(in srgb, var(--color-primary) 20%, transparent);
-  }
-
-  .orb-purple {
-    background: color-mix(in srgb, var(--color-secondary) 15%, transparent);
-  }
-
-  /* Custom Scrollbar - Glass Style */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--glass-bg);
-    border-radius: 10px;
+    background: var(--desk);
   }
 
   ::-webkit-scrollbar-thumb {
-    background: var(--color-text-muted);
-    border-radius: 10px;
-    border: 2px solid transparent;
+    background: var(--rule-strong);
+    border: 3px solid var(--desk);
     background-clip: padding-box;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-primary);
-    border: 2px solid transparent;
+    background: var(--ink-faint);
+    border: 3px solid var(--desk);
     background-clip: padding-box;
   }
 
-  .input-modern {
-    @apply w-full rounded-xl px-4 py-3 text-text-main placeholder-text-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition-all duration-300 backdrop-blur-sm;
-    background: var(--glass-bg);
-    border: 1px solid var(--color-border);
+  /* --- Faixa do Registro ------------------------------------------------- */
+
+  /* O componente de assinatura. Cada aluno é uma faixa onde o período corre da
+     esquerda para a direita: a presença não escreve nada — a linha reta É a
+     evidência de que está tudo certo — a falta escreve uma marca, e o mês de
+     mensalidade carimba embaixo. */
+  .strip-track {
+    @apply relative w-full;
+    height: 36px;
   }
 
-  .input-modern:hover {
-    border-color: var(--color-primary);
+  .strip-rule {
+    @apply absolute left-0 right-0;
+    top: 8px;
+    height: 1px;
+    background: var(--rule-strong);
   }
 
-  .btn-primary-gradient {
-    @apply text-white hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 border-none font-medium;
-    @apply bg-gradient-to-br from-primary/90 to-primary-hover/90 shadow-lg shadow-primary/40;
+  /* Traço de caneta: quadrado, porque é uma marca, não um componente. */
+  .strip-miss {
+    @apply absolute;
+    top: 2px;
+    width: 2px;
+    height: 13px;
+    background: var(--ink);
   }
 
-  .btn-primary-gradient:hover {
-    @apply shadow-xl shadow-primary/50;
+  .strip-month {
+    @apply absolute flex items-center justify-center text-[0.6875rem] font-semibold uppercase;
+    letter-spacing: 0.07em;
+    top: 18px;
+    height: 18px;
+    border-radius: var(--radius-field);
+    border: 1px solid currentColor;
+    background: color-mix(in srgb, currentColor 9%, transparent);
+    overflow: hidden;
+  }
+}
+
+/* Movimento reduzido: alternativa intencional, não um kill global.
+   Mudanças de estado continuam legíveis como fade curto; o spinner de
+   carregamento sobrevive porque comunica progresso. */
+@media (prefers-reduced-motion: reduce) {
+
+  .animate-pulse,
+  .animate-jiggle,
+  .animate-shake {
+    animation: none !important;
   }
 
-  .btn-success-gradient {
-    @apply text-white hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 border-none font-medium;
-    @apply bg-gradient-to-br from-success/90 to-success/70 shadow-lg shadow-success/40;
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-in,
+  .animate-slide-in-right,
+  .animate-spring-up,
+  .animate-stamp,
+  .modal-sheet {
+    animation: fadeIn 0.12s ease-out !important;
   }
 
-  .btn-success-gradient:hover {
-    @apply shadow-xl shadow-success/50;
-  }
-
-  .card-gradient-1 {
-    background: linear-gradient(135deg, rgba(30, 41, 59, 0.5) 0%, rgba(15, 23, 42, 0.5) 100%);
-    @apply backdrop-blur-xl border shadow-xl;
-    border-color: var(--color-border);
-  }
-
-  /* Stat Cards Glass Effect */
-  .stat-card {
-    @apply backdrop-blur-xl rounded-2xl p-6;
-    background: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    box-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.3),
-      0 0 1px 0 var(--glass-border) inset;
-    transition: all 0.3s ease;
-  }
-
-  .stat-card:hover {
-    border-color: var(--color-primary-light);
-    transform: translateY(-2px);
-    box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.5),
-      0 0 1px 0 var(--glass-border) inset;
-  }
-
-  /* Nav Link Glass Effect */
-  .nav-link-glass {
-    @apply flex items-center p-3 rounded-xl transition-all duration-300;
-    backdrop-filter: blur(10px);
-  }
-
-  .nav-link-glass.active {
-    @apply bg-gradient-to-br from-primary/90 to-primary-hover/90 shadow-lg shadow-primary/40 text-white;
-  }
-
-  .nav-link-glass:hover:not(.active) {
-    background: var(--glass-bg);
-  }
-
-  /* Tab Pills Glass Effect */
-  .tab-glass {
-    @apply px-4 py-2 rounded-xl transition-all duration-300 font-medium text-sm;
-    backdrop-filter: blur(10px);
-  }
-
-  .tab-glass.active {
-    @apply bg-primary text-white shadow-lg shadow-primary/40;
-  }
-
-  .tab-glass:hover:not(.active) {
-    @apply text-text-main;
-    background: var(--glass-bg);
-  }
-
-  /* Badge Glass Effect */
-  .badge-glass {
-    @apply px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm;
-    border: 1px solid var(--glass-border);
-  }
-
-  .badge-success {
-    @apply bg-success/20 text-success border-success/30;
-  }
-
-  .badge-warning {
-    @apply bg-warning/20 text-warning border-warning/30;
-  }
-
-  .badge-danger {
-    @apply bg-danger/20 text-danger border-danger/30;
-  }
-
-  .badge-primary {
-    @apply bg-primary/20 text-primary-light border-primary/30;
-  }
-
-  /* Modal Overlay - iOS Style */
   .modal-overlay {
-    @apply fixed inset-0 z-50 flex items-center justify-center p-4;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    animation: overlayFadeIn 0.3s ease-out;
-  }
-
-  /* Tooltip Glass */
-  .tooltip-glass {
-    @apply px-3 py-2 rounded-lg text-sm;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
-    color: var(--color-text-main);
-  }
-
-  /* Shimmer Loading Effect */
-  .shimmer {
-    background: linear-gradient(90deg,
-        transparent 0%,
-        var(--glass-border) 50%,
-        transparent 100%);
-    background-size: 200% 100%;
-    animation: none;
+    animation: none !important;
   }
 }
