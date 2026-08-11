@@ -12,8 +12,10 @@ router = APIRouter(prefix="/billing", tags=["billing"])
 
 
 def _cfg(db: Session, key: str) -> str | None:
+    """Env vence o banco: em produção as chaves live vêm do .env e não podem ser
+    anuladas por um valor de teste que ficou salvo em Configurações."""
     row = db.query(AppConfig).filter(AppConfig.key == key).first()
-    return (row.value if row else None) or os.getenv(key.upper()) or None
+    return os.getenv(key.upper()) or (row.value if row else None) or None
 
 
 def _stripe(db: Session):
@@ -23,13 +25,25 @@ def _stripe(db: Session):
     return stripe
 
 
-def _apply_plan(db: Session, user: User, plan_id: str | None):
+def _apply_plan(db: Session, user: User, plan: Plan | None):
     """Grava o limite de turmas do plano assinado. O limite é aplicado em routers/classes.py."""
-    plan = db.query(Plan).filter(Plan.id == int(plan_id)).first() if plan_id else None
     if plan:
         user.plan_id = str(plan.id)
         user.max_classes = plan.max_classes
         # Turmas já criadas acima do novo limite continuam existindo; só bloqueia criar novas.
+
+
+def _plan_by_id(db: Session, plan_id: str | None) -> Plan | None:
+    return db.query(Plan).filter(Plan.id == int(plan_id)).first() if plan_id else None
+
+
+def _plan_of_subscription(db: Session, sub: dict) -> Plan | None:
+    """Plano pelo price da assinatura: troca de plano feita no portal do Stripe
+    não copia o metadata original, então o price é a única fonte confiável."""
+    items = (sub.get("items") or {}).get("data") or []
+    price_id = items[0].get("price", {}).get("id") if items else None
+    plan = db.query(Plan).filter(Plan.stripe_price_id == price_id).first() if price_id else None
+    return plan or _plan_by_id(db, (sub.get("metadata") or {}).get("plan_id"))
 
 
 @router.post("/checkout")
@@ -90,13 +104,16 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     obj = event["data"]["object"]
 
     if event["type"] == "checkout.session.completed":
-        user = db.query(User).filter(User.id == int(obj["client_reference_id"])).first()
+        # client_reference_id pode vir vazio (ex.: link de pagamento criado no Dashboard);
+        # sem ele não há usuário para vincular, e levantar erro faria o Stripe reenviar em loop.
+        ref = obj.get("client_reference_id")
+        user = db.query(User).filter(User.id == int(ref)).first() if ref and ref.isdigit() else None
         if user:
             user.stripe_customer_id = obj.get("customer")
             user.stripe_subscription_id = obj.get("subscription")
             user.is_trial = False
             user.is_active = True
-            _apply_plan(db, user, (obj.get("metadata") or {}).get("plan_id"))
+            _apply_plan(db, user, _plan_by_id(db, (obj.get("metadata") or {}).get("plan_id")))
             db.commit()
 
     elif event["type"] in ("customer.subscription.deleted", "customer.subscription.updated"):
@@ -104,7 +121,7 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
         if user:
             user.is_active = obj["status"] in ("active", "trialing")
             # Troca de plano no Stripe reflete no limite de turmas
-            _apply_plan(db, user, (obj.get("metadata") or {}).get("plan_id"))
+            _apply_plan(db, user, _plan_of_subscription(db, obj))
             db.commit()
 
     return {"received": True}

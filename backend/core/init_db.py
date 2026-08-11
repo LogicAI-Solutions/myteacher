@@ -44,7 +44,9 @@ def init_db(db: Session):
             "description": "Para quem está começando e gerencia poucas turmas.",
             "price": "R$ 47,90",
             "period": "/mês",
-            "stripe_price_id": "price_1U18QjJtQF0i2t0DQ2RBNFHZ",
+            # Em produção defina STRIPE_PRICE_* no .env com os prices do modo live;
+            # este upsert roda a cada boot e sobrescreveria valores editados no admin.
+            "stripe_price_id": os.getenv("STRIPE_PRICE_ESSENCIAL") or "price_1U18QjJtQF0i2t0DQ2RBNFHZ",
             "role": "autonomous_teacher",
             "max_classes": 5,
             "max_teachers": 1,
@@ -64,7 +66,7 @@ def init_db(db: Session):
             "description": "Para professores com agenda cheia, sem limite de turmas.",
             "price": "R$ 97,90",
             "period": "/mês",
-            "stripe_price_id": "price_1U18BBJtQF0i2t0DhY0GBiLT",
+            "stripe_price_id": os.getenv("STRIPE_PRICE_PROFISSIONAL") or "price_1U18BBJtQF0i2t0DhY0GBiLT",
             "role": "autonomous_teacher",
             "max_classes": 9999,
             "max_teachers": 1,
@@ -96,8 +98,8 @@ def init_db(db: Session):
             {"key": "stripe_public_key", "value": ""},
             {"key": "stripe_secret_key", "value": ""},
             {"key": "stripe_webhook_secret", "value": ""},
-            # Assinatura mensal R$ 97,90 (price criado no Stripe)
-            {"key": "stripe_price_id", "value": "price_1U18BBJtQF0i2t0DhY0GBiLT"},
+            # Fallback quando o checkout vem sem plano; env vence (ver _cfg em routers/billing.py)
+            {"key": "stripe_price_id", "value": os.getenv("STRIPE_PRICE_ID") or "price_1U18BBJtQF0i2t0DhY0GBiLT"},
         ]
         for cfg in configs_data:
             db.add(AppConfigModel(**cfg))

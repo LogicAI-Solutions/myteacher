@@ -137,6 +137,42 @@ def test_webhook_cancelamento_desativa_a_conta():
     assert db.committed
 
 
+def test_webhook_troca_de_plano_no_portal_ajusta_o_limite():
+    """Troca de plano feita no portal do Stripe não copia o metadata da assinatura.
+    O plano tem que sair do price do item, senão o limite de turmas fica no valor antigo."""
+    import asyncio
+    user = _User()
+    user.stripe_subscription_id, user.max_classes = "sub_1", 9999
+    db = _DB(user=user, plan=_Plan(), cfg={"stripe_webhook_secret": "whsec"})
+    db.cfg["stripe_price_id"] = "whsec"
+    event = {
+        "type": "customer.subscription.updated",
+        "data": {"object": {"id": "sub_1", "status": "active", "metadata": {},
+                            "items": {"data": [{"price": {"id": "price_essencial"}}]}}},
+    }
+    req = type("R", (), {"headers": {"stripe-signature": "sig"}, "body": lambda self: _async(b"{}")})()
+    with patch.object(billing, "_stripe") as st:
+        st.return_value.Webhook.construct_event.return_value = event
+        asyncio.run(billing.stripe_webhook(req, db))
+    assert user.max_classes == 5
+    assert user.plan_id == "3"
+
+
+def test_webhook_sem_client_reference_id_nao_quebra():
+    """Sessão criada fora do app (payment link) chega sem client_reference_id.
+    Um 500 aqui faria o Stripe reenviar o evento indefinidamente."""
+    import asyncio
+    db = _DB(user=_User(), cfg={"stripe_webhook_secret": "whsec"})
+    db.cfg["stripe_price_id"] = "whsec"
+    event = {"type": "checkout.session.completed",
+             "data": {"object": {"client_reference_id": None, "customer": "cus_1"}}}
+    req = type("R", (), {"headers": {"stripe-signature": "sig"}, "body": lambda self: _async(b"{}")})()
+    with patch.object(billing, "_stripe") as st:
+        st.return_value.Webhook.construct_event.return_value = event
+        assert asyncio.run(billing.stripe_webhook(req, db)) == {"received": True}
+    assert db.committed is False
+
+
 async def _async(value):
     return value
 
@@ -147,4 +183,6 @@ if __name__ == "__main__":
     test_webhook_aplica_limite_de_turmas_do_plano()
     test_webhook_encerra_trial_e_guarda_ids()
     test_webhook_cancelamento_desativa_a_conta()
+    test_webhook_troca_de_plano_no_portal_ajusta_o_limite()
+    test_webhook_sem_client_reference_id_nao_quebra()
     print("ok")
