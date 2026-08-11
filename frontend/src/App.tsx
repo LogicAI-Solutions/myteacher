@@ -22,6 +22,7 @@ const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Pro
 const TrialExpired = lazy(() => import('./pages/TrialExpired').then(m => ({ default: m.TrialExpired })));
 const Pricing = lazy(() => import('./pages/Pricing'));
 const Register = lazy(() => import('./pages/Register'));
+const CheckoutSuccess = lazy(() => import('./pages/CheckoutSuccess').then(m => ({ default: m.CheckoutSuccess })));
 
 // Layouts
 import { Layout } from './components/Layout';
@@ -67,6 +68,7 @@ function AppRoutes() {
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/register" element={<Register />} />
       <Route path="/trial-expired" element={<TrialExpired />} />
+      <Route path="/checkout/success" element={<CheckoutSuccess />} />
 
       {/* Student Portal Routes */}
       <Route path="/portal/login" element={<StudentLogin />} />

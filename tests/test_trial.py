@@ -41,3 +41,18 @@ def test_rotas_protegidas_bloqueiam_trial_vencido():
     with pytest.raises(HTTPException) as e:
         asyncio.run(get_current_user(_Obj(**_user(14))))
     assert e.value.status_code == 403 and e.value.detail == "TRIAL_EXPIRED"
+
+
+def test_rotas_protegidas_bloqueiam_assinatura_cancelada():
+    """Assinante que cancelou (is_active=False, sem trial) não pode mais usar nada.
+    Mesmo sinal do trial vencido: o front redireciona pro paywall."""
+    cancelado = _Obj(id=1, email="c@c.com", is_active=False, is_admin=False,
+                     is_trial=False, trial_started_at=None)
+    with pytest.raises(HTTPException) as e:
+        asyncio.run(get_current_user(cancelado))
+    assert e.value.status_code == 403 and e.value.detail == "TRIAL_EXPIRED"
+
+    # Assinante ativo passa livre.
+    ativo = _Obj(id=2, email="a@a.com", is_active=True, is_admin=False,
+                 is_trial=False, trial_started_at=None)
+    asyncio.run(get_current_user(ativo))  # não levanta

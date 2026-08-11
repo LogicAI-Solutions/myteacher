@@ -2,13 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
-from datetime import datetime
 from backend.schemas import auth as auth_schemas
 from backend.schemas import users as users_schemas
 from backend.crud import users as users_crud
 from backend.models.users import User
 from backend.core import database, security
-from backend.core.config import settings
 
 router = APIRouter()
 
@@ -53,23 +51,10 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             detail="Usuário ou senha incorretos",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    if not user.is_active:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Sua conta está inativa. Por favor, entre em contato com o suporte.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    # Verificar trial expirado
-    if user.is_trial and user.trial_started_at:
-        elapsed_days = (datetime.utcnow() - user.trial_started_at).days
-        if elapsed_days >= settings.TRIAL_DAYS:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="TRIAL_EXPIRED",
-            )
-    
+
+    # Autenticar não é autorizar: quem tem teste vencido ou assinatura cancelada
+    # PRECISA logar para chegar ao checkout e reassinar. O bloqueio de uso das
+    # features fica no portão security.get_current_user, não aqui.
     access_token_expires = security.timedelta(minutes=security.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = security.create_access_token(
         data={"sub": user.email}, expires_delta=access_token_expires

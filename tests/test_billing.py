@@ -73,8 +73,9 @@ def test_checkout_manda_o_plano_escolhido_e_seu_price():
     # o webhook depende do metadata para aplicar o limite de turmas
     assert kwargs["metadata"] == {"plan_id": "3"}
     assert kwargs["subscription_data"] == {"metadata": {"plan_id": "3"}}
-    # Precisam bater com rotas reais de frontend/src/App.tsx, senão o usuário cai no NotFound
-    assert kwargs["success_url"].startswith("http://app/dashboard")
+    # Precisam bater com rotas reais de frontend/src/App.tsx, senão o usuário cai no NotFound.
+    # /checkout/success faz poll até o webhook ativar a conta antes de mandar pro painel.
+    assert kwargs["success_url"] == "http://app/checkout/success"
     assert kwargs["cancel_url"] == "http://app/trial-expired"
 
 
@@ -115,6 +116,27 @@ def test_webhook_encerra_trial_e_guarda_ids():
     assert db.committed
 
 
+def test_webhook_cancelamento_desativa_a_conta():
+    """Cancelou no Stripe -> customer.subscription.deleted (status 'canceled').
+    A conta precisa ficar is_active=False para o portão de acesso bloquear o uso."""
+    import asyncio
+    user = _User()
+    user.is_active = True
+    user.stripe_subscription_id = "sub_1"
+    db = _DB(user=user, cfg={"stripe_webhook_secret": "whsec"})
+    db.cfg["stripe_price_id"] = "whsec"
+    event = {
+        "type": "customer.subscription.deleted",
+        "data": {"object": {"id": "sub_1", "status": "canceled"}},
+    }
+    req = type("R", (), {"headers": {"stripe-signature": "sig"}, "body": lambda self: _async(b"{}")})()
+    with patch.object(billing, "_stripe") as st:
+        st.return_value.Webhook.construct_event.return_value = event
+        asyncio.run(billing.stripe_webhook(req, db))
+    assert user.is_active is False
+    assert db.committed
+
+
 async def _async(value):
     return value
 
@@ -124,4 +146,5 @@ if __name__ == "__main__":
     test_checkout_manda_o_plano_escolhido_e_seu_price()
     test_webhook_aplica_limite_de_turmas_do_plano()
     test_webhook_encerra_trial_e_guarda_ids()
+    test_webhook_cancelamento_desativa_a_conta()
     print("ok")

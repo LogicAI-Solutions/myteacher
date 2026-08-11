@@ -38,7 +38,6 @@ export default function Pricing() {
   }, []);
 
   const handleSubscribe = (plan: Plan) => {
-    console.log(`Iniciando assinatura do plano ${plan.name}`);
     navigate('/register', { state: { role: plan.role, planId: plan.id, planName: plan.name } });
   };
 

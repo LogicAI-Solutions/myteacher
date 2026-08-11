@@ -67,7 +67,7 @@ def create_checkout_session(
         metadata={"plan_id": str(plan.id)} if plan else {},
         customer=user.stripe_customer_id or None,
         customer_email=None if user.stripe_customer_id else user.email,
-        success_url=f"{base_url}/dashboard?assinatura=ok",
+        success_url=f"{base_url}/checkout/success",
         cancel_url=f"{base_url}/trial-expired",
     )
     return {"url": session.url}

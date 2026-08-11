@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Loading } from '../components/Loading';
 import { AlertCircle, GraduationCap, ClipboardList, ArrowRight, X, HelpCircle, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { Toast, type ToastType } from '../components/Toast';
 
 interface DashboardStats {
     overview: {
@@ -68,6 +69,16 @@ export const Dashboard = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [hideTutorial, setHideTutorial] = useState(() => localStorage.getItem('hideTutorial') === 'true');
+    const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+
+    // Retorno do checkout do Stripe: confirma a ativação e limpa o param da URL.
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('assinatura') === 'ok') {
+            setToast({ message: 'Assinatura ativada! Bem-vindo(a) de volta.', type: 'success' });
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    }, []);
 
     const handleDismissTutorial = () => {
         localStorage.setItem('hideTutorial', 'true');
@@ -120,6 +131,7 @@ export const Dashboard = () => {
 
     return (
         <div className="animate-slide-up">
+            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
             <header className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-bold text-text-main">Olá, {firstName}</h1>

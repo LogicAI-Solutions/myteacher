@@ -58,7 +58,9 @@ async def get_user_from_token(token: str = Depends(oauth2_scheme), db: Session =
 
 
 async def get_current_user(user = Depends(get_user_from_token)):
-    # Verificar trial expirado
+    # Portão de acesso das rotas de feature: bloqueia quem não tem direito de uso.
+    # Dois motivos levam à mesma tela de "assine um plano" (front redireciona no 403
+    # TRIAL_EXPIRED): teste grátis vencido, ou assinatura inativa/cancelada.
     if user.is_trial and user.trial_started_at:
         elapsed_days = (datetime.utcnow() - user.trial_started_at).days
         if elapsed_days >= settings.TRIAL_DAYS:
@@ -66,6 +68,15 @@ async def get_current_user(user = Depends(get_user_from_token)):
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="TRIAL_EXPIRED",
             )
+
+    # Assinante que cancelou fica is_active=False (webhook customer.subscription.deleted).
+    # Sem este gate, o token ainda válido daria acesso total mesmo sem plano ativo.
+    # ponytail: TRIAL_EXPIRED é reusado como sinal único de "sem acesso, vá assinar".
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="TRIAL_EXPIRED",
+        )
 
     return user
 
