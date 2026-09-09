@@ -62,20 +62,56 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+def _get_base_scheme_and_host(request: Request) -> tuple[str, str]:
+    forwarded_proto = request.headers.get("x-forwarded-proto")
+    forwarded_host = request.headers.get("x-forwarded-host")
+    host = forwarded_host or request.headers.get("host") or request.base_url.netloc or "localhost:8501"
+    is_local = "localhost" in host or "127.0.0.1" in host
+    scheme = forwarded_proto or ("http" if is_local else "https")
+    return scheme, host
+
+
 def _get_frontend_url(request: Request) -> str:
-    if settings.FRONTEND_URL:
-        return settings.FRONTEND_URL.rstrip("/")
-    origin = request.headers.get("origin") or request.headers.get("referer")
+    # 1. Tentar obter pelo cabeçalho origin ou referer do navegador
+    origin = request.headers.get("origin")
     if origin:
         return origin.rstrip("/")
-    return str(request.base_url).rstrip("/")
+    referer = request.headers.get("referer")
+    if referer:
+        parsed = urllib.parse.urlparse(referer)
+        if parsed.scheme and parsed.netloc:
+            return f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
+
+    scheme, host = _get_base_scheme_and_host(request)
+    is_local = "localhost" in host or "127.0.0.1" in host
+
+    # 2. Se for local e FRONTEND_URL estiver no .env
+    if is_local and settings.FRONTEND_URL:
+        return settings.FRONTEND_URL.rstrip("/")
+    elif not is_local:
+        return f"{scheme}://{host}".rstrip("/")
+
+    return "http://localhost:5273"
 
 
 def _get_google_callback_url(request: Request) -> str:
-    if settings.GOOGLE_CALLBACK_URL:
-        return settings.GOOGLE_CALLBACK_URL
-    base = str(request.base_url).rstrip("/")
-    return f"{base}/auth/google/callback"
+    scheme, host = _get_base_scheme_and_host(request)
+    is_local = "localhost" in host or "127.0.0.1" in host
+
+    # Se houver configuração explícita e condizente com o ambiente
+    if settings.GOOGLE_CALLBACK_URL and settings.GOOGLE_CALLBACK_URL.strip():
+        configured = settings.GOOGLE_CALLBACK_URL.strip()
+        if is_local and ("localhost" in configured or "127.0.0.1" in configured):
+            return configured
+        elif not is_local and ("localhost" not in configured and "127.0.0.1" not in configured):
+            return configured
+
+    # Detecção 100% dinâmica automática:
+    if is_local:
+        return f"http://localhost:8501/auth/google/callback"
+    else:
+        # Em produção com proxy Nginx, o endpoint público é sob /api/auth/google/callback
+        return f"{scheme}://{host}/api/auth/google/callback"
 
 
 @router.get("/auth/google")
