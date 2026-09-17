@@ -310,7 +310,7 @@ const SortableClassCard = ({ cls, index, isReorderMode, allClasses, openEditModa
                 </p>
 
                 {cardConflicts.length > 0 && (
-                    <div className="mb-3 px-2 py-1 rounded-[2px] bg-amber-500/10 border border-amber-500/25 text-amber-500 text-[11px] flex items-center gap-1.5 font-medium">
+                    <div className="mb-3 px-2 py-1 rounded-[2px] bg-amber-500/10 border border-amber-500/25 text-[var(--ochre)] text-[11px] flex items-center gap-1.5 font-medium">
                         <AlertTriangle size={12} className="shrink-0" />
                         <span className="truncate">Choque com <strong>{cardConflicts.map(c => c.conflictingClass.name).join(', ')}</strong></span>
                     </div>
@@ -963,7 +963,7 @@ export const Classes = () => {
                                 </div>
 
                                 {timeToMinutes(startTime) >= timeToMinutes(endTime) && (
-                                    <div className="flex items-center gap-1.5 text-xs text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-[2px]">
+                                    <div className="flex items-center gap-1.5 text-xs text-[var(--ochre)] bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-[2px]">
                                         <AlertTriangle size={13} />
                                         <span>O horário de início deve ser anterior ao término.</span>
                                     </div>
@@ -1027,7 +1027,7 @@ export const Classes = () => {
                                                         className="w-3.5 h-3.5 rounded text-primary"
                                                     />
                                                     <span className="flex items-center gap-1">
-                                                        <CheckCircle2 size={12} className="text-emerald-400" />
+                                                        <CheckCircle2 size={12} className="text-[var(--color-success)]" />
                                                         Sincronizar eventos com o <strong>Google Agenda</strong>
                                                     </span>
                                                 </label>
@@ -1060,7 +1060,7 @@ export const Classes = () => {
                             {/* Alerta de Conflito de Horário */}
                             {createConflicts.length > 0 && (
                                 <div className="p-3.5 rounded-[3px] border border-amber-500/30 bg-amber-500/10 space-y-2.5 animate-fade-in">
-                                    <div className="flex items-start gap-2.5 text-amber-500">
+                                    <div className="flex items-start gap-2.5 text-[var(--ochre)]">
                                         <ShieldAlert size={18} className="shrink-0 mt-0.5" />
                                         <div className="space-y-1">
                                             <p className="text-xs font-bold leading-tight">Choque de horário detectado!</p>
@@ -1212,7 +1212,7 @@ export const Classes = () => {
                                 </div>
 
                                 {timeToMinutes(editStartTime) >= timeToMinutes(editEndTime) && (
-                                    <div className="flex items-center gap-1.5 text-xs text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-[2px]">
+                                    <div className="flex items-center gap-1.5 text-xs text-[var(--ochre)] bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-[2px]">
                                         <AlertTriangle size={13} />
                                         <span>O horário de início deve ser anterior ao término.</span>
                                     </div>
@@ -1291,7 +1291,7 @@ export const Classes = () => {
                             {/* Alerta de Conflito de Horário na Edição */}
                             {editConflicts.length > 0 && (
                                 <div className="p-3.5 rounded-[3px] border border-amber-500/30 bg-amber-500/10 space-y-2.5 animate-fade-in">
-                                    <div className="flex items-start gap-2.5 text-amber-500">
+                                    <div className="flex items-start gap-2.5 text-[var(--ochre)]">
                                         <ShieldAlert size={18} className="shrink-0 mt-0.5" />
                                         <div className="space-y-1">
                                             <p className="text-xs font-bold leading-tight">Choque de horário detectado!</p>

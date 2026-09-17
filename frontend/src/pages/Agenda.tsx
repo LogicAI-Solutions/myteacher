@@ -46,13 +46,13 @@ interface ClassOption {
 }
 
 const CATEGORY_MAP: Record<string, { label: string; color: string; bg: string; text: string }> = {
-  lesson: { label: 'Turma', color: '#10b981', bg: 'bg-emerald-500/15 border-emerald-500/30', text: 'text-emerald-400' },
-  private: { label: 'Particular', color: '#8b5cf6', bg: 'bg-purple-500/15 border-purple-500/30', text: 'text-purple-400' },
-  meeting: { label: 'Reunião', color: '#f59e0b', bg: 'bg-amber-500/15 border-amber-500/30', text: 'text-amber-400' },
-  exam: { label: 'Prova', color: '#ef4444', bg: 'bg-rose-500/15 border-rose-500/30', text: 'text-rose-400' },
-  reminder: { label: 'Lembrete', color: '#06b6d4', bg: 'bg-cyan-500/15 border-cyan-500/30', text: 'text-cyan-400' },
-  google: { label: 'Google', color: '#3b82f6', bg: 'bg-blue-500/15 border-blue-500/30', text: 'text-blue-400' },
-  other: { label: 'Outro', color: '#64748b', bg: 'bg-slate-500/15 border-slate-500/30', text: 'text-slate-400' },
+  lesson: { label: 'Turma', color: '#10b981', bg: 'bg-emerald-500/15 border-emerald-500/30', text: 'event-ink-emerald' },
+  private: { label: 'Particular', color: '#8b5cf6', bg: 'bg-purple-500/15 border-purple-500/30', text: 'event-ink-purple' },
+  meeting: { label: 'Reunião', color: '#f59e0b', bg: 'bg-amber-500/15 border-amber-500/30', text: 'event-ink-amber' },
+  exam: { label: 'Prova', color: '#ef4444', bg: 'bg-rose-500/15 border-rose-500/30', text: 'event-ink-rose' },
+  reminder: { label: 'Lembrete', color: '#06b6d4', bg: 'bg-cyan-500/15 border-cyan-500/30', text: 'event-ink-cyan' },
+  google: { label: 'Google', color: '#3b82f6', bg: 'bg-blue-500/15 border-blue-500/30', text: 'event-ink-blue' },
+  other: { label: 'Outro', color: '#64748b', bg: 'bg-slate-500/15 border-slate-500/30', text: 'event-ink-slate' },
 };
 
 export const Agenda = () => {
@@ -511,7 +511,7 @@ export const Agenda = () => {
           {/* Google Status Badge */}
           {googleConnected ? (
             <div
-              className="h-8 flex items-center gap-1.5 px-2 rounded-[2px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-medium"
+              className="h-8 flex items-center gap-1.5 px-2 rounded-[2px] bg-emerald-500/10 border border-emerald-500/20 event-ink-emerald text-[10px] font-medium"
               title={googleEmail ? `Conectado como ${googleEmail}` : 'Google Agenda conectado'}
             >
               <CheckCircle2 size={12} />
@@ -523,7 +523,7 @@ export const Agenda = () => {
                 }}
                 disabled={isSyncing}
                 title="Sincronizar com Google Agenda"
-                className="text-emerald-400 hover:text-emerald-300 transition-colors p-0.5"
+                className="event-ink-emerald hover:opacity-75 transition-opacity p-0.5"
               >
                 <RefreshCw size={11} className={isSyncing ? 'animate-spin' : ''} />
               </button>
@@ -634,10 +634,10 @@ export const Agenda = () => {
                       <div
                         className={`text-[10px] sm:text-xs font-semibold px-1.5 py-1 rounded-[2px] truncate flex items-center gap-1 ${
                           day.holiday?.type === 'national_holiday'
-                            ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300'
+                            ? 'bg-rose-500/15 border border-rose-500/30 event-ink-rose'
                             : day.holiday?.type === 'educational'
-                            ? 'bg-amber-500/15 border border-amber-500/30 text-amber-300'
-                            : 'bg-purple-500/15 border border-purple-500/30 text-purple-300'
+                            ? 'bg-amber-500/15 border border-amber-500/30 event-ink-amber'
+                            : 'bg-purple-500/15 border border-purple-500/30 event-ink-purple'
                         }`}
                         title={`${day.holiday?.name} (${day.holiday?.type === 'national_holiday' ? 'Feriado Nacional' : 'Ponto Facultativo'})`}
                       >
@@ -926,7 +926,7 @@ export const Agenda = () => {
               {/* Integração com Google Agenda se conectado */}
               {googleConnected && (
                 <div className="p-2.5 bg-blue-500/10 border border-blue-500/20 rounded-[2px] space-y-1.5">
-                  <div className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-400">
+                  <div className="flex items-center gap-1.5 text-[11px] font-semibold event-ink-blue">
                     <Sparkles size={12} /> Opções do Google Agenda
                   </div>
                   <div className="flex flex-col gap-1 text-[11px] text-text-muted">
@@ -1027,10 +1027,10 @@ export const Agenda = () => {
                         key={`hol_${idx}`}
                         className={`p-2 rounded-[2px] border text-xs font-medium space-y-0.5 ${
                           item.holiday.type === 'national_holiday'
-                            ? 'bg-rose-500/15 border-rose-500/30 text-rose-300'
+                            ? 'bg-rose-500/15 border-rose-500/30 event-ink-rose'
                             : item.holiday.type === 'educational'
-                            ? 'bg-amber-500/15 border-amber-500/30 text-amber-300'
-                            : 'bg-purple-500/15 border-purple-500/30 text-purple-300'
+                            ? 'bg-amber-500/15 border-amber-500/30 event-ink-amber'
+                            : 'bg-purple-500/15 border-purple-500/30 event-ink-purple'
                         }`}
                       >
                         <div className="flex items-center gap-1 font-bold text-[11px]">

@@ -179,6 +179,14 @@
   --ink-faint: #63788e;
   --rule: #d7e5ef;
   --rule-strong: #b6cee0;
+  --control-border: #7891a4;
+  --event-emerald: #065f46;
+  --event-purple: #6b21a8;
+  --event-amber: #92400e;
+  --event-rose: #9f1239;
+  --event-cyan: #155e75;
+  --event-blue: #1e40af;
+  --event-slate: #1e293b;
 
   --institution: #0A4174;
   --institution-pressed: #001D39;
@@ -230,11 +238,12 @@
   --ink-faint: #41688d;
   --rule: #a6cae2;
   --rule-strong: #78a9cb;
+  --control-border: #5f8aaa;
 
   --institution: #0277bd;
   --institution-pressed: #01579b;
   --institution-light: #29b6f6;
-  --ochre: #9c6e1b;
+  --ochre: #80590f;
   --margin-red: #b92b1b;
 
   --wash-1: rgba(2, 119, 189, 0.05);
@@ -261,7 +270,7 @@
   --color-bg-darker: var(--desk-sunk);
   --color-text-main: var(--ink);
   --color-text-muted: var(--ink-muted);
-  --color-success: #1b7a54;
+  --color-success: #176d4a;
   --color-warning: var(--ochre);
   --color-danger: var(--margin-red);
   --color-border: var(--rule);
@@ -280,6 +289,14 @@
   --ink-faint: #85a8c1;
   --rule: #123c65;
   --rule-strong: #1f5280;
+  --control-border: #6487a2;
+  --event-emerald: #6ee7b7;
+  --event-purple: #d8b4fe;
+  --event-amber: #fcd34d;
+  --event-rose: #fda4af;
+  --event-cyan: #67e8f9;
+  --event-blue: #93c5fd;
+  --event-slate: #cbd5e1;
 
   --institution: #7BBDE8;
   --institution-pressed: #8DD8E9;
@@ -484,7 +501,7 @@
   }
 
   .theme-ardosia .btn-danger:hover:not(:disabled) {
-    background: #c24736;
+    background: #d36d60;
   }
 
   .theme-ardosia .btn-danger {
@@ -496,7 +513,7 @@
   .field {
     @apply relative block w-full;
     background: var(--sheet);
-    border: 1px solid var(--rule-strong);
+    border: 1px solid var(--control-border);
     border-radius: var(--radius-field);
     transition: border-color 150ms ease, box-shadow 150ms ease;
   }
@@ -539,7 +556,7 @@
     @apply w-full px-3 py-2 text-[0.9375rem];
     background: var(--sheet);
     color: var(--ink);
-    border: 1px solid var(--rule-strong);
+    border: 1px solid var(--control-border);
     border-radius: var(--radius-field);
     transition: border-color 150ms ease, box-shadow 150ms ease;
   }
@@ -589,6 +606,15 @@
   .stamp-idle {
     color: var(--ink-muted);
   }
+
+  /* Rótulos de agenda: a cor da categoria permanece, mas a tinta acompanha o tema. */
+  .event-ink-emerald { color: var(--event-emerald); }
+  .event-ink-purple { color: var(--event-purple); }
+  .event-ink-amber { color: var(--event-amber); }
+  .event-ink-rose { color: var(--event-rose); }
+  .event-ink-cyan { color: var(--event-cyan); }
+  .event-ink-blue { color: var(--event-blue); }
+  .event-ink-slate { color: var(--event-slate); }
 
   /* --- Tabela ----------------------------------------------------------- */
 

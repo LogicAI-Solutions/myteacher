@@ -107,7 +107,6 @@ export const Landing = () => {
                     <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
                     <div className="container mx-auto grid lg:grid-cols-[0.92fr_1.08fr] gap-10 lg:gap-16 items-center max-w-6xl relative">
                         <div className="animate-slide-up">
-                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20 mb-4"><Sparkles size={13} /><span>Feito para quem ensina por conta própria</span></div>
                             <h1 className="text-4xl sm:text-5xl lg:text-[3.7rem] font-bold leading-[1.04] tracking-tight max-w-[12ch]">Menos planilha. Mais tempo para ensinar.</h1>
                             <p className="mt-5 text-base sm:text-lg text-text-muted leading-relaxed max-w-[48ch]">O MyTeacherApp organiza alunos, turmas, presença, mensalidades e agenda em um só lugar — para você saber o que acontece sem depender da memória.</p>
                             <div className="mt-7 flex flex-col sm:flex-row gap-3"><button onClick={() => navigate('/register')} className="btn btn-primary text-base px-5 py-2.5 group">Criar minha conta grátis<ArrowRight className="group-hover:translate-x-0.5 transition-transform w-4 h-4" /></button><button onClick={() => scrollTo('exemplos')} className="btn btn-outline text-base px-5 py-2.5">Ver exemplos</button></div>

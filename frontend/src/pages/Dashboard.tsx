@@ -469,18 +469,18 @@ export const Dashboard = () => {
                                         <div className="flex items-center justify-between gap-2 mb-2">
                                             <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-[2px] text-xs font-bold font-mono border ${
                                                 isDone
-                                                    ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
+                                                    ? 'bg-emerald-500/10 text-[var(--color-success)] border-emerald-500/20'
                                                     : 'bg-primary/15 text-primary border-primary/25'
                                             }`}>
                                                 <Clock size={11} /> {item.today_time}
                                             </span>
 
                                             {isDone ? (
-                                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-[2px] border border-emerald-500/20">
+                                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--color-success)] bg-emerald-500/10 px-2 py-0.5 rounded-[2px] border border-emerald-500/20">
                                                     <CheckCircle2 size={12} /> Feita
                                                 </span>
                                             ) : (
-                                                <span className="text-[11px] text-amber-500 font-semibold flex items-center gap-1">
+                                                <span className="text-[11px] text-[var(--ochre)] font-semibold flex items-center gap-1">
                                                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
                                                     Pendente
                                                 </span>
@@ -509,7 +509,7 @@ export const Dashboard = () => {
                                                 href={item.meet_link}
                                                 target="_blank"
                                                 rel="noreferrer"
-                                                className="p-2 rounded-[2px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
+                                                className="p-2 rounded-[2px] bg-emerald-500/10 text-[var(--color-success)] border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
                                                 title="Entrar no Google Meet"
                                             >
                                                 <Video size={14} />
@@ -522,7 +522,7 @@ export const Dashboard = () => {
                                                 className="px-3 py-1.5 rounded-[2px] text-xs font-semibold border border-border bg-[var(--wash-2)] text-text-muted hover:text-text-main hover:border-border transition-all flex-1 flex items-center justify-center gap-1.5 no-underline hover:bg-[var(--wash-1)]"
                                                 title="Ver histórico de chamadas e aulas anteriores desta turma"
                                             >
-                                                <History size={13} className="text-emerald-500" />
+                                                <History size={13} className="text-[var(--color-success)]" />
                                                 <span>Ver Histórico</span>
                                             </Link>
                                         ) : (
