@@ -25,6 +25,8 @@ const Pricing = lazy(() => import('./pages/Pricing'));
 const Register = lazy(() => import('./pages/Register'));
 const CheckoutSuccess = lazy(() => import('./pages/CheckoutSuccess').then(m => ({ default: m.CheckoutSuccess })));
 const OAuthCallback = lazy(() => import('./pages/OAuthCallback'));
+const Privacy = lazy(() => import('./pages/Privacy').then(m => ({ default: m.Privacy })));
+const Terms = lazy(() => import('./pages/Terms').then(m => ({ default: m.Terms })));
 
 // Layouts
 import { Layout } from './components/Layout';
@@ -72,6 +74,8 @@ function AppRoutes() {
       <Route path="/auth/callback" element={<OAuthCallback />} />
       <Route path="/trial-expired" element={<TrialExpired />} />
       <Route path="/checkout/success" element={<CheckoutSuccess />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
 
       {/* Student Portal Routes */}
       <Route path="/portal/login" element={<StudentLogin />} />
