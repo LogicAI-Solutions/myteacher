@@ -122,6 +122,7 @@ export const Login = () => {
                     required
                     fullWidth
                     autoFocus
+                    name="email"
                     autoComplete="email"
                     placeholder="maria@escola.com.br"
                 />
@@ -133,6 +134,7 @@ export const Login = () => {
                     onChange={e => setPassword(e.target.value)}
                     required
                     fullWidth
+                    name="password"
                     autoComplete="current-password"
                     slotProps={{
                         input: {

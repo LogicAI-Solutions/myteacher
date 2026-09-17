@@ -92,6 +92,7 @@ export const Register = () => {
                         required
                         fullWidth
                         autoFocus
+                        name="first_name"
                         autoComplete="given-name"
                         placeholder="Maria"
                         slotProps={{ htmlInput: { minLength: 2, maxLength: 60 } }}
@@ -102,6 +103,7 @@ export const Register = () => {
                         onChange={set('last_name')}
                         required
                         fullWidth
+                        name="last_name"
                         autoComplete="family-name"
                         placeholder="Silva"
                         slotProps={{ htmlInput: { minLength: 2, maxLength: 60 } }}
@@ -115,6 +117,7 @@ export const Register = () => {
                     onChange={set('email')}
                     required
                     fullWidth
+                    name="email"
                     autoComplete="email"
                     placeholder="maria@escola.com.br"
                 />
@@ -126,6 +129,7 @@ export const Register = () => {
                     onChange={set('password')}
                     required
                     fullWidth
+                    name="password"
                     autoComplete="new-password"
                     helperText="Mínimo de 8 caracteres."
                     slotProps={{
