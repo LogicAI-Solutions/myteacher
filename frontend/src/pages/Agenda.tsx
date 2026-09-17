@@ -386,48 +386,48 @@ export const Agenda = () => {
   const weekDayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
   return (
-    <div className="space-y-3 max-w-7xl mx-auto pb-4">
+    <div className="space-y-4 w-full min-w-0 pb-4">
       {/* Toast Notification */}
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}
 
       {/* Top Header & Compact Controls Bar */}
-      <div className="bg-bg-card px-3.5 py-2.5 rounded-[2px] border border-rule-subtle shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+      <div className="bg-bg-card px-3 py-3 sm:px-5 rounded-[2px] border border-rule-subtle shadow-sm flex flex-wrap items-center justify-between gap-3">
         {/* Left: Month Nav & Date */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
           <div className="flex items-center border border-border rounded-[2px] bg-bg-dark overflow-hidden">
             <button
               onClick={handlePrev}
-              className="p-1 hover:bg-[var(--wash-2)] text-text-muted hover:text-text-main transition-colors"
+              className="p-2 hover:bg-[var(--wash-2)] text-text-muted hover:text-text-main transition-colors"
               title="Mês Anterior"
             >
               <ChevronLeft size={16} />
             </button>
             <button
               onClick={handleToday}
-              className="px-2 py-0.5 text-[11px] font-semibold text-text-main hover:bg-[var(--wash-2)] border-x border-border transition-colors"
+              className="px-3 py-2 text-xs font-semibold text-text-main hover:bg-[var(--wash-2)] border-x border-border transition-colors"
             >
               Hoje
             </button>
             <button
               onClick={handleNext}
-              className="p-1 hover:bg-[var(--wash-2)] text-text-muted hover:text-text-main transition-colors"
+              className="p-2 hover:bg-[var(--wash-2)] text-text-muted hover:text-text-main transition-colors"
               title="Próximo Mês"
             >
               <ChevronRight size={16} />
             </button>
           </div>
 
-          <span className="text-sm font-bold text-text-main capitalize ml-1">
+          <span className="text-base sm:text-lg font-bold text-text-main capitalize ml-1">
             {monthNames[currentMonth]} <span className="text-primary">{currentYear}</span>
           </span>
 
           {/* View Mode Switcher */}
-          <div className="flex items-center bg-bg-dark border border-border rounded-[2px] p-0.5 ml-2">
+          <div className="flex items-center bg-bg-dark border border-border rounded-[2px] p-0.5 sm:ml-2">
             <button
               onClick={() => setViewMode('month')}
-              className={`flex items-center gap-1 px-2 py-1 text-[11px] font-semibold rounded-[2px] transition-all ${
+              className={`flex items-center gap-1 px-3 py-2 text-xs font-semibold rounded-[2px] transition-all ${
                 viewMode === 'month' ? 'bg-bg-card text-primary shadow-sm' : 'text-text-muted hover:text-text-main'
               }`}
             >
@@ -435,7 +435,7 @@ export const Agenda = () => {
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`flex items-center gap-1 px-2 py-1 text-[11px] font-semibold rounded-[2px] transition-all ${
+              className={`flex items-center gap-1 px-3 py-2 text-xs font-semibold rounded-[2px] transition-all ${
                 viewMode === 'list' ? 'bg-bg-card text-primary shadow-sm' : 'text-text-muted hover:text-text-main'
               }`}
             >
@@ -445,9 +445,9 @@ export const Agenda = () => {
         </div>
 
         {/* Center/Right: Category Filters & Actions */}
-        <div className="flex flex-wrap items-center gap-2 justify-between md:justify-end">
+        <div className="flex flex-wrap items-center gap-2 justify-between lg:justify-end min-w-0">
           {/* Categorias */}
-          <div className="flex items-center gap-1 text-[10px]">
+          <div className="flex flex-wrap items-center gap-1 text-xs">
             {[
               { id: 'all', label: 'Tudo' },
               { id: 'lesson', label: 'Turmas' },
@@ -458,7 +458,7 @@ export const Agenda = () => {
               <button
                 key={tab.id}
                 onClick={() => setFilterCategory(tab.id)}
-                className={`px-2 py-1 rounded-[2px] font-medium transition-all ${
+                className={`px-2.5 py-2 rounded-[2px] font-medium transition-all ${
                   filterCategory === tab.id
                     ? 'bg-primary text-white'
                     : 'bg-bg-dark text-text-muted hover:text-text-main hover:bg-[var(--wash-2)] border border-border'
@@ -504,7 +504,7 @@ export const Agenda = () => {
           {/* Botão Novo Evento */}
           <button
             onClick={() => handleOpenNewEventModal()}
-            className="btn btn-primary flex items-center gap-1 py-1 px-2.5 text-xs font-semibold"
+            className="btn btn-primary flex items-center gap-1 py-2 px-3 text-xs font-semibold"
           >
             <Plus size={14} /> Novo Evento
           </button>
@@ -513,19 +513,19 @@ export const Agenda = () => {
 
       {/* Visualização Principal */}
       {isLoading ? (
-        <div className="h-64 flex flex-col items-center justify-center gap-2 bg-bg-card rounded-[2px] border border-rule-subtle">
+        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-2 bg-bg-card rounded-[2px] border border-rule-subtle">
           <RefreshCw size={22} className="animate-spin text-primary" />
           <p className="text-xs text-text-muted font-medium">Carregando agenda...</p>
         </div>
       ) : viewMode === 'month' ? (
-        /* GRADE MENSAL COMPACTA */
+        /* Grade mensal que ocupa o espaço disponível. */
         <div className="bg-bg-card border border-rule-subtle rounded-[2px] overflow-hidden shadow-sm">
           {/* Cabeçalho dos dias da semana */}
-          <div className="grid grid-cols-7 border-b border-border bg-bg-dark/80 text-center py-1">
+          <div className="grid grid-cols-7 border-b border-border bg-bg-dark/80 text-center py-2 sm:py-3">
             {weekDayNames.map((day, idx) => (
               <span
                 key={day}
-                className={`text-[10px] font-bold uppercase tracking-wider ${
+                className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${
                   idx === 0 || idx === 6 ? 'text-text-muted/60' : 'text-text-muted'
                 }`}
               >
@@ -534,7 +534,7 @@ export const Agenda = () => {
             ))}
           </div>
 
-          {/* Grade de dias com altura enxuta */}
+          {/* Células crescem com a altura da tela, mantendo toque confortável no celular. */}
           <div className="grid grid-cols-7 auto-rows-fr divide-x divide-y divide-border">
             {monthDays.map(day => {
               const hasHoliday = Boolean(day.holiday);
@@ -555,7 +555,7 @@ export const Agenda = () => {
                       ],
                     });
                   }}
-                  className={`min-h-[64px] sm:min-h-[70px] lg:min-h-[76px] p-1 sm:p-1.5 flex flex-col justify-between transition-colors relative cursor-pointer group ${
+                  className={`min-w-0 min-h-[88px] sm:min-h-[clamp(110px,16vh,170px)] p-1.5 sm:p-3 flex flex-col transition-colors relative cursor-pointer group ${
                     day.isCurrentMonth
                       ? 'bg-bg-card hover:bg-[var(--wash-1)]'
                       : 'bg-bg-dark/30 text-text-muted/40 hover:bg-[var(--wash-1)]'
@@ -564,7 +564,7 @@ export const Agenda = () => {
                   {/* Topo da célula: Número do dia + botão rápido */}
                   <div className="flex items-center justify-between">
                     <span
-                      className={`text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full ${
+                      className={`text-xs sm:text-sm font-bold w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full ${
                         day.isToday
                           ? 'bg-primary text-white shadow-sm'
                           : day.isCurrentMonth
@@ -581,18 +581,18 @@ export const Agenda = () => {
                         handleOpenNewEventModal(day.date);
                       }}
                       title="Adicionar evento"
-                      className="opacity-0 group-hover:opacity-100 p-0.5 text-text-muted hover:text-primary hover:bg-bg-dark rounded transition-all"
+                      className="hidden sm:inline-flex opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 p-1 text-text-muted hover:text-primary hover:bg-bg-dark rounded transition-all"
                     >
-                      <Plus size={12} />
+                      <Plus size={16} />
                     </button>
                   </div>
 
                   {/* Conteúdo do dia: Feriados + Eventos */}
-                  <div className="space-y-0.5 my-0.5 overflow-hidden">
+                  <div className="space-y-1 mt-1.5 min-w-0 overflow-hidden">
                     {/* Feriado Brasileiro */}
                     {hasHoliday && (
                       <div
-                        className={`text-[9px] font-semibold px-1 py-0.5 rounded-[2px] truncate flex items-center gap-0.5 ${
+                        className={`text-[10px] sm:text-xs font-semibold px-1.5 py-1 rounded-[2px] truncate flex items-center gap-1 ${
                           day.holiday?.type === 'national_holiday'
                             ? 'bg-rose-500/15 border border-rose-500/30 text-rose-300'
                             : day.holiday?.type === 'educational'
@@ -607,7 +607,7 @@ export const Agenda = () => {
                     )}
 
                     {/* Lista de eventos */}
-                    {dayEvents.slice(0, 2).map(ev => {
+                    {dayEvents.slice(0, 4).map((ev, index) => {
                       const timeStr = ev.all_day 
                         ? 'Todo dia' 
                         : new Date(ev.start_time).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -616,23 +616,23 @@ export const Agenda = () => {
                       return (
                         <div
                           key={ev.id}
-                          className={`text-[9px] font-medium px-1 py-0.5 rounded-[2px] border truncate flex items-center gap-0.5 ${catStyle.bg} ${catStyle.text}`}
+                          className={`${index > 1 ? 'hidden lg:flex' : 'flex'} text-[10px] sm:text-xs font-medium px-1.5 py-1 rounded-[2px] border truncate items-center gap-1 ${catStyle.bg} ${catStyle.text}`}
                           title={`${timeStr} - ${ev.title}`}
                         >
-                          <span className="text-[8px] opacity-75 shrink-0">{timeStr}</span>
+                          <span className="hidden md:inline text-[10px] opacity-75 shrink-0">{timeStr}</span>
                           <span className="truncate">{ev.title}</span>
                         </div>
                       );
                     })}
 
                     {dayEvents.length > 2 && (
-                      <p className="text-[8px] text-text-muted font-bold pl-0.5">
+                      <p className="lg:hidden text-[10px] sm:text-xs text-text-muted font-bold pl-0.5">
                         +{dayEvents.length - 2} mais
                       </p>
                     )}
+                    {dayEvents.length > 4 && <p className="hidden lg:block text-xs text-text-muted font-bold pl-0.5">+{dayEvents.length - 4} mais</p>}
                   </div>
 
-                  <div className="h-0.5" />
                 </div>
               );
             })}
@@ -745,7 +745,7 @@ export const Agenda = () => {
       {/* MODAL DE CRIAÇÃO / EDIÇÃO DE EVENTO */}
       {isEventModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-bg-card border border-rule-strong w-full max-w-md rounded-[2px] p-5 shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+          <div className="bg-bg-card border border-rule-strong w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-[2px] p-5 shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-border pb-2.5">
               <h2 className="text-sm font-bold text-text-main flex items-center gap-1.5">
                 {editingEvent ? <Pencil size={16} className="text-primary" /> : <Plus size={16} className="text-primary" />}

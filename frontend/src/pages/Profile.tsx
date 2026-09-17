@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { UserCircle, Key, Palette, Camera, Check, AlertCircle, Save, X, CreditCard } from 'lucide-react';
+import { UserCircle, Key, Palette, Camera, Check, AlertCircle, Save, X, CreditCard, ExternalLink } from 'lucide-react';
 import ReactCrop, { centerCrop, makeAspectCrop, type Crop, type PixelCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import { useAuth } from '../context/AuthContext';
@@ -47,6 +47,20 @@ export const Profile = () => {
     }, []);
 
     const currentPlan = user?.is_trial ? undefined : plans.find(p => String(p.id) === user?.plan_id);
+
+    const [portalLoading, setPortalLoading] = useState(false);
+
+    const handlePortal = async () => {
+        setPortalLoading(true);
+        setPlanMessage({ type: '', text: '' });
+        try {
+            const { data } = await api.post('/billing/portal');
+            window.location.href = data.url;
+        } catch (error: any) {
+            setPlanMessage({ type: 'error', text: error?.response?.data?.detail || 'Não foi possível abrir o portal de assinatura.' });
+            setPortalLoading(false);
+        }
+    };
 
     const handleSubscribe = async (planId: number) => {
         setCheckoutFor(planId);
@@ -242,7 +256,19 @@ export const Profile = () => {
                             {user.trial_days_remaining === 1 ? 'dia restante' : 'dias restantes'}
                         </span>
                     ) : currentPlan ? (
-                        <span className="stamp stamp-paid">Plano {currentPlan.name} ativo</span>
+                        <div className="flex items-center gap-3">
+                            <span className="stamp stamp-paid">Plano {currentPlan.name} ativo</span>
+                            <button
+                                type="button"
+                                onClick={handlePortal}
+                                disabled={portalLoading || checkoutFor !== null}
+                                aria-busy={portalLoading}
+                                className="btn btn-outline text-primary"
+                            >
+                                <ExternalLink size={15} />
+                                {portalLoading ? 'Abrindo...' : 'Gerenciar assinatura'}
+                            </button>
+                        </div>
                     ) : null}
                 </div>
 

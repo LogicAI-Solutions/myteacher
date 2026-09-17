@@ -44,9 +44,8 @@ def init_db(db: Session):
             "description": "Para quem está começando e gerencia poucas turmas.",
             "price": "R$ 47,90",
             "period": "/mês",
-            # Em produção defina STRIPE_PRICE_* no .env com os prices do modo live;
-            # este upsert roda a cada boot e sobrescreveria valores editados no admin.
-            "stripe_price_id": os.getenv("STRIPE_PRICE_ESSENCIAL") or "price_1U18QjJtQF0i2t0DQ2RBNFHZ",
+            # Price (price_…, não prod_) vem do .env; sem env, mantém o que o admin salvou.
+            "stripe_price_id": os.getenv("STRIPE_PRICE_ESSENCIAL"),
             "role": "autonomous_teacher",
             "max_classes": 5,
             "max_teachers": 1,
@@ -66,7 +65,7 @@ def init_db(db: Session):
             "description": "Para professores com agenda cheia, sem limite de turmas.",
             "price": "R$ 97,90",
             "period": "/mês",
-            "stripe_price_id": os.getenv("STRIPE_PRICE_PROFISSIONAL") or "price_1U18BBJtQF0i2t0DhY0GBiLT",
+            "stripe_price_id": os.getenv("STRIPE_PRICE_PROFISSIONAL"),
             "role": "autonomous_teacher",
             "max_classes": 9999,
             "max_teachers": 1,
@@ -84,6 +83,8 @@ def init_db(db: Session):
     ]:
         db_plan = db.query(PlanModel).filter(PlanModel.name == plan_dict["name"]).first() or PlanModel()
         for key, value in plan_dict.items():
+            if key == "stripe_price_id" and not value:
+                continue  # env vazio não apaga o price configurado pelo admin
             setattr(db_plan, key, value)
         db.add(db_plan)
     db.commit()
@@ -99,7 +100,7 @@ def init_db(db: Session):
             {"key": "stripe_secret_key", "value": ""},
             {"key": "stripe_webhook_secret", "value": ""},
             # Fallback quando o checkout vem sem plano; env vence (ver _cfg em routers/billing.py)
-            {"key": "stripe_price_id", "value": os.getenv("STRIPE_PRICE_ID") or "price_1U18BBJtQF0i2t0DhY0GBiLT"},
+            {"key": "stripe_price_id", "value": os.getenv("STRIPE_PRICE_ID") or ""},
         ]
         for cfg in configs_data:
             db.add(AppConfigModel(**cfg))

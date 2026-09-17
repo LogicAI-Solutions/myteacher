@@ -1,6 +1,9 @@
 """Checagem da rota de assinatura: preço resolvido, sessão criada, webhook ativando o usuário."""
 import sys, os
 sys.path.append(os.getcwd())
+# _cfg/_base_url preferem env: limpa para o teste não depender do .env do ambiente (ex.: dentro do container)
+for _k in [k for k in os.environ if k.startswith("STRIPE_") or k == "FRONTEND_URL"]:
+    os.environ.pop(_k)
 
 from unittest.mock import patch
 from backend.routers import billing
@@ -74,9 +77,59 @@ def test_checkout_manda_o_plano_escolhido_e_seu_price():
     assert kwargs["metadata"] == {"plan_id": "3"}
     assert kwargs["subscription_data"] == {"metadata": {"plan_id": "3"}}
     # Precisam bater com rotas reais de frontend/src/App.tsx, senão o usuário cai no NotFound.
-    # /checkout/success faz poll até o webhook ativar a conta antes de mandar pro painel.
-    assert kwargs["success_url"] == "http://app/checkout/success"
+    # /checkout/success chama /billing/confirm com o session_id e depois faz poll do webhook.
+    assert kwargs["success_url"] == "http://app/checkout/success?session_id={CHECKOUT_SESSION_ID}"
     assert kwargs["cancel_url"] == "http://app/trial-expired"
+
+
+def test_checkout_config_errada_vira_503_com_a_causa():
+    """prod_ no lugar de price_, price de outra conta etc.: o Stripe recusa com
+    InvalidRequestError; o front mostra o detail em vez de um 500 mudo."""
+    from fastapi import HTTPException
+    import pytest, stripe
+    with patch.object(billing, "_stripe") as st, pytest.raises(HTTPException) as e:
+        st.return_value.checkout.Session.create.side_effect = stripe.InvalidRequestError("No such price: prod_x", "price")
+        billing.create_checkout_session(type("R", (), {"base_url": "http://app/"})(), 3, _DB(plan=_Plan()), _User())
+    assert e.value.status_code == 503 and "prod_x" in e.value.detail
+
+
+def test_confirm_ativa_a_conta_sem_esperar_webhook():
+    """Usa um objeto Stripe de verdade (não dict): stripe>=15 removeu .get() deles."""
+    import stripe
+    user, db = _User(), None
+    db = _DB(user=user, plan=_Plan(), cfg={"stripe_price_id": "sk"})
+    session = stripe.checkout.Session.construct_from(
+        {"client_reference_id": "7", "status": "complete", "customer": "cus_1",
+         "subscription": "sub_1", "metadata": {"plan_id": "3"}}, "sk")
+    with patch.object(billing, "_stripe") as st:
+        st.return_value.checkout.Session.retrieve.return_value = session
+        billing.confirm_checkout("cs_1", db, user)
+    assert user.is_trial is False and user.is_active is True
+    assert (user.stripe_subscription_id, user.max_classes, user.plan_id) == ("sub_1", 5, "3")
+    assert db.committed
+
+
+def test_confirm_recusa_sessao_de_outro_usuario():
+    """session_id vem da URL: qualquer um pode colar o de outra pessoa."""
+    from fastapi import HTTPException
+    import pytest
+    user = _User()
+    db = _DB(user=user, cfg={"stripe_price_id": "sk"})
+    with patch.object(billing, "_stripe") as st:
+        st.return_value.checkout.Session.retrieve.return_value = {"client_reference_id": "99", "status": "complete"}
+        with pytest.raises(HTTPException) as e:
+            billing.confirm_checkout("cs_1", db, user)
+    assert e.value.status_code == 403
+    assert user.is_trial is True and db.committed is False
+
+
+def test_confirm_sessao_incompleta_nao_ativa():
+    user = _User()
+    db = _DB(user=user, cfg={"stripe_price_id": "sk"})
+    with patch.object(billing, "_stripe") as st:
+        st.return_value.checkout.Session.retrieve.return_value = {"client_reference_id": "7", "status": "open"}
+        billing.confirm_checkout("cs_1", db, user)
+    assert user.is_trial is True and db.committed is False
 
 
 def test_webhook_aplica_limite_de_turmas_do_plano():
@@ -145,11 +198,12 @@ def test_webhook_troca_de_plano_no_portal_ajusta_o_limite():
     user.stripe_subscription_id, user.max_classes = "sub_1", 9999
     db = _DB(user=user, plan=_Plan(), cfg={"stripe_webhook_secret": "whsec"})
     db.cfg["stripe_price_id"] = "whsec"
-    event = {
+    import stripe
+    event = stripe.Event.construct_from({
         "type": "customer.subscription.updated",
         "data": {"object": {"id": "sub_1", "status": "active", "metadata": {},
                             "items": {"data": [{"price": {"id": "price_essencial"}}]}}},
-    }
+    }, "sk")  # objeto real: garante que o webhook não depende de .get() do SDK
     req = type("R", (), {"headers": {"stripe-signature": "sig"}, "body": lambda self: _async(b"{}")})()
     with patch.object(billing, "_stripe") as st:
         st.return_value.Webhook.construct_event.return_value = event
@@ -185,4 +239,8 @@ if __name__ == "__main__":
     test_webhook_cancelamento_desativa_a_conta()
     test_webhook_troca_de_plano_no_portal_ajusta_o_limite()
     test_webhook_sem_client_reference_id_nao_quebra()
+    test_checkout_config_errada_vira_503_com_a_causa()
+    test_confirm_ativa_a_conta_sem_esperar_webhook()
+    test_confirm_recusa_sessao_de_outro_usuario()
+    test_confirm_sessao_incompleta_nao_ativa()
     print("ok")

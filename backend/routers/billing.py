@@ -1,3 +1,4 @@
+import json
 import os
 import stripe
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -25,6 +26,16 @@ def _stripe(db: Session):
     return stripe
 
 
+def _as_dict(obj) -> dict:
+    """stripe>=15 removeu .get() dos objetos e renomeou a conversão recursiva; str() é JSON
+    em todas as versões, então é o caminho estável para um dict puro aninhado."""
+    return json.loads(str(obj)) if isinstance(obj, stripe.StripeObject) else obj
+
+
+def _base_url(request: Request) -> str:
+    return os.getenv("FRONTEND_URL") or str(request.base_url).rstrip("/")
+
+
 def _apply_plan(db: Session, user: User, plan: Plan | None):
     """Grava o limite de turmas do plano assinado. O limite é aplicado em routers/classes.py."""
     if plan:
@@ -46,6 +57,17 @@ def _plan_of_subscription(db: Session, sub: dict) -> Plan | None:
     return plan or _plan_by_id(db, (sub.get("metadata") or {}).get("plan_id"))
 
 
+def _activate_from_checkout(db: Session, user: User, session: dict):
+    """Ponto único de ativação: usado pelo webhook e pelo /confirm (retorno do Checkout).
+    Idempotente — rodar duas vezes com a mesma sessão não muda nada."""
+    user.stripe_customer_id = session.get("customer")
+    user.stripe_subscription_id = session.get("subscription")
+    user.is_trial = False
+    user.is_active = True
+    _apply_plan(db, user, _plan_by_id(db, (session.get("metadata") or {}).get("plan_id")))
+    db.commit()
+
+
 @router.post("/checkout")
 def create_checkout_session(
     request: Request,
@@ -58,33 +80,65 @@ def create_checkout_session(
     if plan_id and not plan:
         raise HTTPException(status_code=404, detail="Plano não encontrado")
 
-    base_url = os.getenv("FRONTEND_URL") or str(request.base_url).rstrip("/")
+    base_url = _base_url(request)
 
     # Quem já assina troca de plano no portal do Stripe; abrir um checkout novo
     # criaria uma segunda assinatura e cobraria duas vezes.
     if user.stripe_subscription_id and user.stripe_customer_id:
-        portal = _stripe(db).billing_portal.Session.create(
-            customer=user.stripe_customer_id,
-            return_url=f"{base_url}/dashboard/profile",
-        )
-        return {"url": portal.url}
+        return create_portal_session(request, db, user)
 
     price_id = (plan.stripe_price_id if plan else None) or _cfg(db, "stripe_price_id")
     if not price_id:
         raise HTTPException(status_code=503, detail="Preço da assinatura não configurado.")
-
-    session = _stripe(db).checkout.Session.create(
-        mode="subscription",
-        line_items=[{"price": price_id, "quantity": 1}],
-        client_reference_id=str(user.id),
-        subscription_data={"metadata": {"plan_id": str(plan.id)}} if plan else {},
-        metadata={"plan_id": str(plan.id)} if plan else {},
-        customer=user.stripe_customer_id or None,
-        customer_email=None if user.stripe_customer_id else user.email,
-        success_url=f"{base_url}/checkout/success",
-        cancel_url=f"{base_url}/trial-expired",
-    )
+    try:
+        session = _stripe(db).checkout.Session.create(
+            mode="subscription",
+            line_items=[{"price": price_id, "quantity": 1}],
+            client_reference_id=str(user.id),
+            subscription_data={"metadata": {"plan_id": str(plan.id)}} if plan else {},
+            metadata={"plan_id": str(plan.id)} if plan else {},
+            customer=user.stripe_customer_id or None,
+            customer_email=None if user.stripe_customer_id else user.email,
+            # session_id permite ao /confirm ativar a conta na volta, sem esperar o webhook.
+            success_url=f"{base_url}/checkout/success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{base_url}/trial-expired",
+        )
+    except stripe.InvalidRequestError as e:
+        # Config errada (prod_ no lugar de price_, price de outra conta...): causa no detail, não 500 mudo.
+        raise HTTPException(status_code=503, detail=f"Stripe: {e.user_message or e}")
     return {"url": session.url}
+
+
+@router.post("/confirm")
+def confirm_checkout(
+    session_id: str,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_user_from_token),
+):
+    """Retorno do Checkout: confirma direto na API do Stripe que a sessão foi paga e ativa a conta.
+    O webhook continua sendo a fonte de verdade para eventos futuros (cancelamento, troca);
+    isto só evita que quem pagou fique preso no paywall enquanto o webhook não chega."""
+    session = _as_dict(_stripe(db).checkout.Session.retrieve(session_id))
+    if session.get("client_reference_id") != str(user.id):
+        raise HTTPException(status_code=403, detail="Sessão de pagamento não pertence a este usuário.")
+    if session.get("status") == "complete":
+        _activate_from_checkout(db, user, session)
+
+
+@router.post("/portal")
+def create_portal_session(
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_user_from_token),
+):
+    """Portal do Stripe: trocar cartão, trocar de plano, ver faturas e cancelar."""
+    if not user.stripe_customer_id:
+        raise HTTPException(status_code=404, detail="Nenhuma assinatura encontrada.")
+    portal = _stripe(db).billing_portal.Session.create(
+        customer=user.stripe_customer_id,
+        return_url=f"{_base_url(request)}/dashboard/profile",
+    )
+    return {"url": portal.url}
 
 
 @router.post("/webhook")
@@ -101,7 +155,7 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
         # construct_event só levanta ValueError / SignatureVerificationError
         raise HTTPException(status_code=400, detail="Assinatura do webhook inválida")
 
-    obj = event["data"]["object"]
+    obj = _as_dict(event["data"]["object"])
 
     if event["type"] == "checkout.session.completed":
         # client_reference_id pode vir vazio (ex.: link de pagamento criado no Dashboard);
@@ -109,12 +163,7 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
         ref = obj.get("client_reference_id")
         user = db.query(User).filter(User.id == int(ref)).first() if ref and ref.isdigit() else None
         if user:
-            user.stripe_customer_id = obj.get("customer")
-            user.stripe_subscription_id = obj.get("subscription")
-            user.is_trial = False
-            user.is_active = True
-            _apply_plan(db, user, _plan_by_id(db, (obj.get("metadata") or {}).get("plan_id")))
-            db.commit()
+            _activate_from_checkout(db, user, obj)
 
     elif event["type"] in ("customer.subscription.deleted", "customer.subscription.updated"):
         user = db.query(User).filter(User.stripe_subscription_id == obj["id"]).first()

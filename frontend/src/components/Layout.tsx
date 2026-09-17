@@ -180,7 +180,7 @@ export const Layout = () => {
             </nav>
 
             <main className="flex-1 overflow-auto px-3 py-4 sm:p-4 md:p-6 lg:p-8 pt-16 md:pt-6 lg:pt-8 pb-24 md:pb-6 lg:pb-8 w-full h-screen">
-                <div className="container mx-auto max-w-6xl">
+                <div className={location.pathname === '/dashboard/agenda' ? 'w-full min-w-0' : 'container mx-auto max-w-6xl'}>
                     <Outlet />
                 </div>
             </main>
