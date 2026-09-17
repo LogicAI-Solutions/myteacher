@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://myteacherapp.com.br/sitemap.xml

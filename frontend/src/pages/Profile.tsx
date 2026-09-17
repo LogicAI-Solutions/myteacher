@@ -418,9 +418,12 @@ export const Profile = () => {
 
                         <div className="space-y-4">
                             <div>
-                                <label className="label">Nova Senha</label>
+                                <label htmlFor="new-password" className="label">Nova Senha</label>
                                 <input
+                                    id="new-password"
+                                    name="new-password"
                                     type="password"
+                                    autoComplete="new-password"
                                     className="input mt-2"
                                     value={newPassword}
                                     onChange={e => setNewPassword(e.target.value)}
@@ -429,9 +432,12 @@ export const Profile = () => {
                                 />
                             </div>
                             <div>
-                                <label className="label">Confirmar Nova Senha</label>
+                                <label htmlFor="confirm-password" className="label">Confirmar Nova Senha</label>
                                 <input
+                                    id="confirm-password"
+                                    name="confirm-password"
                                     type="password"
+                                    autoComplete="new-password"
                                     className="input mt-2"
                                     value={confirmPassword}
                                     onChange={e => setConfirmPassword(e.target.value)}

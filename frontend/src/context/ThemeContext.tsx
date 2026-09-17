@@ -23,6 +23,7 @@ const isTheme = (value: string): value is Theme =>
     value === 'registro' || value === 'almaco' || value === 'ardosia';
 
 const readStoredTheme = (): Theme => {
+    if (typeof window === 'undefined') return 'registro';
     const saved = localStorage.getItem('app-theme');
     if (!saved) return 'registro';
     if (isTheme(saved)) return saved;

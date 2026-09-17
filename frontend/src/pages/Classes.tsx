@@ -791,7 +791,7 @@ export const Classes = () => {
                     <Loading text="Carregando turmas..." />
                 </div>
             ) : (
-                <div className="animate-fade-in space-y-8">
+                <div className="space-y-8">
                     {isReorderMode && (
                         <div className="bg-primary/10 border border-primary/30 rounded-[2px] p-4 text-center">
                             <p className="text-primary text-sm">

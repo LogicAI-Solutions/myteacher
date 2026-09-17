@@ -1,5 +1,5 @@
-import { lazy, Suspense, type ReactNode } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { StudentAuthProvider, useStudentAuth } from './context/StudentAuthContext';
 import { Loading } from './components/Loading';
@@ -64,6 +64,23 @@ function App() {
 }
 
 function AppRoutes() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const home = pathname === '/';
+    document.title = home ? 'MyTeacherApp | Gestão para professores particulares' : 'Minha conta | MyTeacherApp';
+    document.querySelector('meta[name="robots"]')?.setAttribute('content', home ? 'index, follow' : 'noindex, follow');
+    let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (home) {
+      if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.rel = 'canonical';
+        document.head.appendChild(canonical);
+      }
+      canonical.href = 'https://myteacherapp.com.br/';
+    } else {
+      canonical?.remove();
+    }
+  }, [pathname]);
   return (
     <Suspense fallback={<Loading variant="fullscreen" text="Carregando..." />}>
       <Routes>

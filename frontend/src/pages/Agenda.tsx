@@ -103,7 +103,7 @@ export const Agenda = () => {
   // Turmas só mudam quando o professor sai desta página para editá-las.
   useEffect(() => {
     let active = true;
-    api.get('/classes')
+    api.get('/classes/')
       .then(res => { if (active) setClasses(res.data || []); })
       .catch(err => console.error('Erro ao carregar turmas:', err));
     return () => { active = false; };
