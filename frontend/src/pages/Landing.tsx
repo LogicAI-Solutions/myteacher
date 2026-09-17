@@ -374,8 +374,8 @@ export const Landing = () => {
                         >
                             Fale conosco
                         </button>
-                        <a href="#" className="text-text-muted hover:text-primary transition-colors no-underline">Termos</a>
-                        <a href="#" className="text-text-muted hover:text-primary transition-colors no-underline">Privacidade</a>
+                        <button onClick={() => navigate('/terms')} className="bg-transparent border-none p-0 text-text-muted hover:text-primary cursor-pointer transition-colors">Termos</button>
+                        <button onClick={() => navigate('/privacy')} className="bg-transparent border-none p-0 text-text-muted hover:text-primary cursor-pointer transition-colors">Privacidade</button>
                     </div>
                     <p>&copy; {new Date().getFullYear()} LogicIA Solutions</p>
                 </div>
