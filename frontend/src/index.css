@@ -33,7 +33,7 @@
   --color-warning: var(--color-warning);
   --color-border: var(--color-border);
 
-  --font-sans: Archivo, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: "Google Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 
   --radius-field: 2px;
   --radius-sheet: 3px;
@@ -686,7 +686,7 @@
 
   .sheet-footer-nav {
     background: var(--sheet);
-    border-top: 1px solid var(--rule);
+    border: 1px solid var(--rule);
   }
 }
 

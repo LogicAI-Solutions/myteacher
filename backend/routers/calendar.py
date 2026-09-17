@@ -2,7 +2,7 @@ from datetime import datetime, date, timedelta, timezone
 from typing import List, Optional
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 
 from backend.core import database, security
@@ -142,6 +142,7 @@ async def list_calendar_events(
     start_date: Optional[str] = Query(None, description="ISO format start date"),
     end_date: Optional[str] = Query(None, description="ISO format end date"),
     include_google: bool = Query(True, description="Incluir eventos da conta Google vinculada caso disponível"),
+    google_only: bool = Query(False, description="Retornar apenas eventos do Google"),
     db: Session = Depends(database.get_db),
     current_user: User = Depends(security.get_current_user),
 ):
@@ -168,7 +169,15 @@ async def list_calendar_events(
         except Exception:
             pass
 
-    local_events = query.all()
+    if google_only:
+        local_events = []
+        mirrored_google_ids = {
+            event_id for (event_id,) in query.with_entities(CalendarEvent.google_event_id)
+            .filter(CalendarEvent.google_event_id.isnot(None)).all()
+        }
+    else:
+        local_events = query.options(joinedload(CalendarEvent.course_class)).all()
+        mirrored_google_ids = {ev.google_event_id for ev in local_events if ev.google_event_id}
     for ev in local_events:
         class_name = ev.course_class.name if ev.course_class else None
         results.append(
@@ -192,12 +201,16 @@ async def list_calendar_events(
 
     # 2. Buscar sessões de turmas do professor (AttendanceSession)
     try:
-        classes_owned = db.query(Class).filter(Class.owner_id == current_user.id).all()
+        classes_owned = [] if google_only else db.query(Class).filter(Class.owner_id == current_user.id).all()
         class_map = {c.id: c.name for c in classes_owned}
         class_ids = list(class_map.keys())
 
         if class_ids:
             session_query = db.query(AttendanceSession).filter(AttendanceSession.class_id.in_(class_ids))
+            if start_date:
+                session_query = session_query.filter(AttendanceSession.date >= date.fromisoformat(start_date[:10]))
+            if end_date:
+                session_query = session_query.filter(AttendanceSession.date <= date.fromisoformat(end_date[:10]))
             sessions = session_query.all()
             for s in sessions:
                 if not s.date:
@@ -229,7 +242,7 @@ async def list_calendar_events(
     # 3. Buscar eventos do Google Calendar se conectado e autorizado
     if include_google and (current_user.google_access_token or current_user.google_refresh_token):
         try:
-            token = await _refresh_google_token_if_needed(current_user, db)
+            token = current_user.google_access_token or await _refresh_google_token_if_needed(current_user, db)
             if token:
                 params = {
                     "calendarId": "primary",
@@ -248,12 +261,20 @@ async def list_calendar_events(
                         headers={"Authorization": f"Bearer {token}"},
                         params=params,
                     )
+                    if res.status_code == 401 and current_user.google_refresh_token:
+                        refreshed_token = await _refresh_google_token_if_needed(current_user, db)
+                        if refreshed_token and refreshed_token != token:
+                            res = await client.get(
+                                settings.GOOGLE_CALENDAR_API_URL,
+                                headers={"Authorization": f"Bearer {refreshed_token}"},
+                                params=params,
+                            )
                     if res.status_code == 200:
                         google_items = res.json().get("items", [])
                         for g_ev in google_items:
                             # Ignorar eventos que já foram salvos localmente
                             g_id = g_ev.get("id")
-                            if any(e.google_event_id == g_id for e in local_events):
+                            if g_id in mirrored_google_ids:
                                 continue
 
                             start_info = g_ev.get("start", {})

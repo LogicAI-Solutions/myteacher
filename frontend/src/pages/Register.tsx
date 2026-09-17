@@ -63,7 +63,7 @@ export const Register = () => {
                 <button
                     type="button"
                     onClick={() => navigate('/')}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-text-muted hover:text-primary bg-bg-card/80 hover:bg-bg-card border border-rule-subtle rounded-[3px] backdrop-blur-sm transition-all shadow-sm cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-text-muted hover:text-primary bg-bg-card/80 hover:bg-bg-card border border-rule rounded-[3px] backdrop-blur-sm transition-all shadow-sm cursor-pointer"
                 >
                     <ArrowLeft size={15} />
                     <span>Voltar para o início</span>

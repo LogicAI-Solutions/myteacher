@@ -17,37 +17,37 @@ colors:
   margin-red: "#A33124"
 typography:
   display:
-    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Google Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "clamp(1.75rem, 3vw, 2.5rem)"
     fontWeight: 700
     lineHeight: 1.1
     letterSpacing: "-0.02em"
   headline:
-    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Google Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1.375rem"
     fontWeight: 600
     lineHeight: 1.2
     letterSpacing: "-0.01em"
   title:
-    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Google Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "1rem"
     fontWeight: 600
     lineHeight: 1.3
     letterSpacing: "0"
   body:
-    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Google Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.9375rem"
     fontWeight: 400
     lineHeight: 1.55
     letterSpacing: "0"
   label:
-    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Google Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.6875rem"
     fontWeight: 500
     lineHeight: 1.2
     letterSpacing: "0.07em"
   data:
-    fontFamily: "Archivo, ui-sans-serif, system-ui, sans-serif"
+    fontFamily: "Google Sans, ui-sans-serif, system-ui, sans-serif"
     fontSize: "0.9375rem"
     fontWeight: 500
     lineHeight: 1.3
@@ -209,15 +209,13 @@ diferentes de mensalidade, e nada além disso.
 
 ## Typography
 
-**Display Font:** Archivo (fallback `ui-sans-serif, system-ui, sans-serif`)
-**Body Font:** Archivo
-**Label Font:** Archivo, em versalete traqueado
+**Display Font:** Google Sans (fallback `ui-sans-serif, system-ui, sans-serif`)
+**Body Font:** Google Sans
+**Label Font:** Google Sans, em versalete traqueado
 
-**Character:** Archivo é uma grotesca de trabalho, desenhada para texto pequeno
-em formulário impresso e para manchete curta — a mesma face serve o rótulo de
-11px dentro do campo e o título de 40px do dashboard sem trocar de família. Tem
-eixo de largura e algarismos tabulares, que é o motivo real da escolha: as
-colunas de mensalidade precisam alinhar dígito com dígito.
+Google Sans é usada em todas as telas. Dados numéricos continuam com
+`font-variant-numeric: tabular-nums` para manter alinhadas as colunas de
+mensalidade.
 
 ### Hierarchy
 

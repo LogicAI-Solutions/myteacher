@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import api from '../api';
 import { DollarSign, Search, ArrowUp, ArrowDown } from 'lucide-react';
 import { formatCurrency, parseCurrency } from '../utils/masks';
@@ -57,33 +57,15 @@ export const Payments = () => {
     // Notification
     const [toast, setToast] = useState<{ msg: string, type: 'success' | 'error' } | null>(null);
 
-    // Reset page when search changes
+    // Um único fetch por mudança: busca digitada espera 500ms, o resto é imediato.
+    // (Dois efeitos separados disparavam duas vezes no mount = loading duplo.)
+    const lastSearch = useRef(search);
     useEffect(() => {
-        setPage(0);
-    }, [search, filterStatus, sortDesc]);
-
-    // Immediate fetch for filters/sort/pagination/date
-    useEffect(() => {
-        fetchData();
-    }, [selectedMonth, selectedYear, page, filterStatus, sortDesc]);
-
-    // Debounced fetch for search only
-    useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            // Avoid running on mount if possible, but simplest is to let it run (redundant call on mount is acceptable vs complexity)
-            // Or simple check: if search is empty on mount? checking render count?
-            // To prevent double-mount call, we is usually fine.
-            if (search !== '') fetchData();
-            // If search IS empty, the other effect handles the "initial load" (since sortDesc etc are set)
-            // But wait, if I refresh page, search is empty. The other effect runs.
-            // This search effect runs too?
-            // If I add `if (search !== '')` it won't run on clear search? That's bad.
-            // Let's just run it. The user has explicitly complained about slowness/lack of loading on SORT.
-            // Prioritizing that interaction.
-            fetchData();
-        }, 500);
+        const delay = search !== lastSearch.current ? 500 : 0;
+        lastSearch.current = search;
+        const timeoutId = setTimeout(fetchData, delay);
         return () => clearTimeout(timeoutId);
-    }, [search]);
+    }, [selectedMonth, selectedYear, page, filterStatus, sortDesc, search]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -235,7 +217,7 @@ export const Payments = () => {
                         <span className="label-print">Situação</span>
                         <select
                             value={filterStatus}
-                            onChange={e => setFilterStatus(e.target.value as 'all' | 'PAID' | 'PENDING')}
+                            onChange={e => { setFilterStatus(e.target.value as 'all' | 'PAID' | 'PENDING'); setPage(0); }}
                             className="input py-1.5 text-sm"
                         >
                             <option value="all">Todas</option>
@@ -302,7 +284,7 @@ export const Payments = () => {
                     aria-label="Buscar aluno pelo nome"
                     className="input pl-10"
                     value={search}
-                    onChange={e => setSearch(e.target.value)}
+                    onChange={e => { setSearch(e.target.value); setPage(0); }}
                 />
             </div>
 
@@ -389,7 +371,7 @@ export const Payments = () => {
                             <tr>
                                 <th>
                                     <button
-                                        onClick={() => setSortDesc(!sortDesc)}
+                                        onClick={() => { setSortDesc(!sortDesc); setPage(0); }}
                                         className="flex items-center gap-1 bg-transparent border-none p-0 cursor-pointer uppercase tracking-[0.07em] text-[0.6875rem] font-semibold text-text-muted hover:text-text-main transition-colors"
                                     >
                                         Aluno

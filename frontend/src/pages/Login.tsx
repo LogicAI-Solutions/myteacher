@@ -79,7 +79,7 @@ export const Login = () => {
             },
             shape: { borderRadius: 3 },
             typography: {
-                fontFamily: 'Archivo, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
+                fontFamily: '"Google Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif',
                 button: { textTransform: 'none', fontWeight: 700 },
             },
             components: {

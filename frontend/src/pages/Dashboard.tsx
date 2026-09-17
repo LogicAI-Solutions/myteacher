@@ -304,6 +304,45 @@ export const Dashboard = () => {
                 )}
             </header>
 
+            {isFirstTime && (
+                <section className="sheet sheet-p relative">
+                    <button
+                        onClick={handleDismissTutorial}
+                        className="absolute top-3 right-3 p-2 text-text-muted hover:text-text-main hover:bg-[var(--wash-2)] rounded-[2px] transition-colors duration-150"
+                        aria-label="Ocultar o passo a passo"
+                    >
+                        <X size={18} />
+                    </button>
+                    <h2 className="text-lg font-semibold text-text-main pr-10">Comece por aqui</h2>
+                    <p className="text-text-muted mt-1 text-sm">Três passos para o primeiro mês ficar completo.</p>
+
+                    <ol className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-px" style={{ background: 'var(--rule)' }}>
+                        {[
+                            { n: 1, to: '/dashboard/classes', icon: GraduationCap, title: 'Criar uma turma', note: 'Defina a disciplina e o valor da mensalidade.' },
+                            { n: 2, to: '/dashboard/students', icon: Users, title: 'Cadastrar alunos', note: 'Matricule cada aluno na turma dele.' },
+                            { n: 3, to: '/dashboard/classes', icon: ClipboardList, title: 'Fazer a chamada', note: 'Abra a turma e marque as presenças do dia.' },
+                        ].map(({ n, to, icon: Icon, title, note }) => (
+                            <li key={n} style={{ background: 'var(--sheet)' }}>
+                                <Link
+                                    to={to}
+                                    className="flex h-full items-start gap-3 p-4 no-underline transition-colors duration-150 group"
+                                >
+                                    <Icon size={19} className="mt-0.5 shrink-0 text-primary" />
+                                    <span className="min-w-0 flex-1">
+                                        <span className="label-print">Passo {n}</span>
+                                        <span className="mt-1 block text-sm font-semibold text-text-main group-hover:text-primary transition-colors">
+                                            {title}
+                                        </span>
+                                        <span className="mt-0.5 block text-xs text-text-muted leading-snug">{note}</span>
+                                    </span>
+                                    <ArrowRight size={15} className="mt-0.5 shrink-0 text-text-muted group-hover:text-primary transition-colors" />
+                                </Link>
+                            </li>
+                        ))}
+                    </ol>
+                </section>
+            )}
+
             {/* Aulas de Hoje */}
             <section className="sheet sheet-p">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
@@ -502,45 +541,6 @@ export const Dashboard = () => {
                     </div>
                 )}
             </section>
-
-            {isFirstTime && (
-                <section className="sheet sheet-p relative">
-                    <button
-                        onClick={handleDismissTutorial}
-                        className="absolute top-3 right-3 p-2 text-text-muted hover:text-text-main hover:bg-[var(--wash-2)] rounded-[2px] transition-colors duration-150"
-                        aria-label="Ocultar o passo a passo"
-                    >
-                        <X size={18} />
-                    </button>
-                    <h2 className="text-lg font-semibold text-text-main pr-10">Comece por aqui</h2>
-                    <p className="text-text-muted mt-1 text-sm">Três passos para o primeiro mês ficar completo.</p>
-
-                    <ol className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-px" style={{ background: 'var(--rule)' }}>
-                        {[
-                            { n: 1, to: '/dashboard/classes', icon: GraduationCap, title: 'Criar uma turma', note: 'Defina a disciplina e o valor da mensalidade.' },
-                            { n: 2, to: '/dashboard/students', icon: Users, title: 'Cadastrar alunos', note: 'Matricule cada aluno na turma dele.' },
-                            { n: 3, to: '/dashboard/classes', icon: ClipboardList, title: 'Fazer a chamada', note: 'Abra a turma e marque as presenças do dia.' },
-                        ].map(({ n, to, icon: Icon, title, note }) => (
-                            <li key={n} style={{ background: 'var(--sheet)' }}>
-                                <Link
-                                    to={to}
-                                    className="flex h-full items-start gap-3 p-4 no-underline transition-colors duration-150 group"
-                                >
-                                    <Icon size={19} className="mt-0.5 shrink-0 text-primary" />
-                                    <span className="min-w-0 flex-1">
-                                        <span className="label-print">Passo {n}</span>
-                                        <span className="mt-1 block text-sm font-semibold text-text-main group-hover:text-primary transition-colors">
-                                            {title}
-                                        </span>
-                                        <span className="mt-0.5 block text-xs text-text-muted leading-snug">{note}</span>
-                                    </span>
-                                    <ArrowRight size={15} className="mt-0.5 shrink-0 text-text-muted group-hover:text-primary transition-colors" />
-                                </Link>
-                            </li>
-                        ))}
-                    </ol>
-                </section>
-            )}
 
             {/* O fechamento do mês: a pergunta que o professor abre o sistema
                 para responder, respondida antes de qualquer clique. */}

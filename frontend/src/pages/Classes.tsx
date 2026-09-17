@@ -1230,7 +1230,7 @@ export const Classes = () => {
                             </div>
 
                             {/* Opção para adicionar/atualizar no Calendário */}
-                            <div className="p-3 rounded-[3px] border border-rule-subtle bg-bg-dark space-y-2.5">
+                            <div className="p-3 rounded-[3px] border border-rule bg-bg-dark space-y-2.5">
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { LogOut, LayoutDashboard, GraduationCap, Menu, X, ChevronLeft, ChevronRight, Settings, UserCircle, DollarSign, MessageCircle, Users, Calendar } from 'lucide-react';
+import { LogOut, LayoutDashboard, GraduationCap, ChevronLeft, ChevronRight, Settings, UserCircle, DollarSign, MessageCircle, Users, Calendar } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { openSupportWhatsApp } from '../utils/support';
 
@@ -29,7 +29,7 @@ export const Layout = () => {
     const { logout, user } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
     const entries = NAV.filter(e => !e.adminOnly || user?.is_admin);
@@ -45,34 +45,10 @@ export const Layout = () => {
 
     return (
         <div className="flex h-screen bg-bg-dark overflow-hidden relative">
-            {/* Cabeçalho no celular */}
-            <header className="md:hidden flex items-center justify-between px-4 py-3 sheet-header w-full fixed top-0 left-0 z-50">
-                <h1 className="flex items-center gap-2 font-bold text-lg">
-                    <GraduationCap size={22} className="text-primary" /> MyTeacherApp
-                </h1>
-                <button
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                    className="p-2 text-text-muted hover:text-text-main rounded-[2px] hover:bg-[var(--wash-2)] transition-colors duration-150"
-                    aria-label={isMobileMenuOpen ? 'Fechar menu' : 'Abrir menu'}
-                    aria-expanded={isMobileMenuOpen}
-                >
-                    {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-                </button>
-            </header>
-
-            {isMobileMenuOpen && (
-                <div
-                    className="fixed inset-0 z-40 md:hidden"
-                    style={{ background: 'var(--scrim)' }}
-                    onClick={() => setIsMobileMenuOpen(false)}
-                />
-            )}
-
             {/* Sidebar */}
             <aside
                 className={`
-                    fixed md:static inset-y-0 left-0 z-50 sheet-sidebar flex flex-col transition-[width,transform] duration-300 ease-in-out
-                    ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+                    hidden md:flex sheet-sidebar flex-col transition-[width] duration-300 ease-in-out
                     ${isSidebarCollapsed ? 'w-[70px]' : 'w-[260px]'}
                 `}
             >
@@ -100,7 +76,6 @@ export const Layout = () => {
                             <Link
                                 key={to}
                                 to={to}
-                                onClick={() => setIsMobileMenuOpen(false)}
                                 aria-current={active ? 'page' : undefined}
                                 className={`nav-item ${active ? 'active' : ''} ${isSidebarCollapsed ? 'justify-center gap-0' : 'gap-3'}`}
                                 title={label}
@@ -156,20 +131,24 @@ export const Layout = () => {
                 </div>
             </aside>
 
-            {/* Barra inferior no celular. O item ativo ganha o fio de 2px no topo. */}
+            {/* Barra inferior flutuante no celular. Destinos principais + avatar;
+                o avatar abre perfil, admin (se houver), suporte e sair. */}
+            {isProfileOpen && (
+                <div className="fixed inset-0 z-40 md:hidden" onClick={() => setIsProfileOpen(false)} />
+            )}
             <nav
-                className="md:hidden fixed bottom-0 left-0 right-0 z-50 sheet-footer-nav flex items-stretch justify-around px-1"
-                style={{ paddingBottom: 'env(safe-area-inset-bottom, 6px)' }}
+                className="md:hidden fixed left-3 right-3 z-50 sheet-footer-nav rounded-full shadow-lg flex items-stretch justify-around px-2"
+                style={{ bottom: 'calc(env(safe-area-inset-bottom, 0px) + 12px)' }}
             >
-                {entries.slice(0, 5).map(({ to, short, icon: Icon, match }) => {
+                {entries.filter(e => !e.adminOnly).map(({ to, short, icon: Icon, match }) => {
                     const active = match(location.pathname);
                     return (
                         <Link
                             key={to}
                             to={to}
                             aria-current={active ? 'page' : undefined}
-                            className={`flex flex-col items-center gap-0.5 pt-2 pb-1.5 px-3 min-w-[64px] border-t-2 transition-colors duration-150 ${
-                                active ? 'border-t-primary text-primary' : 'border-t-transparent text-text-muted'
+                            className={`flex flex-col items-center gap-0.5 py-2 px-1 flex-1 transition-colors duration-150 ${
+                                active ? 'text-primary' : 'text-text-muted'
                             }`}
                         >
                             <Icon size={19} />
@@ -177,9 +156,51 @@ export const Layout = () => {
                         </Link>
                     );
                 })}
+                <button
+                    onClick={() => setIsProfileOpen(o => !o)}
+                    aria-expanded={isProfileOpen}
+                    aria-label="Menu do perfil"
+                    className="flex items-center justify-center px-2 flex-1"
+                >
+                    {user?.avatar ? (
+                        <img src={user.avatar} alt="" className={`w-8 h-8 rounded-full object-cover border-2 ${isProfileOpen || location.pathname === '/dashboard/profile' ? 'border-primary' : 'border-border'}`} />
+                    ) : (
+                        <UserCircle size={28} className={isProfileOpen || location.pathname === '/dashboard/profile' ? 'text-primary' : 'text-text-muted'} />
+                    )}
+                </button>
+
+                {isProfileOpen && (
+                    <div className="absolute bottom-full right-0 mb-3 w-60 sheet-footer-nav rounded-3xl shadow-lg p-2 flex flex-col gap-0.5">
+                        <div className="flex items-center gap-3 px-3 py-2 rule-b mb-1">
+                            {user?.avatar ? (
+                                <img src={user.avatar} alt="" className="w-10 h-10 rounded-full object-cover border border-border" />
+                            ) : (
+                                <UserCircle size={36} className="text-text-muted" />
+                            )}
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-sm font-semibold text-text-main truncate">{user?.full_name || 'Usuário'}</span>
+                                <span className="text-xs text-text-muted truncate">{user?.email}</span>
+                            </div>
+                        </div>
+                        {entries.filter(e => e.adminOnly).map(({ to, label, icon: Icon, match }) => (
+                            <Link key={to} to={to} onClick={() => setIsProfileOpen(false)} className={`nav-item ${match(location.pathname) ? 'active' : ''}`}>
+                                <Icon size={19} /> {label}
+                            </Link>
+                        ))}
+                        <Link to="/dashboard/profile" onClick={() => setIsProfileOpen(false)} className={`nav-item ${location.pathname === '/dashboard/profile' ? 'active' : ''}`}>
+                            <UserCircle size={19} /> Meu perfil
+                        </Link>
+                        <button onClick={() => { setIsProfileOpen(false); handleSupportClick(); }} className="nav-item text-primary">
+                            <MessageCircle size={19} /> Suporte
+                        </button>
+                        <button onClick={handleLogout} className="nav-item">
+                            <LogOut size={19} /> Sair
+                        </button>
+                    </div>
+                )}
             </nav>
 
-            <main className="flex-1 overflow-auto px-3 py-4 sm:p-4 md:p-6 lg:p-8 pt-16 md:pt-6 lg:pt-8 pb-24 md:pb-6 lg:pb-8 w-full h-screen">
+            <main className="flex-1 overflow-auto px-3 py-4 sm:p-4 md:p-6 lg:p-8 pb-28 md:pb-6 lg:pb-8 w-full h-screen">
                 <div className={location.pathname === '/dashboard/agenda' ? 'w-full min-w-0' : 'container mx-auto max-w-6xl'}>
                     <Outlet />
                 </div>

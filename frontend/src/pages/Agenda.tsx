@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -66,6 +66,8 @@ export const Agenda = () => {
   const [googleEmail, setGoogleEmail] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
+  const requestId = useRef(0);
+  const requestController = useRef<AbortController | null>(null);
 
   // Modais e seleções
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
@@ -98,44 +100,80 @@ export const Agenda = () => {
     return map;
   }, [holidays]);
 
-  // Carregar dados
+  // Turmas só mudam quando o professor sai desta página para editá-las.
+  useEffect(() => {
+    let active = true;
+    api.get('/classes')
+      .then(res => { if (active) setClasses(res.data || []); })
+      .catch(err => console.error('Erro ao carregar turmas:', err));
+    return () => { active = false; };
+  }, []);
+
+  // Mostrar os eventos locais assim que chegarem; Google completa a grade depois.
   const loadCalendarData = useCallback(async () => {
+    requestController.current?.abort();
+    const controller = new AbortController();
+    requestController.current = controller;
+    const thisRequest = ++requestId.current;
     setIsLoading(true);
-    try {
-      // 1. Status do Google
+    const startOfMonth = new Date(currentYear, currentMonth - 1, 1).toISOString();
+    const endOfMonth = new Date(currentYear, currentMonth + 2, 0).toISOString();
+    const params = { start_date: startOfMonth, end_date: endOfMonth };
+
+    const googleEventsPromise = (async (): Promise<CalendarEvent[]> => {
       try {
-        const statusRes = await api.get('/calendar/status');
+        const statusRes = await api.get('/calendar/status', { signal: controller.signal });
+        if (thisRequest !== requestId.current) return [];
         setGoogleConnected(statusRes.data.connected);
         setGoogleEmail(statusRes.data.email || null);
-      } catch {
-        setGoogleConnected(false);
-      }
-
-      // 2. Turmas
-      try {
-        const classesRes = await api.get('/classes');
-        setClasses(classesRes.data || []);
+        if (!statusRes.data.connected) return [];
       } catch (err) {
-        console.error('Erro ao carregar turmas:', err);
+        if (!controller.signal.aborted) {
+          console.error('Erro ao verificar conexão Google:', err);
+          if (thisRequest === requestId.current) {
+            setGoogleConnected(false);
+            setGoogleEmail(null);
+          }
+        }
+        return [];
       }
+      try {
+        const res = await api.get('/calendar/events', { params: { ...params, google_only: true }, signal: controller.signal });
+        return res.data || [];
+      } catch (err) {
+        if (!controller.signal.aborted) console.error('Erro ao carregar eventos do Google:', err);
+        return [];
+      }
+    })();
 
-      // 3. Eventos da agenda
-      const startOfMonth = new Date(currentYear, currentMonth - 1, 1).toISOString();
-      const endOfMonth = new Date(currentYear, currentMonth + 2, 0).toISOString();
-      const eventsRes = await api.get('/calendar/events', {
-        params: { start_date: startOfMonth, end_date: endOfMonth, include_google: true },
-      });
-      setEvents(eventsRes.data || []);
+    let localEvents: CalendarEvent[] = [];
+    try {
+      const eventsRes = await api.get('/calendar/events', { params: { ...params, include_google: false }, signal: controller.signal });
+      localEvents = eventsRes.data || [];
+      if (thisRequest === requestId.current) setEvents(localEvents);
     } catch (err) {
-      console.error('Erro ao carregar eventos:', err);
+      if (!controller.signal.aborted) {
+        console.error('Erro ao carregar eventos:', err);
+        if (thisRequest === requestId.current) setEvents([]);
+      }
     } finally {
-      setIsLoading(false);
-      setIsSyncing(false);
+      if (thisRequest === requestId.current) setIsLoading(false);
     }
+
+    const googleEvents = await googleEventsPromise;
+    if (thisRequest !== requestId.current) return;
+    if (googleEvents.length) {
+      setEvents([...localEvents, ...googleEvents].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()));
+    }
+    setIsSyncing(false);
   }, [currentYear, currentMonth]);
 
   useEffect(() => {
     loadCalendarData();
+    return () => {
+      requestId.current += 1;
+      requestController.current?.abort();
+    };
   }, [loadCalendarData]);
 
   // Navegação
@@ -393,10 +431,10 @@ export const Agenda = () => {
       )}
 
       {/* Top Header & Compact Controls Bar */}
-      <div className="bg-bg-card px-3 py-3 sm:px-5 rounded-[2px] border border-rule-subtle shadow-sm flex flex-wrap items-center justify-between gap-3">
+      <div className="bg-bg-card px-3 py-3 sm:px-5 rounded-[2px] border border-rule shadow-sm flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         {/* Left: Month Nav & Date */}
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
-          <div className="flex items-center border border-border rounded-[2px] bg-bg-dark overflow-hidden">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="flex items-center border border-border rounded-[2px] bg-bg-dark overflow-hidden shrink-0">
             <button
               onClick={handlePrev}
               className="p-2 hover:bg-[var(--wash-2)] text-text-muted hover:text-text-main transition-colors"
@@ -419,12 +457,12 @@ export const Agenda = () => {
             </button>
           </div>
 
-          <span className="text-base sm:text-lg font-bold text-text-main capitalize ml-1">
+          <span className="text-base sm:text-lg font-bold text-text-main capitalize ml-1 truncate min-w-0">
             {monthNames[currentMonth]} <span className="text-primary">{currentYear}</span>
           </span>
 
           {/* View Mode Switcher */}
-          <div className="flex items-center bg-bg-dark border border-border rounded-[2px] p-0.5 sm:ml-2">
+          <div className="flex items-center bg-bg-dark border border-border rounded-[2px] p-0.5 ml-auto lg:ml-2 shrink-0">
             <button
               onClick={() => setViewMode('month')}
               className={`flex items-center gap-1 px-3 py-2 text-xs font-semibold rounded-[2px] transition-all ${
@@ -445,9 +483,9 @@ export const Agenda = () => {
         </div>
 
         {/* Center/Right: Category Filters & Actions */}
-        <div className="flex flex-wrap items-center gap-2 justify-between lg:justify-end min-w-0">
-          {/* Categorias */}
-          <div className="flex flex-wrap items-center gap-1 text-xs">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between lg:justify-end min-w-0">
+          {/* Categorias: scroll horizontal no celular, quebra de linha do sm pra cima */}
+          <div className="flex items-center gap-1 text-xs overflow-x-auto -mx-3 px-3 sm:mx-0 sm:px-0 sm:flex-wrap [&>button]:shrink-0 [&>button]:whitespace-nowrap">
             {[
               { id: 'all', label: 'Tudo' },
               { id: 'lesson', label: 'Turmas' },
@@ -458,7 +496,7 @@ export const Agenda = () => {
               <button
                 key={tab.id}
                 onClick={() => setFilterCategory(tab.id)}
-                className={`px-2.5 py-2 rounded-[2px] font-medium transition-all ${
+                className={`h-8 px-2.5 rounded-[2px] font-medium transition-all ${
                   filterCategory === tab.id
                     ? 'bg-primary text-white'
                     : 'bg-bg-dark text-text-muted hover:text-text-main hover:bg-[var(--wash-2)] border border-border'
@@ -469,10 +507,11 @@ export const Agenda = () => {
             ))}
           </div>
 
+          <div className="flex items-center justify-between gap-2 sm:justify-end">
           {/* Google Status Badge */}
           {googleConnected ? (
             <div
-              className="flex items-center gap-1.5 px-2 py-1 rounded-[2px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-medium"
+              className="h-8 flex items-center gap-1.5 px-2 rounded-[2px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-medium"
               title={googleEmail ? `Conectado como ${googleEmail}` : 'Google Agenda conectado'}
             >
               <CheckCircle2 size={12} />
@@ -492,7 +531,7 @@ export const Agenda = () => {
           ) : (
             <button
               onClick={handleConnectGoogle}
-              className="px-2 py-1 rounded-[2px] bg-bg-dark border border-border text-text-muted hover:text-text-main text-[10px] flex items-center gap-1 font-medium transition-colors"
+              className="h-8 px-2 rounded-[2px] bg-bg-dark border border-border text-text-muted hover:text-text-main text-[10px] flex items-center gap-1 font-medium transition-colors"
               title="Vincular com Google Agenda"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -504,22 +543,23 @@ export const Agenda = () => {
           {/* Botão Novo Evento */}
           <button
             onClick={() => handleOpenNewEventModal()}
-            className="btn btn-primary flex items-center gap-1 py-2 px-3 text-xs font-semibold"
+            className="btn btn-primary h-8 flex items-center gap-1 py-0 px-3 text-xs font-semibold"
           >
             <Plus size={14} /> Novo Evento
           </button>
+          </div>
         </div>
       </div>
 
       {/* Visualização Principal */}
       {isLoading ? (
-        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-2 bg-bg-card rounded-[2px] border border-rule-subtle">
+        <div className="min-h-[60vh] flex flex-col items-center justify-center gap-2 bg-bg-card rounded-[2px] border border-rule">
           <RefreshCw size={22} className="animate-spin text-primary" />
           <p className="text-xs text-text-muted font-medium">Carregando agenda...</p>
         </div>
       ) : viewMode === 'month' ? (
         /* Grade mensal que ocupa o espaço disponível. */
-        <div className="bg-bg-card border border-rule-subtle rounded-[2px] overflow-hidden shadow-sm">
+        <div className="bg-bg-card border border-rule rounded-[2px] overflow-hidden shadow-sm">
           {/* Cabeçalho dos dias da semana */}
           <div className="grid grid-cols-7 border-b border-border bg-bg-dark/80 text-center py-2 sm:py-3">
             {weekDayNames.map((day, idx) => (
@@ -642,7 +682,7 @@ export const Agenda = () => {
         /* VISUALIZAÇÃO EM LISTA / PRÓXIMOS EVENTOS */
         <div className="space-y-2">
           {filteredEvents.length === 0 ? (
-            <div className="p-8 text-center bg-bg-card rounded-[2px] border border-rule-subtle space-y-2">
+            <div className="p-8 text-center bg-bg-card rounded-[2px] border border-rule space-y-2">
               <CalendarCheck size={32} className="mx-auto text-text-muted/50" />
               <h3 className="text-sm font-bold text-text-main">Nenhum compromisso encontrado</h3>
               <p className="text-xs text-text-muted max-w-md mx-auto">
@@ -673,7 +713,7 @@ export const Agenda = () => {
                 return (
                   <div
                     key={ev.id}
-                    className="p-3 bg-bg-card rounded-[2px] border border-rule-subtle hover:border-border transition-all flex flex-col justify-between gap-2 shadow-sm"
+                    className="p-3 bg-bg-card rounded-[2px] border border-rule hover:border-border transition-all flex flex-col justify-between gap-2 shadow-sm"
                   >
                     <div className="space-y-1">
                       <div className="flex items-start justify-between gap-2">
