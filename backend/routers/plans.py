@@ -10,7 +10,7 @@ router = APIRouter(prefix="/plans", tags=["plans"])
 
 @router.get("/", response_model=List[Plan])
 def get_plans(db: Session = Depends(get_db)):
-    return db.query(PlanModel).all()
+    return db.query(PlanModel).order_by(PlanModel.id).all()  # Essencial antes de Profissional
 
 @router.post("/", response_model=Plan)
 def create_plan(plan: PlanCreate, db: Session = Depends(get_db), current_user = Depends(get_current_active_user)):

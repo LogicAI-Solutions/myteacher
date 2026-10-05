@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { GraduationCap, ArrowLeft, User, Mail, AtSign, Lock, Loader2, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
+import { Alert, Box, Button, CircularProgress, Divider, IconButton, InputAdornment, Link, Stack, TextField, Typography } from '@mui/material';
+import { AuthLayout, GoogleButton } from '../components/AuthLayout';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 
@@ -15,12 +17,18 @@ export const Register = () => {
     // pagamento acontece quando o teste acaba.
     const planName = (location.state as { planName?: string } | null)?.planName;
 
-    const [form, setForm] = useState({ full_name: '', email: '', nickname: '', password: '' });
+    const [form, setForm] = useState({ first_name: '', last_name: '', email: '', password: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const set = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) =>
         setForm((prev) => ({ ...prev, [field]: e.target.value }));
+
+    const handleGoogleLogin = () => {
+        const apiUrl = import.meta.env.VITE_API_URL || '/api';
+        window.location.href = `${apiUrl}/auth/google`;
+    };
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -34,8 +42,8 @@ export const Register = () => {
         setLoading(true);
         try {
             await api.post('/register', form);
-            // Entra direto: o valor tem que vir antes de qualquer outra tela.
-            await login(form.nickname, form.password);
+            // Entra direto com email e senha
+            await login(form.email, form.password);
             navigate('/dashboard');
         } catch (err: any) {
             if (err.code === 'ERR_NETWORK' || !err.response) {
@@ -43,7 +51,7 @@ export const Register = () => {
             } else if (err.response.status === 409) {
                 setError(err.response.data.detail);
             } else if (err.response.status === 422) {
-                setError('Confira os dados: o usuário aceita apenas letras, números, ponto, hífen e underscore.');
+                setError('Confira os dados preenchidos e tente novamente.');
             } else {
                 setError(err.response.data?.detail || 'Não foi possível criar sua conta. Tente de novo.');
             }
@@ -52,161 +60,117 @@ export const Register = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-bg-dark text-text-main p-6 relative overflow-hidden">
-            <div className="absolute top-[-20%] left-[-20%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[100px]"></div>
+        <AuthLayout>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>
+                Criar conta
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+                {planName ? <>Plano <strong>{planName}</strong>. </> : null}
+                {TRIAL_DAYS} dias grátis, sem cartão de crédito.
+            </Typography>
 
-            <div className="relative z-10 w-full max-w-md animate-fade-in">
-                <button
-                    onClick={() => navigate('/')}
-                    className="mb-6 flex items-center gap-2 rounded-[2px] px-2 py-2 text-text-muted transition-colors hover:text-text-main focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+            {error && (
+                <Alert severity="error" sx={{ mt: 2 }} onClose={() => setError('')}>
+                    {error}
+                </Alert>
+            )}
+
+            <Box sx={{ mt: 2 }}>
+                <GoogleButton onClick={handleGoogleLogin} />
+            </Box>
+
+            <Divider sx={{ my: 2, fontSize: '0.75rem', textTransform: 'uppercase', color: 'text.secondary' }}>
+                ou
+            </Divider>
+
+            <Stack component="form" onSubmit={handleSubmit} spacing={2}>
+                <Stack direction="row" spacing={1.5}>
+                    <TextField
+                        label="Nome"
+                        value={form.first_name}
+                        onChange={set('first_name')}
+                        required
+                        fullWidth
+                        autoFocus
+                        name="first_name"
+                        autoComplete="given-name"
+                        placeholder="Maria"
+                        slotProps={{ htmlInput: { minLength: 2, maxLength: 60 } }}
+                    />
+                    <TextField
+                        label="Sobrenome"
+                        value={form.last_name}
+                        onChange={set('last_name')}
+                        required
+                        fullWidth
+                        name="last_name"
+                        autoComplete="family-name"
+                        placeholder="Silva"
+                        slotProps={{ htmlInput: { minLength: 2, maxLength: 60 } }}
+                    />
+                </Stack>
+
+                <TextField
+                    label="E-mail"
+                    type="email"
+                    value={form.email}
+                    onChange={set('email')}
+                    required
+                    fullWidth
+                    name="email"
+                    autoComplete="email"
+                    placeholder="maria@escola.com.br"
+                />
+
+                <TextField
+                    label="Senha"
+                    type={showPassword ? 'text' : 'password'}
+                    value={form.password}
+                    onChange={set('password')}
+                    required
+                    fullWidth
+                    name="password"
+                    autoComplete="new-password"
+                    helperText="Mínimo de 8 caracteres."
+                    slotProps={{
+                        htmlInput: { minLength: 8 },
+                        input: {
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    <IconButton
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        edge="end"
+                                        aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+                                    >
+                                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        },
+                    }}
+                />
+
+                <Button
+                    type="submit"
+                    variant="contained"
+                    size="large"
+                    fullWidth
+                    disabled={loading}
+                    startIcon={loading ? <CircularProgress size={16} color="inherit" /> : null}
                 >
-                    <ArrowLeft size={20} /> Voltar
-                </button>
+                    {loading ? 'Criando sua conta...' : `Começar ${TRIAL_DAYS} dias grátis`}
+                </Button>
+            </Stack>
 
-                <div className="sheet sheet-p">
-                    <div className="text-center">
-                        <div className="mb-4 flex justify-center">
-                            <div className="flex h-16 w-16 items-center justify-center rounded-[3px] border border-primary/30 bg-primary/20 text-primary">
-                                <GraduationCap size={32} />
-                            </div>
-                        </div>
-                        <h1 className="text-3xl font-bold">Criar conta</h1>
-                        <p className="mt-2 text-text-muted">
-                            {planName ? (
-                                <>Plano <strong className="text-text-main">{planName}</strong>. </>
-                            ) : null}
-                            {TRIAL_DAYS} dias grátis, sem cartão de crédito.
-                        </p>
-                    </div>
+            <Divider sx={{ my: 2 }} />
 
-                    {error && (
-                        <div
-                            role="alert"
-                            className="mt-6 rounded-[2px] border border-danger/20 bg-danger/10 p-4 text-sm text-danger"
-                        >
-                            {error}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-                        <div className="space-y-1">
-                            <label htmlFor="full_name" className="ml-1 text-sm font-medium text-text-muted">
-                                Seu nome
-                            </label>
-                            <div className="relative">
-                                <User size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
-                                <input
-                                    id="full_name"
-                                    className="input pl-12"
-                                    value={form.full_name}
-                                    onChange={set('full_name')}
-                                    required
-                                    minLength={2}
-                                    maxLength={120}
-                                    autoComplete="name"
-                                    placeholder="Maria Silva"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-1">
-                            <label htmlFor="email" className="ml-1 text-sm font-medium text-text-muted">
-                                E-mail
-                            </label>
-                            <div className="relative">
-                                <Mail size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
-                                <input
-                                    id="email"
-                                    type="email"
-                                    className="input pl-12"
-                                    value={form.email}
-                                    onChange={set('email')}
-                                    required
-                                    autoComplete="email"
-                                    placeholder="maria@escola.com.br"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-1">
-                            <label htmlFor="nickname" className="ml-1 text-sm font-medium text-text-muted">
-                                Usuário
-                            </label>
-                            <div className="relative">
-                                <AtSign size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
-                                <input
-                                    id="nickname"
-                                    className="input pl-12"
-                                    value={form.nickname}
-                                    onChange={set('nickname')}
-                                    required
-                                    minLength={3}
-                                    maxLength={40}
-                                    pattern="[A-Za-z0-9._\-]+"
-                                    autoComplete="username"
-                                    placeholder="maria.silva"
-                                    aria-describedby="nickname-hint"
-                                />
-                            </div>
-                            <p id="nickname-hint" className="ml-1 text-xs text-text-muted">
-                                É com ele que você entra no sistema. Letras, números, ponto, hífen e underscore.
-                            </p>
-                        </div>
-
-                        <div className="space-y-1">
-                            <label htmlFor="password" className="ml-1 text-sm font-medium text-text-muted">
-                                Senha
-                            </label>
-                            <div className="relative">
-                                <Lock size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
-                                <input
-                                    id="password"
-                                    type="password"
-                                    className="input pl-12"
-                                    value={form.password}
-                                    onChange={set('password')}
-                                    required
-                                    minLength={8}
-                                    autoComplete="new-password"
-                                    aria-describedby="password-hint"
-                                />
-                            </div>
-                            <p id="password-hint" className="ml-1 text-xs text-text-muted">
-                                Mínimo de 8 caracteres.
-                            </p>
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="btn btn-primary flex w-full items-center justify-center gap-2 rounded-[2px] px-6 py-3.5 text-base font-bold disabled:pointer-events-none disabled:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-                        >
-                            {loading ? (
-                                <>
-                                    <Loader2 size={20} className="animate-spin" />
-                                    Criando sua conta...
-                                </>
-                            ) : (
-                                <>
-                                    <CheckCircle size={20} />
-                                    Começar {TRIAL_DAYS} dias grátis
-                                </>
-                            )}
-                        </button>
-                    </form>
-
-                    <p className="mt-6 text-center text-sm text-text-muted">
-                        Já tem conta?{' '}
-                        <button
-                            onClick={() => navigate('/login')}
-                            className="rounded font-semibold text-primary hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-                        >
-                            Entrar
-                        </button>
-                    </p>
-                </div>
-            </div>
-        </div>
+            <Typography variant="body2" sx={{ color: 'text.secondary', textAlign: 'center' }}>
+                Já tem conta?{' '}
+                <Link component="button" type="button" variant="body2" sx={{ fontWeight: 600 }} onClick={() => navigate('/login')}>
+                    Entrar
+                </Link>
+            </Typography>
+        </AuthLayout>
     );
 };
 

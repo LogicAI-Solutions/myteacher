@@ -1,5 +1,5 @@
-import { lazy, Suspense, type ReactNode } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { StudentAuthProvider, useStudentAuth } from './context/StudentAuthContext';
 import { Loading } from './components/Loading';
@@ -11,6 +11,7 @@ const Landing = lazy(() => import('./pages/Landing').then(m => ({ default: m.Lan
 const Login = lazy(() => import('./pages/Login'));
 const Dashboard = lazy(() => import('./pages/Dashboard').then(m => ({ default: m.Dashboard })));
 const Classes = lazy(() => import('./pages/Classes').then(m => ({ default: m.Classes })));
+const Agenda = lazy(() => import('./pages/Agenda').then(m => ({ default: m.Agenda })));
 const ClassDetails = lazy(() => import('./pages/ClassDetails').then(m => ({ default: m.ClassDetails })));
 const Students = lazy(() => import('./pages/Students').then(m => ({ default: m.Students })));
 const Payments = lazy(() => import('./pages/Payments').then(m => ({ default: m.Payments })));
@@ -23,6 +24,9 @@ const TrialExpired = lazy(() => import('./pages/TrialExpired').then(m => ({ defa
 const Pricing = lazy(() => import('./pages/Pricing'));
 const Register = lazy(() => import('./pages/Register'));
 const CheckoutSuccess = lazy(() => import('./pages/CheckoutSuccess').then(m => ({ default: m.CheckoutSuccess })));
+const OAuthCallback = lazy(() => import('./pages/OAuthCallback'));
+const Privacy = lazy(() => import('./pages/Privacy').then(m => ({ default: m.Privacy })));
+const Terms = lazy(() => import('./pages/Terms').then(m => ({ default: m.Terms })));
 
 // Layouts
 import { Layout } from './components/Layout';
@@ -60,6 +64,23 @@ function App() {
 }
 
 function AppRoutes() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const home = pathname === '/';
+    document.title = home ? 'MyTeacherApp | Gestão para professores particulares' : 'Minha conta | MyTeacherApp';
+    document.querySelector('meta[name="robots"]')?.setAttribute('content', home ? 'index, follow' : 'noindex, follow');
+    let canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (home) {
+      if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.rel = 'canonical';
+        document.head.appendChild(canonical);
+      }
+      canonical.href = 'https://myteacherapp.com.br/';
+    } else {
+      canonical?.remove();
+    }
+  }, [pathname]);
   return (
     <Suspense fallback={<Loading variant="fullscreen" text="Carregando..." />}>
       <Routes>
@@ -67,8 +88,11 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/pricing" element={<Pricing />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/auth/callback" element={<OAuthCallback />} />
       <Route path="/trial-expired" element={<TrialExpired />} />
       <Route path="/checkout/success" element={<CheckoutSuccess />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
 
       {/* Student Portal Routes */}
       <Route path="/portal/login" element={<StudentLogin />} />
@@ -88,6 +112,7 @@ function AppRoutes() {
         </ProtectedRoute>
       }>
         <Route index element={<Dashboard />} />
+        <Route path="agenda" element={<Agenda />} />
         <Route path="classes" element={<Classes />} />
         <Route path="class/:id" element={<ClassDetails />} />
         <Route path="students" element={<Students />} />

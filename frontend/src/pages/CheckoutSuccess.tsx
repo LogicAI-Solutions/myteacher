@@ -3,10 +3,10 @@ import { CheckCircle, Loader2, MessageCircle } from 'lucide-react';
 import { buildSupportWhatsAppUrl } from '../utils/support';
 import api from '../api';
 
-// O Stripe redireciona pra cá depois do pagamento, mas a conta só é ativada quando
-// o webhook checkout.session.completed chega no backend (assíncrono, alguns segundos).
-// Aqui a gente espera essa ativação antes de mandar o usuário pro painel — senão o
-// /users/me ainda devolve TRIAL_EXPIRED e quem pagou cairia de volta no paywall.
+// O Stripe redireciona pra cá depois do pagamento. Primeiro tentamos ativar na hora
+// via /billing/confirm (o backend consulta a sessão direto no Stripe). Se isso falhar,
+// caímos no poll do /users/me esperando o webhook checkout.session.completed — senão
+// quem pagou cairia de volta no paywall com TRIAL_EXPIRED.
 const POLL_INTERVAL_MS = 2000;
 const MAX_ATTEMPTS = 20; // ~40s de tolerância pro webhook
 
@@ -19,8 +19,13 @@ export const CheckoutSuccess = () => {
     useEffect(() => {
         let active = true;
         let timer: ReturnType<typeof setTimeout>;
+        const sessionId = new URLSearchParams(window.location.search).get('session_id');
 
         const check = async () => {
+            if (sessionId && attempts.current === 0) {
+                // Ativação imediata; qualquer erro só nos leva ao poll do webhook.
+                await api.post('/billing/confirm', null, { params: { session_id: sessionId } }).catch(() => {});
+            }
             try {
                 const { data } = await api.get('/users/me');
                 // Webhook processou: trial encerrado e conta ativa.
