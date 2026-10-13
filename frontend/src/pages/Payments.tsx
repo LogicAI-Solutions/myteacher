@@ -219,6 +219,9 @@ export const Payments = () => {
                     <p className="text-text-muted mt-1.5 text-sm">
                         Mensalidades de {new Date(0, selectedMonth - 1).toLocaleString('pt-BR', { month: 'long' })} de {selectedYear}.
                     </p>
+                    <p className="text-text-muted mt-0.5 text-xs">
+                        Alunos com mensalidade e vencimento no cadastro têm a cobrança de cada mês criada automaticamente.
+                    </p>
                 </div>
 
                 <div className="flex flex-wrap items-end gap-2">

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, Float, Date
 from sqlalchemy.orm import relationship
 from backend.core.database import Base
 
@@ -20,6 +20,10 @@ class Student(Base):
     
     exempt = Column(Boolean, default=False, nullable=True)  # isento de mensalidade (NULL = não isento, linhas antigas)
     photo = Column(String, nullable=True)
+    # Mensalidade automática: valor e dia de vencimento; billing_start = quando a cobrança começou
+    monthly_fee = Column(Float, nullable=True)
+    due_day = Column(Integer, nullable=True)
+    billing_start = Column(Date, nullable=True)
 
     owner = relationship("User", back_populates="students")
     enrollments = relationship("Enrollment", back_populates="student")

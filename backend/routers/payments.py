@@ -21,6 +21,7 @@ def read_payments(
     ctx: Access = Depends(require(FINANCE))
 ):
     # In a real app, restrict to students owned by user, but skipping complex join for brevity
+    payment_crud.ensure_monthly_payments(db, ctx.tenant_id)
     return payment_crud.get_payments(db, user_id=ctx.tenant_id, student_id=student_id, year=year, month=month, skip=skip, limit=limit, search=search)
 
 @router.post("/payments/", response_model=payment_schemas.Payment)
@@ -52,6 +53,7 @@ def get_payment_stats(
     db: Session = Depends(database.get_db),
     ctx: Access = Depends(require(FINANCE))
 ):
+    payment_crud.ensure_monthly_payments(db, ctx.tenant_id)
     return payment_crud.get_payment_stats(db, user_id=ctx.tenant_id, month=month, year=year)
 
 from docx import Document
@@ -69,6 +71,7 @@ def generate_monthly_report(
 ):
     # 1. Get all students (limit 1000 to be safe)
     # We reuse functionality, but ideally we'd have a lighter query for just names/IDs
+    payment_crud.ensure_monthly_payments(db, ctx.tenant_id)
     all_students = student_crud.get_students(db, user_id=ctx.tenant_id, limit=1000)
     
     # 2. Get payments for the month
