@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import { Loading } from '../components/Loading';
+import { formatCurrency } from '../utils/masks';
 import { 
     AlertCircle, 
     GraduationCap, 
@@ -38,6 +39,18 @@ interface DashboardStats {
         paid: number;
         total_expected: number;
         pending: number;
+        overdue_count: number;
+        overdue_amount: number;
+        overdue_items: {
+            payment_id: number;
+            student_id: number;
+            student_name: string;
+            month: number;
+            year: number;
+            due_date: string;
+            days_overdue: number;
+            amount: number;
+        }[];
     };
 }
 
@@ -551,6 +564,34 @@ export const Dashboard = () => {
                         Abrir o financeiro
                     </Link>
                 </div>
+
+                {stats.payments.overdue_count > 0 && (
+                    <div className="mt-4 rounded-[2px] border p-3" style={{ borderColor: 'var(--margin-red)', background: 'color-mix(in srgb, var(--margin-red) 7%, transparent)' }}>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="stamp stamp-late">
+                                {stats.payments.overdue_count} em atraso
+                            </span>
+                            <span className="text-sm font-semibold text-text-main tabular">
+                                {formatCurrency(stats.payments.overdue_amount)} a receber
+                            </span>
+                        </div>
+                        <ul className="mt-3 divide-y list-none p-0 m-0" style={{ borderColor: 'var(--rule)' }}>
+                            {stats.payments.overdue_items.map(item => (
+                                <li key={item.payment_id} className="flex items-center justify-between gap-3 py-1.5 text-sm">
+                                    <span className="min-w-0 truncate font-medium text-text-main">{item.student_name}</span>
+                                    <span className="shrink-0 text-text-muted tabular">
+                                        {MONTHS[item.month - 1]?.slice(0, 3)}/{item.year} • venceu há {item.days_overdue} dia{item.days_overdue === 1 ? '' : 's'} • {formatCurrency(item.amount)}
+                                    </span>
+                                </li>
+                            ))}
+                        </ul>
+                        {stats.payments.overdue_count > stats.payments.overdue_items.length && (
+                            <p className="mt-2 text-xs text-text-muted">
+                                e mais {stats.payments.overdue_count - stats.payments.overdue_items.length}. Veja todas no financeiro.
+                            </p>
+                        )}
+                    </div>
+                )}
 
                 {total_expected === 0 ? (
                     <p className="mt-4 text-text-muted">
