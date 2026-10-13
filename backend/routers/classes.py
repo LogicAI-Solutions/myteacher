@@ -8,9 +8,18 @@ from backend.schemas import attendance as attendance_schemas
 from backend.crud import classes as class_crud
 from backend.crud import enrollments as enrollment_crud
 from backend.crud import attendance as attendance_crud
+from backend.crud import students as student_crud
 from backend.core import database, security
 
 router = APIRouter()
+
+
+def _own_class(db: Session, class_id: int, current_user):
+    """404 também para turma de outro professor: IDs são sequenciais e 403 confirmaria que existe."""
+    db_class = class_crud.get_class_for_owner(db, class_id=class_id, owner_id=current_user.id)
+    if not db_class:
+        raise HTTPException(status_code=404, detail="Class not found")
+    return db_class
 
 @router.get("/classes/", response_model=List[class_schemas.Class])
 def read_classes(skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
@@ -63,30 +72,30 @@ def delete_class(class_id: int, db: Session = Depends(database.get_db), current_
 
 @router.get("/classes/{class_id}/students", response_model=List[student_schemas.Student])
 def read_class_students(class_id: int, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
-    # Verify ownership
-    db_class = class_crud.get_class(db, class_id=class_id)
-    if not db_class or db_class.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not authorized")
+    _own_class(db, class_id, current_user)
     return enrollment_crud.get_students_for_class(db, class_id=class_id)
 
 @router.get("/classes/{class_id}/attendance", response_model=List[attendance_schemas.AttendanceSession])
 def read_attendance_sessions(class_id: int, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
-    # Verify class belongs to user
-    # TODO: Add check
+    _own_class(db, class_id, current_user)
     return attendance_crud.get_class_attendance_sessions(db, class_id=class_id)
 
 @router.post("/classes/{class_id}/attendance", response_model=attendance_schemas.AttendanceSession)
 def create_attendance_session(class_id: int, session: attendance_schemas.AttendanceSessionCreate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
-    # Verify class belongs to user
-    # TODO: Add check
-    # TODO: Add check
+    _own_class(db, class_id, current_user)
+    if not student_crud.owns_all_students(db, [log.student_id for log in session.logs], current_user.id):
+        raise HTTPException(status_code=404, detail="Student not found")
     return attendance_crud.create_attendance_session(db=db, session=session, class_id=class_id)
 
 @router.post("/classes/{class_id}/enroll/{student_id}")
 def enroll_student_in_class(class_id: int, student_id: int, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
+    _own_class(db, class_id, current_user)
+    if not student_crud.get_student_for_owner(db, student_id=student_id, owner_id=current_user.id):
+        raise HTTPException(status_code=404, detail="Student not found")
     return enrollment_crud.enroll_student(db, class_id=class_id, student_id=student_id)
 
 @router.delete("/classes/{class_id}/enroll/{student_id}")
 def unenroll_student_from_class(class_id: int, student_id: int, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
+    _own_class(db, class_id, current_user)
     enrollment_crud.unenroll_student(db, class_id=class_id, student_id=student_id)
     return {"message": "Student unenrolled successfully"}

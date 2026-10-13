@@ -1,12 +1,16 @@
 import os
 from typing import Optional
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+DEFAULT_SECRET_KEY = "change-me-in-production-please-use-a-strong-random-value"
 
 
 class Settings(BaseSettings):
     # Aplicação / Segurança
     PROJECT_NAME: str = "MyTeacherApp"
-    SECRET_KEY: str = "change-me-in-production-please-use-a-strong-random-value"
+    ENVIRONMENT: str = "development"  # "production" ativa as checagens de _check_production
+    SECRET_KEY: str = DEFAULT_SECRET_KEY
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 120
     TRIAL_DAYS: int = 14
@@ -35,6 +39,30 @@ class Settings(BaseSettings):
     STRIPE_PRICE_ID: Optional[str] = None
     STRIPE_PRICE_ESSENCIAL: Optional[str] = None
     STRIPE_PRICE_PROFISSIONAL: Optional[str] = None
+
+    @property
+    def is_production(self) -> bool:
+        return self.ENVIRONMENT.lower() == "production"
+
+    @model_validator(mode="after")
+    def _check_production(self):
+        """Em produção, recusa subir com configuração que abriria a aplicação:
+        SECRET_KEY padrão deixa qualquer um forjar JWT; sem FRONTEND_URL/CORS os
+        redirects e o CORS caem em defaults de desenvolvimento."""
+        if not self.is_production:
+            return self
+        problems = []
+        if self.SECRET_KEY == DEFAULT_SECRET_KEY or len(self.SECRET_KEY) < 32:
+            problems.append("SECRET_KEY padrão ou com menos de 32 caracteres")
+        if not self.FRONTEND_URL:
+            problems.append("FRONTEND_URL não definida")
+        if not self.CORS_ORIGINS:
+            problems.append("CORS_ORIGINS não definida")
+        if self.GOOGLE_CLIENT_ID and not self.GOOGLE_CALLBACK_URL:
+            problems.append("GOOGLE_CALLBACK_URL não definida (Google OAuth ativo)")
+        if problems:
+            raise ValueError("Configuração de produção inválida: " + "; ".join(problems))
+        return self
 
     model_config = SettingsConfigDict(
         env_file=os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), ".env"),

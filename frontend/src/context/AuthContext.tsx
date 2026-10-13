@@ -15,6 +15,7 @@ interface User {
     full_name?: string;
     nickname?: string;
     avatar?: string;
+    has_password?: boolean;
 }
 
 interface AuthContextType {

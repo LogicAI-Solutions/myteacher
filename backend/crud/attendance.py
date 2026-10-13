@@ -52,8 +52,9 @@ def create_attendance_session(db: Session, session: AttendanceSessionCreate, cla
     db.refresh(db_session)
     return db_session
 
-def update_attendance_session(db: Session, session_id: int, session_data: AttendanceSessionCreate):
-    db_session = db.query(AttendanceSession).filter(AttendanceSession.id == session_id).first()
+def update_attendance_session(db: Session, session_id: int, session_data: AttendanceSessionCreate, class_id: int):
+    # class_id no filtro: a posse é verificada na turma, então a sessão tem que ser dela
+    db_session = db.query(AttendanceSession).filter(AttendanceSession.id == session_id, AttendanceSession.class_id == class_id).first()
     if not db_session:
         return None
     
@@ -90,8 +91,8 @@ def get_class_attendance_sessions(db: Session, class_id: int):
 def get_attendance_session(db: Session, session_id: int):
     return db.query(AttendanceSession).options(joinedload(AttendanceSession.logs).joinedload(AttendanceLog.student)).filter(AttendanceSession.id == session_id).first()
 
-def delete_attendance_session(db: Session, session_id: int):
-    db_session = db.query(AttendanceSession).filter(AttendanceSession.id == session_id).first()
+def delete_attendance_session(db: Session, session_id: int, class_id: int):
+    db_session = db.query(AttendanceSession).filter(AttendanceSession.id == session_id, AttendanceSession.class_id == class_id).first()
     if db_session:
         db.delete(db_session)
         db.commit()

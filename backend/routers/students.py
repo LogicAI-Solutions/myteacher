@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from docx import Document
 from typing import List, Optional
@@ -13,6 +14,14 @@ from backend.crud import classes as class_crud
 from backend.core import database, security
 
 router = APIRouter()
+
+
+def _own_student(db: Session, student_id: int, current_user):
+    """404 também para aluno de outro professor: IDs são sequenciais e 403 confirmaria que existe."""
+    student = student_crud.get_student_for_owner(db, student_id=student_id, owner_id=current_user.id)
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    return student
 
 @router.get("/students/", response_model=student_schemas.StudentListResponse)
 def read_students(
@@ -56,14 +65,13 @@ def read_students(
 def create_student(student: student_schemas.StudentCreate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
     try:
         return student_crud.create_student(db=db, student=student, user_id=current_user.id)
-    except Exception as e:
-        if "UNIQUE constraint failed" in str(e) or "duplicate key" in str(e).lower():
-            raise HTTPException(status_code=409, detail="Este nome de usuário já está sendo utilizado por outro aluno.")
-        raise HTTPException(status_code=500, detail=f"Debug Error: {str(e)}")
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Este nome de usuário já está sendo utilizado por outro aluno.")
 
 @router.put("/students/{student_id}", response_model=student_schemas.Student)
 def update_student(student_id: int, student_data: student_schemas.StudentCreate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
-    # Verify ownership logic could be added here (check student -> owner_id)
+    _own_student(db, student_id, current_user)
     student = student_crud.update_student(db, student_id=student_id, student_data=student_data)
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
@@ -71,6 +79,7 @@ def update_student(student_id: int, student_data: student_schemas.StudentCreate,
 
 @router.delete("/students/{student_id}")
 def delete_student(student_id: int, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
+    _own_student(db, student_id, current_user)
     student = student_crud.delete_student(db, student_id=student_id)
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
@@ -78,6 +87,7 @@ def delete_student(student_id: int, db: Session = Depends(database.get_db), curr
 
 @router.get("/students/{student_id}/evolution", response_model=List[student_schemas.StudentEvolutionPoint])
 def get_student_evolution(student_id: int, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
+    _own_student(db, student_id, current_user)
     results = student_crud.get_student_evolution(db, student_id=student_id)
     
     response = []
@@ -96,6 +106,7 @@ def get_student_enrollment(
     current_user: user_schemas.User = Depends(security.get_current_user)
 ):
     """Retorna a turma atual do aluno (pode ser null se não estiver em nenhuma)"""
+    _own_student(db, student_id, current_user)
     enrollment = enrollment_crud.get_enrollment_for_student(db, student_id=student_id)
     if enrollment:
         # Busca dados da turma para retornar
@@ -111,6 +122,9 @@ def update_student_enrollment(
     current_user: user_schemas.User = Depends(security.get_current_user)
 ):
     """Atualiza a turma do aluno (pass class_id=null para remover da turma)"""
+    _own_student(db, student_id, current_user)
+    if class_id and not class_crud.get_class_for_owner(db, class_id=class_id, owner_id=current_user.id):
+        raise HTTPException(status_code=404, detail="Class not found")
     enrollment_crud.change_student_class(db, student_id=student_id, new_class_id=class_id)
     return {"message": "Enrollment updated successfully"}
 
@@ -127,6 +141,7 @@ def generate_student_report(
     db: Session = Depends(database.get_db), 
     current_user: user_schemas.User = Depends(security.get_current_user)
 ):
+    _own_student(db, student_id, current_user)
     stats = student_crud.get_student_report_stats(db, student_id=student_id, month=month, year=year)
     if not stats:
         raise HTTPException(status_code=404, detail="Student not found")

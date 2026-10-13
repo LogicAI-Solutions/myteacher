@@ -5,17 +5,18 @@ from backend.models.users import User
 from backend.schemas.users import UserCreate, UserUpdate
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-from sqlalchemy import or_
+from sqlalchemy import func, or_
 
 def get_user_by_email(db: Session, email: str):
-    return db.query(User).filter(User.email.ilike(email)).first()
+    # Igualdade sem caixa, não ilike: em ilike, '%' e '_' digitados viram curinga e casam outras contas.
+    return db.query(User).filter(func.lower(User.email) == email.strip().lower()).first()
 
 def get_user_by_google_id(db: Session, google_id: str):
     return db.query(User).filter(User.google_id == google_id).first()
 
 def get_user_by_nickname(db: Session, nickname: str):
     return db.query(User).filter(
-        or_(User.email.ilike(nickname), User.nickname == nickname)
+        or_(func.lower(User.email) == nickname.strip().lower(), User.nickname == nickname)
     ).first()
 
 def get_users(db: Session, skip: int = 0, limit: int = 100, search: str = None):

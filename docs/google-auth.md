@@ -13,23 +13,30 @@ Este documento fornece o passo a passo completo para configurar e habilitar o **
 [Frontend: redireciona para /auth/google no Backend]
                   │
                   ▼
-[Backend: redireciona para tela de consentimento do Google]
+[Backend: grava cookie g_oauth_nonce e redireciona ao Google com state assinado (JWT 10 min)]
                   │
                   ▼
 [Usuário autoriza e Google redireciona para /auth/google/callback com ?code=...]
                   │
                   ▼
-[Backend troca code por tokens e dados do perfil (email, nome, foto)]
+[Backend confere state (assinatura + nonce == cookie) e troca code por tokens e perfil]
                   │
                   ▼
 [Backend busca ou cria conta (14 dias de teste grátis se novo) e gera JWT]
                   │
                   ▼
-[Backend redireciona para /auth/callback?token=... no Frontend]
+[Backend redireciona para FRONTEND_URL/auth/callback#token=... (fragmento, fora de logs)]
                   │
                   ▼
 [Frontend armazena JWT no localStorage e entra no /dashboard]
 ```
+
+**Conectar o Google Agenda (usuário já logado):** o frontend chama `POST /auth/google/link`, que devolve
+`/auth/google?link=<token de 2 min>`. O popup abre esse caminho e segue o mesmo fluxo acima, mas o
+callback vincula o Google à conta do token e volta para `/auth/callback#linked=1` sem emitir JWT novo.
+
+O destino do redirect vem **só** de `FRONTEND_URL` e o callback **só** de `GOOGLE_CALLBACK_URL`;
+nada é derivado de cabeçalhos da requisição.
 
 ---
 
@@ -142,5 +149,5 @@ FRONTEND_URL=https://myteacherapp.com.br
 | :--- | :--- | :--- |
 | `redirect_uri_mismatch` (Google Error 400) | O URI de callback configurado no Google Console não bate exatamente com o `GOOGLE_CALLBACK_URL` do `.env`. | Verifique se a URL com porta (ex: `http://localhost:8501/auth/google/callback`) está cadastrada em *URIs de redirecionamento autorizados*. |
 | `google_not_configured` | As variáveis `GOOGLE_CLIENT_ID` ou `GOOGLE_CLIENT_SECRET` estão vazias no `.env`. | Preencha as chaves no `.env` e reinicie os containers (`docker-compose restart backend`). |
-| `oauth_failed` | Falha na troca de tokens ou autorização cancelada pelo usuário. | Verifique se o secret do Google está correto e se o container do backend tem acesso à internet. |
+| `oauth_failed` | Falha na troca de tokens, autorização cancelada, ou state/cookie inválido (fluxo expirou após 10 min, cookies bloqueados, ou iniciado em outro navegador). | Verifique o secret do Google e o acesso do backend à internet; tente de novo a partir do botão. Nos logs aparece "state inválido ou sem cookie de nonce" no último caso. |
 | Usuário não autorizado / Acesso bloqueado | App em modo "Teste" no Google Console e o e-mail não foi adicionado na lista de testes. | Adicione o e-mail do usuário em *Tela de consentimento OAuth* > *Usuários de teste*, ou publique o app para produção. |

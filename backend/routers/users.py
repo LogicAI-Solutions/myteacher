@@ -4,7 +4,6 @@ from typing import List
 from backend.schemas import users as user_schemas
 from backend.crud import users as user_crud
 from backend.core import database, security
-import pydantic
 
 router = APIRouter()
 
@@ -29,7 +28,7 @@ async def read_users_me(current_user: user_schemas.User = Depends(security.get_c
     return current_user
 
 @router.put("/users/me", response_model=user_schemas.User)
-def update_own_profile(user_update: user_schemas.UserUpdate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
+def update_own_profile(user_update: user_schemas.UserSelfUpdate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
     updated_user = user_crud.update_user(db, user_id=current_user.id, user_update=user_update)
     return updated_user
 
@@ -46,16 +45,19 @@ def delete_user(user_id: int, db: Session = Depends(database.get_db), current_us
         raise HTTPException(status_code=404, detail="Usuário não encontrado.")
     return {"detail": "Usuário removido com sucesso"}
 
-class PasswordUpdate(pydantic.BaseModel):
-    password: str
-
 @router.put("/users/me/password")
-def update_own_password(password_data: PasswordUpdate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
+def update_own_password(password_data: user_schemas.PasswordUpdate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
+    # Sem isto, um token vazado bastava para trocar a senha e tomar a conta de vez.
+    if current_user.hashed_password and not (
+        password_data.current_password
+        and security.verify_password(password_data.current_password, current_user.hashed_password)
+    ):
+        raise HTTPException(status_code=400, detail="Senha atual incorreta.")
     user = user_crud.update_user_password(db, user_id=current_user.id, password=password_data.password)
     return {"detail": "Sua senha foi atualizada com sucesso"}
 
 @router.put("/users/{user_id}/password")
-def update_password(user_id: int, password_data: PasswordUpdate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
+def update_password(user_id: int, password_data: user_schemas.PasswordUpdate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Acesso restrito a administradores.")
     
