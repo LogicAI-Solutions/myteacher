@@ -26,6 +26,7 @@ def get_dashboard_stats(db: Session, user_id: int):
     # Total de pagamentos pagos no mês atual
     payments_paid_count = db.query(Payment).join(Student).filter(
         Student.owner_id == user_id,
+        Student.exempt.isnot(True),
         Payment.month == current_month,
         Payment.year == current_year,
         Payment.status == "PAID"
@@ -34,12 +35,13 @@ def get_dashboard_stats(db: Session, user_id: int):
     # Total esperado para o mês
     total_payments_expected = db.query(Payment).join(Student).filter(
         Student.owner_id == user_id,
+        Student.exempt.isnot(True),
         Payment.month == current_month,
         Payment.year == current_year
     ).count()
 
     # Mensalidades em atraso (todos os meses, não só o atual)
-    overdue_filter = (Student.owner_id == user_id, overdue_clause(today))
+    overdue_filter = (Student.owner_id == user_id, Student.exempt.isnot(True), overdue_clause(today))
     overdue_count, overdue_amount = db.query(
         func.count(Payment.id), func.coalesce(func.sum(Payment.amount), 0.0)
     ).join(Student).filter(*overdue_filter).one()

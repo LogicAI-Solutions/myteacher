@@ -20,8 +20,7 @@ interface Student {
     intended_profession?: string;
     class_type?: string;
     active: boolean;
-    username?: string;
-    password?: string;
+    exempt?: boolean;
 }
 
 interface EvolutionPoint {
@@ -54,11 +53,11 @@ export const Students = () => {
 
     // Modal States
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [newStudentData, setNewStudentData] = useState<Partial<Student>>({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, username: '', password: '' });
+    const [newStudentData, setNewStudentData] = useState<Partial<Student>>({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, exempt: false });
     const [selectedClassId, setSelectedClassId] = useState<number | ''>(''); // For enrollment
 
     const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-    const [editStudentData, setEditStudentData] = useState<Partial<Student>>({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, username: '', password: '' });
+    const [editStudentData, setEditStudentData] = useState<Partial<Student>>({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, exempt: false });
     const [editClassId, setEditClassId] = useState<number | ''>(''); // Turma atual do aluno no editar
     const [originalClassId, setOriginalClassId] = useState<number | null>(null); // Para detectar mudança
 
@@ -146,27 +145,19 @@ export const Students = () => {
             return;
         }
 
-        if (newStudentData.username && !newStudentData.password) {
-            showToast('Se você definir um usuário, a senha também é obrigatória.', 'warning');
-            return;
-        }
-
         try {
             const payload = {
                 ...newStudentData,
                 name,
                 phone: unmaskPhone(newStudentData.phone),
                 parent_phone: unmaskPhone(newStudentData.parent_phone),
-                // Ensure empty strings are not sent as usernames/passwords
-                username: newStudentData.username?.trim() || null,
-                password: newStudentData.password || null
             };
             const res = await api.post('/students/', payload);
             if (selectedClassId) {
                 await api.post(`/classes/${selectedClassId}/enroll/${res.data.id}`);
             }
             setShowCreateModal(false);
-            setNewStudentData({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, username: '', password: '' });
+            setNewStudentData({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, exempt: false });
             setSelectedClassId('');
             showToast('Aluno criado com sucesso!', 'success');
             fetchData();
@@ -193,8 +184,6 @@ export const Students = () => {
                 name,
                 phone: unmaskPhone(editStudentData.phone),
                 parent_phone: unmaskPhone(editStudentData.parent_phone),
-                username: editStudentData.username?.trim() || null,
-                password: editStudentData.password || null
             };
             await api.put(`/students/${editingStudent.id}`, payload);
 
@@ -378,7 +367,7 @@ export const Students = () => {
                                     <span className="text-sm font-bold text-primary">{student.name.charAt(0).toUpperCase()}</span>
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="font-semibold text-text-main text-sm truncate">{student.name}</p>
+                                    <p className="font-semibold text-text-main text-sm truncate">{student.name}{student.exempt && <span className="stamp stamp-idle ml-2">Isento</span>}</p>
                                     <p className="text-xs text-text-muted">{student.phone ? formatPhone(student.phone) : 'Sem telefone'}</p>
                                 </div>
                             </div>
@@ -424,7 +413,7 @@ export const Students = () => {
                                 </button>
                                 <button onClick={async () => {
                                     setEditingStudent(student);
-                                    setEditStudentData({ name: student.name, phone: student.phone || '', parent_name: student.parent_name || '', parent_phone: student.parent_phone || '', parent_email: student.parent_email || '', school_year: student.school_year || '', school: student.school || '', intended_profession: student.intended_profession || '', class_type: student.class_type || '', active: student.active ?? true, username: student.username || '', password: '' });
+                                    setEditStudentData({ name: student.name, phone: student.phone || '', parent_name: student.parent_name || '', parent_phone: student.parent_phone || '', parent_email: student.parent_email || '', school_year: student.school_year || '', school: student.school || '', intended_profession: student.intended_profession || '', class_type: student.class_type || '', active: student.active ?? true, exempt: !!student.exempt });
                                     try { const res = await api.get(`/students/${student.id}/enrollment`); setEditClassId(res.data.class_id || ''); setOriginalClassId(res.data.class_id); } catch { setEditClassId(''); setOriginalClassId(null); }
                                     setOpenMenuId(null);
                                 }} className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-primary/10 flex items-center gap-2 transition-colors">
@@ -529,7 +518,7 @@ export const Students = () => {
                                 return (
                                     <tr key={student.id} className="hover:bg-[var(--wash-1)] transition-colors">
                                         <td className="p-3 sm:p-4 min-w-[200px]">
-                                            <div className="font-medium text-text-main text-sm sm:text-base">{student.name}</div>
+                                            <div className="font-medium text-text-main text-sm sm:text-base">{student.name}{student.exempt && <span className="stamp stamp-idle ml-2">Isento</span>}</div>
                                         </td>
                                         <td className="p-3 sm:p-4 text-text-muted text-sm whitespace-nowrap">{student.phone ? formatPhone(student.phone) : '-'}</td>
                                         <td className="p-3 sm:p-4 whitespace-nowrap">
@@ -596,8 +585,7 @@ export const Students = () => {
                                                                 intended_profession: student.intended_profession || '',
                                                                 class_type: student.class_type || '',
                                                                 active: student.active ?? true,
-                                                                username: student.username || '',
-                                                                password: '' // Reset password field
+                                                                exempt: !!student.exempt
                                                             });
                                                             // Buscar turma atual do aluno
                                                             try {
@@ -664,7 +652,8 @@ export const Students = () => {
             {/* Create Modal */}
             {showCreateModal && (
                 <div className="modal-overlay animate-fade-in">
-                    <div className="modal-sheet w-full max-w-lg animate-slide-up relative max-h-[90vh] overflow-hidden flex flex-col">                        <button onClick={() => setShowCreateModal(false)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-[2px] hover:bg-[var(--wash-1)] transition-all z-10"><X size={20} /></button>
+                    <div className="modal-sheet w-full max-w-lg animate-slide-up relative max-h-[90vh] overflow-hidden flex flex-col">
+                        <button onClick={() => setShowCreateModal(false)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-[2px] hover:bg-[var(--wash-1)] transition-all z-10"><X size={20} /></button>
                         <div className="p-8 overflow-y-auto flex-1">
                             <h3 className="text-2xl font-bold text-text-main mb-6">Novo Aluno</h3>
                             <form onSubmit={handleCreateStudent} className="space-y-4">
@@ -743,27 +732,19 @@ export const Students = () => {
                                     </div>
                                     <span className="text-sm font-medium text-text-main select-none">Aluno Ativo</span>
                                 </div>
-
-                                <div className="pt-2 border-t border-border mt-2">
-                                    <h4 className="text-sm font-bold text-text-main mb-2">Acesso do Aluno (Opcional)</h4>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="label">Usuário</label>
-                                            <input className="input"
-                                                value={newStudentData.username || ''}
-                                                onChange={e => setNewStudentData({ ...newStudentData, username: e.target.value })}
-                                                placeholder="Login do aluno" />
-                                        </div>
-                                        <div>
-                                            <label className="label">Senha</label>
-                                            <input className="input"
-                                                type="password"
-                                                value={newStudentData.password || ''}
-                                                onChange={e => setNewStudentData({ ...newStudentData, password: e.target.value })}
-                                                placeholder="Senha de acesso" />
-                                        </div>
-                                    </div>
+                            <div
+                                className="flex items-start gap-3 bg-[var(--wash-1)] p-3 rounded-[2px] border border-border cursor-pointer transition-all"
+                                onClick={() => setNewStudentData({ ...newStudentData, exempt: !newStudentData.exempt })}
+                            >
+                                <div className={`w-10 h-5 shrink-0 rounded-full relative transition-colors duration-300 ${newStudentData.exempt ? 'bg-primary' : 'bg-[var(--wash-1)]'}`}>
+                                    <div className={`w-3 h-3 rounded-full bg-white absolute top-1 shadow-sm transition-transform duration-300 ${newStudentData.exempt ? 'translate-x-[22px]' : 'translate-x-1'}`} />
                                 </div>
+                                <div>
+                                    <span className="text-sm font-medium text-text-main select-none">Isento de mensalidade</span>
+                                    <p className="text-xs text-text-muted mt-0.5">Não entra nas cobranças nem nos totais do financeiro.</p>
+                                </div>
+                            </div>
+
 
                                 <div className="pt-2 border-t border-border mt-2">
                                     <label className="label">Matricular na Turma (Opcional)</label>
@@ -790,7 +771,8 @@ export const Students = () => {
             {/* Edit Modal */}
             {editingStudent && (
                 <div className="modal-overlay animate-fade-in">
-                    <div className="modal-sheet w-full max-w-lg p-8 animate-slide-up relative overflow-y-auto max-h-[90vh]">                        <button onClick={() => setEditingStudent(null)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-[2px] hover:bg-[var(--wash-1)] transition-all"><X size={20} /></button>
+                    <div className="modal-sheet w-full max-w-lg p-8 animate-slide-up relative overflow-y-auto max-h-[90vh]">
+                        <button onClick={() => setEditingStudent(null)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-[2px] hover:bg-[var(--wash-1)] transition-all"><X size={20} /></button>
                         <h3 className="text-2xl font-bold text-text-main mb-6">Editar Aluno</h3>
                         <form onSubmit={handleUpdateStudent} className="space-y-4">
                             <div>
@@ -860,26 +842,6 @@ export const Students = () => {
                                 </div>
                             </div>
 
-                            <div className="pt-2 border-t border-border mt-2">
-                                <h4 className="text-sm font-bold text-text-main mb-2">Acesso do Aluno</h4>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="label">Usuário</label>
-                                        <input className="input"
-                                            value={editStudentData.username || ''}
-                                            onChange={e => setEditStudentData({ ...editStudentData, username: e.target.value })}
-                                            placeholder="Login do aluno" />
-                                    </div>
-                                    <div>
-                                        <label className="label">Nova Senha</label>
-                                        <input className="input"
-                                            type="password"
-                                            value={editStudentData.password || ''}
-                                            onChange={e => setEditStudentData({ ...editStudentData, password: e.target.value })}
-                                            placeholder="Alterar senha (opcional)" />
-                                    </div>
-                                </div>
-                            </div>
 
                             <div className="pt-2 border-t border-border mt-2">
                                 <label className="label">Turma Matriculada</label>
@@ -902,6 +864,18 @@ export const Students = () => {
                                 </div>
                                 <span className="text-sm font-medium text-text-main select-none">Aluno Ativo</span>
                             </div>
+                            <div
+                                className="flex items-start gap-3 bg-[var(--wash-1)] p-3 rounded-[2px] border border-border cursor-pointer transition-all"
+                                onClick={() => setEditStudentData({ ...editStudentData, exempt: !editStudentData.exempt })}
+                            >
+                                <div className={`w-10 h-5 shrink-0 rounded-full relative transition-colors duration-300 ${editStudentData.exempt ? 'bg-primary' : 'bg-[var(--wash-1)]'}`}>
+                                    <div className={`w-3 h-3 rounded-full bg-white absolute top-1 shadow-sm transition-transform duration-300 ${editStudentData.exempt ? 'translate-x-[22px]' : 'translate-x-1'}`} />
+                                </div>
+                                <div>
+                                    <span className="text-sm font-medium text-text-main select-none">Isento de mensalidade</span>
+                                    <p className="text-xs text-text-muted mt-0.5">Não entra nas cobranças nem nos totais do financeiro.</p>
+                                </div>
+                            </div>
                             <div className="flex justify-end gap-3 mt-6">
                                 <button type="button" onClick={() => setEditingStudent(null)} className="px-5 py-2.5 text-text-muted hover:text-text-main hover:bg-[var(--wash-1)] rounded-[2px] transition-all font-medium">Cancelar</button>
                                 <button type="submit" className="btn btn-primary px-6 py-2.5 text-text-main rounded-[2px] font-medium">Salvar</button>
@@ -914,7 +888,8 @@ export const Students = () => {
             {/* Evolution Modal */}
             {viewingEvolution && (
                 <div className="modal-overlay animate-fade-in">
-                    <div className="modal-sheet w-full max-w-4xl p-8 animate-slide-up relative overflow-y-auto max-h-[90vh]">                        <button onClick={() => setViewingEvolution(null)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-[2px] hover:bg-[var(--wash-1)] transition-all"><X size={20} /></button>
+                    <div className="modal-sheet w-full max-w-4xl p-8 animate-slide-up relative overflow-y-auto max-h-[90vh]">
+                        <button onClick={() => setViewingEvolution(null)} className="absolute top-4 right-4 text-text-muted hover:text-text-main p-2 rounded-[2px] hover:bg-[var(--wash-1)] transition-all"><X size={20} /></button>
 
                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
                             <h3 className="text-xl sm:text-2xl font-bold text-text-main truncate max-w-[200px] sm:max-w-none">Evolução: {viewingEvolution.name}</h3>
@@ -998,7 +973,8 @@ export const Students = () => {
             {/* Delete Modal */}
             {deletingStudent && (
                 <div className="modal-overlay animate-fade-in">
-                    <div className="modal-sheet w-full max-w-sm p-6 relative animate-slide-up overflow-y-auto max-h-[90vh]">                        <div className="flex flex-col items-center text-center pt-2">
+                    <div className="modal-sheet w-full max-w-sm p-6 relative animate-slide-up overflow-y-auto max-h-[90vh]">
+                        <div className="flex flex-col items-center text-center pt-2">
                             <div className="text-danger mb-3"><AlertTriangle size={28} /></div>
                             <h3 className="text-xl font-bold text-text-main mb-2">Excluir Aluno?</h3>
                             <p className="text-text-muted mb-6">Tem certeza que deseja excluir <strong className="text-text-main">{deletingStudent.name}</strong>? Esta ação é irreversível.</p>

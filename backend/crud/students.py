@@ -30,7 +30,7 @@ def get_students(db: Session, user_id: int, skip: int = 0, limit: int = 100, sea
                 Payment.month == payment_month,
                 Payment.year == payment_year,
                 Payment.status == 'PAID'
-            ))
+            )).filter(Student.exempt.isnot(True))
         elif payment_status == 'PENDING':
             # Students who DO NOT have a PAID payment for that month/year
             # This includes explicit PENDING records AND missing records
@@ -43,12 +43,14 @@ def get_students(db: Session, user_id: int, skip: int = 0, limit: int = 100, sea
                 Payment.month == payment_month,
                 Payment.year == payment_year,
                 Payment.status == 'PAID'
-            )).filter(Payment.id == None)
+            )).filter(Payment.id == None, Student.exempt.isnot(True))
+        elif payment_status == 'EXEMPT':
+            query = query.filter(Student.exempt.is_(True))
         elif payment_status == 'LATE':
             # Mensalidade do mês não paga e com vencimento já passado
             from datetime import date
             from backend.models.payments import overdue_clause
-            query = query.filter(Student.payments.any(and_(
+            query = query.filter(Student.exempt.isnot(True), Student.payments.any(and_(
                 Payment.month == payment_month,
                 Payment.year == payment_year,
                 overdue_clause(date.today())
@@ -95,19 +97,21 @@ def count_students(db: Session, user_id: int, search: str = None, active_status:
                 Payment.month == payment_month,
                 Payment.year == payment_year,
                 Payment.status == 'PAID'
-            ))
+            )).filter(Student.exempt.isnot(True))
         elif payment_status == 'PENDING':
             query = query.outerjoin(Payment, and_(
                 Payment.student_id == Student.id,
                 Payment.month == payment_month,
                 Payment.year == payment_year,
                 Payment.status == 'PAID'
-            )).filter(Payment.id == None)
+            )).filter(Payment.id == None, Student.exempt.isnot(True))
+        elif payment_status == 'EXEMPT':
+            query = query.filter(Student.exempt.is_(True))
         elif payment_status == 'LATE':
             # Mensalidade do mês não paga e com vencimento já passado
             from datetime import date
             from backend.models.payments import overdue_clause
-            query = query.filter(Student.payments.any(and_(
+            query = query.filter(Student.exempt.isnot(True), Student.payments.any(and_(
                 Payment.month == payment_month,
                 Payment.year == payment_year,
                 overdue_clause(date.today())
@@ -115,9 +119,6 @@ def count_students(db: Session, user_id: int, search: str = None, active_status:
 
     return query.count()
 
-
-# Need to import pwd_context
-from backend.core.security import pwd_context
 
 def get_student_for_owner(db: Session, student_id: int, owner_id: int):
     """None quando o aluno não existe ou é de outro professor — o router responde 404 nos dois casos."""
@@ -129,34 +130,8 @@ def owns_all_students(db: Session, student_ids, owner_id: int) -> bool:
         return True
     return db.query(Student).filter(Student.id.in_(ids), Student.owner_id == owner_id).count() == len(ids)
 
-def get_student_by_username(db: Session, username: str):
-    return db.query(Student).filter(Student.username == username).first()
-
-def authenticate_student(db: Session, username: str, password: str):
-    student = get_student_by_username(db, username)
-    if not student:
-        return False
-    if not student.hashed_password:
-        return False
-    if not pwd_context.verify(password, student.hashed_password):
-        return False
-    return student
-
 def create_student(db: Session, student: StudentCreate, user_id: int):
-    student_data = student.model_dump()
-    # Convert empty strings to None for unique fields
-    if not student_data.get('username'):
-        student_data['username'] = None
-    
-    if student_data.get('password'):
-        student_data['hashed_password'] = pwd_context.hash(student_data['password'])
-    else:
-        student_data['hashed_password'] = None
-    
-    if 'password' in student_data:
-        del student_data['password']
-    
-    db_student = Student(**student_data, owner_id=user_id)
+    db_student = Student(**student.model_dump(), owner_id=user_id)
     db.add(db_student)
     db.commit()
     db.refresh(db_student)
@@ -165,22 +140,8 @@ def create_student(db: Session, student: StudentCreate, user_id: int):
 def update_student(db: Session, student_id: int, student_data: StudentCreate):
     student = db.query(Student).filter(Student.id == student_id).first()
     if student:
-        update_data = student_data.model_dump(exclude_unset=True)
-        # Handle username: if empty string, set to None
-        if 'username' in update_data and not update_data['username']:
-            update_data['username'] = None
-            
-        if update_data.get('password'):
-            update_data['hashed_password'] = pwd_context.hash(update_data['password'])
-            del update_data['password']
-        elif 'password' in update_data:
-            # If password was provided as empty string/None in update, we might want to skip it 
-            # or explicitly clear it. Usually we just skip.
-            del update_data['password']
-            
-        for key, value in update_data.items():
+        for key, value in student_data.model_dump(exclude_unset=True).items():
             setattr(student, key, value)
-
         db.commit()
         db.refresh(student)
     return student

@@ -1,15 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { Home, ArrowLeft, GraduationCap } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { useStudentAuth } from '../context/StudentAuthContext';
 
 export const NotFound = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { student } = useStudentAuth();
 
-    const destination = user ? '/dashboard' : student ? '/portal/dashboard' : '/';
-    const destinationLabel = user ? 'Ir para o painel' : student ? 'Ir para o portal' : 'Ir para o início';
+    const destination = user ? '/dashboard' : '/';
+    const destinationLabel = user ? 'Ir para o painel' : 'Ir para o início';
 
     return (
         <div className="min-h-screen bg-bg-dark flex items-center justify-center p-4">

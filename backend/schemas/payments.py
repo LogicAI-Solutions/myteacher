@@ -21,6 +21,8 @@ class Payment(PaymentBase):
     @computed_field
     @property
     def is_overdue(self) -> bool:
+        if self.student is not None and self.student.exempt:
+            return False
         return self.status != "PAID" and self.due_date is not None and self.due_date < date.today()
 
     class Config:

@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional, List
 import datetime
 
@@ -13,11 +13,16 @@ class StudentBase(BaseModel):
     intended_profession: Optional[str] = None
     class_type: Optional[str] = None
     active: bool = True
+    exempt: bool = False
     photo: Optional[str] = None
 
+    @field_validator("exempt", mode="before")
+    @classmethod
+    def _exempt_null_is_false(cls, v):
+        return False if v is None else v
+
 class StudentCreate(StudentBase):
-    username: Optional[str] = None
-    password: Optional[str] = None
+    pass
 
 class StudentUpdate(BaseModel):
     name: Optional[str] = None
@@ -30,13 +35,11 @@ class StudentUpdate(BaseModel):
     intended_profession: Optional[str] = None
     class_type: Optional[str] = None
     active: Optional[bool] = None
-    username: Optional[str] = None
-    password: Optional[str] = None
+    exempt: Optional[bool] = None
 
 class Student(StudentBase):
     id: int
     owner_id: int
-    username: Optional[str] = None
     class Config:
         from_attributes = True
 

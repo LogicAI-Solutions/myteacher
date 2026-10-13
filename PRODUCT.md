@@ -13,9 +13,8 @@ ou preparatório — que gerencia as próprias turmas sem secretaria, sem equipe
 administrativa e sem software de gestão. Ele é o dono do negócio, o professor e o
 financeiro ao mesmo tempo.
 
-Audiência secundária confirmada pelo código, não prioritária no design: o aluno
-(e/ou responsável), que acessa um portal próprio em `/portal` apenas para
-consultar a própria situação. Escolas e redes aparecem como plano comercial
+O aluno (e/ou responsável) não tem acesso ao sistema: não existe portal nem login
+de aluno. Escolas e redes aparecem como plano comercial
 (Enterprise) mas não guiam as decisões de interface.
 
 Cenário de uso real, confirmado pelo usuário: **notebook, em sessões de
@@ -61,8 +60,6 @@ Fluxos confirmados no código:
   pendente, visão do mês e do ano.
 - **Dashboard** (`/dashboard`): contagem de alunos ativos/inativos, pagos e
   pendentes do mês, em cartões e dois gráficos (Recharts).
-- **Portal do aluno** (`/portal`): autenticação separada (`StudentAuthContext`),
-  com dashboard próprio e escopo estritamente de leitura da própria situação.
 - **Administração** (`/dashboard/admin`, planos, configurações): visível apenas
   para `is_admin`; gerencia usuários, planos e configurações do sistema.
 - **Suporte:** o canal de suporte e de venda consultiva é WhatsApp
@@ -115,8 +112,7 @@ Fluxos confirmados no código:
    efeito.
 4. **Nunca anunciar o que não existe.** Preço, capacidade e prova só aparecem se
    forem verdadeiros no backend.
-5. **O aluno vê só o que é dele.** O portal é de leitura e estritamente
-   escopado ao próprio registro.
+5. **Só o professor entra.** Aluno e responsável são registros, não usuários.
 
 ## Accessibility & Inclusion
 

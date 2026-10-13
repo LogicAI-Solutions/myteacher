@@ -18,8 +18,7 @@ class Student(Base):
     active = Column(Boolean, default=True)
     owner_id = Column(Integer, ForeignKey("users.id"))
     
-    username = Column(String, unique=True, index=True, nullable=True)
-    hashed_password = Column(String, nullable=True)
+    exempt = Column(Boolean, default=False, nullable=True)  # isento de mensalidade (NULL = não isento, linhas antigas)
     photo = Column(String, nullable=True)
 
     owner = relationship("User", back_populates="students")

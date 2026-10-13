@@ -98,17 +98,6 @@ def test_dono_continua_operando(client):
     assert client.put(f"/classes/{cb}/attendance/{ids['session_b']}", json={"date": "2026-01-11", "logs": [{"student_id": sb, "status": "present"}]}, headers=b).status_code == 200
 
 
-def test_token_de_aluno_nao_vale_como_professor(client):
-    """Aluno com username = e-mail de um professor não pode se passar por ele."""
-    _teacher("vitima@x.com")
-    headers = _teacher("atacante@x.com")
-    client.post("/students/", json={"name": "Fake", "username": "vitima@x.com", "password": "123456"}, headers=headers)
-
-    token = client.post("/student/token", data={"username": "vitima@x.com", "password": "123456"}).json()["access_token"]
-    assert client.get("/users/me", headers={"Authorization": f"Bearer {token}"}).status_code == 401
-    assert client.get("/student/me", headers={"Authorization": f"Bearer {token}"}).status_code == 200
-
-
 def test_usuario_nao_altera_proprio_trial_ou_status(client):
     db = TestingSession()
     db.add(User(email="trial@x.com", hashed_password="x", is_active=True, is_trial=True))

@@ -12,6 +12,7 @@ interface Student {
     parent_phone?: string;
     school_year?: string;
     class_type?: string;
+    exempt?: boolean;
 }
 
 interface Payment {
@@ -51,7 +52,7 @@ export const Payments = () => {
 
     // Filter & Sort
     const [sortDesc, setSortDesc] = useState(false);
-    const [filterStatus, setFilterStatus] = useState<'all' | 'PAID' | 'PENDING' | 'LATE'>('all');
+    const [filterStatus, setFilterStatus] = useState<'all' | 'PAID' | 'PENDING' | 'LATE' | 'EXEMPT'>('all');
 
     // Local State for Batch Edits
     const [localPayments, setLocalPayments] = useState<Record<number, PaymentInput>>({});
@@ -141,7 +142,8 @@ export const Payments = () => {
     const handleSavePayments = async () => {
         setSaving(true);
         try {
-            const updates = Object.values(localPayments);
+            const exemptIds = new Set(students.filter(s => s.exempt).map(s => s.id));
+            const updates = Object.values(localPayments).filter(p => !exemptIds.has(p.student_id));
             await Promise.all(updates.map(async (p) => {
                 // Only save if it's one of the currently visible students to avoid accidental overwrites?
                 // Actually we only populate localPayments with current page.
@@ -224,13 +226,14 @@ export const Payments = () => {
                         <span className="label-print">Situação</span>
                         <select
                             value={filterStatus}
-                            onChange={e => { setFilterStatus(e.target.value as 'all' | 'PAID' | 'PENDING' | 'LATE'); setPage(0); }}
+                            onChange={e => { setFilterStatus(e.target.value as 'all' | 'PAID' | 'PENDING' | 'LATE' | 'EXEMPT'); setPage(0); }}
                             className="input py-1.5 text-sm"
                         >
                             <option value="all">Todas</option>
                             <option value="PAID">Pagas</option>
                             <option value="PENDING">Pendentes</option>
                             <option value="LATE">Em atraso</option>
+                            <option value="EXEMPT">Isentos</option>
                         </select>
                     </label>
 
@@ -263,7 +266,7 @@ export const Payments = () => {
             <div className="sheet overflow-hidden mb-5">
                 <div className="grid grid-cols-2 lg:grid-cols-5 gap-px" style={{ background: 'var(--rule)' }}>
                     <div className="px-4 py-3.5" style={{ background: 'var(--sheet)' }}>
-                        <p className="label-print">Alunos no mês</p>
+                        <p className="label-print">Alunos pagantes</p>
                         <p className="mt-1.5 text-2xl font-bold text-text-main tabular">{totalStudentsCount}</p>
                     </div>
                     <div className="px-4 py-3.5" style={{ background: 'var(--sheet)' }}>
@@ -313,6 +316,17 @@ export const Payments = () => {
                 {!loading && !saving && students.map(student => {
                     const payment = localPayments[student.id] || { status: 'PENDING', amount: 0, student_id: student.id };
                     const isPaid = payment.status === 'PAID';
+                    if (student.exempt) {
+                        return (
+                            <div key={student.id} className="sheet sheet-p flex items-center justify-between gap-3">
+                                <div className="min-w-0">
+                                    <p className="font-semibold text-text-main text-sm truncate">{student.name}</p>
+                                    <p className="text-xs text-text-muted">Sem cobrança de mensalidade</p>
+                                </div>
+                                <span className="stamp stamp-idle">Isento</span>
+                            </div>
+                        );
+                    }
                     return (
                         <div key={student.id} className="sheet sheet-p">
                             <div className="flex items-center justify-between mb-3">
@@ -414,6 +428,19 @@ export const Payments = () => {
                             {students.map(student => {
                                 const payment = localPayments[student.id] || { status: 'PENDING', amount: 0, student_id: student.id };
                                 const isPaid = payment.status === 'PAID';
+                                if (student.exempt) {
+                                    return (
+                                        <tr key={student.id}>
+                                            <td className="font-medium text-sm">{student.name}</td>
+                                            <td className="text-sm text-text-muted whitespace-nowrap">{student.parent_name || '—'}</td>
+                                            <td className="text-sm text-text-muted whitespace-nowrap">{student.school_year || '—'}</td>
+                                            <td className="text-sm text-text-muted whitespace-nowrap">{student.class_type || '—'}</td>
+                                            <td className="text-sm text-text-muted">—</td>
+                                            <td><span className="stamp stamp-idle">Isento</span></td>
+                                            <td className="text-right text-sm text-text-muted">—</td>
+                                        </tr>
+                                    );
+                                }
                                 return (
                                     <tr key={student.id}>
                                         <td className="font-medium text-sm">{student.name}</td>

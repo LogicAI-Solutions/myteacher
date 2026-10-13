@@ -15,6 +15,7 @@ interface Student {
     parent_phone?: string;
     parent_email?: string;
     active?: boolean;
+    exempt?: boolean;
 }
 
 interface ClassModel {
@@ -249,7 +250,8 @@ export const ClassDetails = () => {
     const handleSavePayments = async () => {
         setSavingPayments(true);
         try {
-            const updates = Object.values(localPayments);
+            const exemptIds = new Set(students.filter((s: Student) => s.exempt).map((s: Student) => s.id));
+            const updates = Object.values(localPayments).filter((p: PaymentInput) => !exemptIds.has(p.student_id));
             await Promise.all(updates.map(async (p: PaymentInput) => {
                 const payload = {
                     student_id: p.student_id,
@@ -893,6 +895,9 @@ export const ClassDetails = () => {
                                             <p className="text-xs text-text-muted">{s.parent_name || 'Sem responsável'}</p>
                                         </div>
                                     </div>
+                                    {s.exempt ? (
+                                        <span className="stamp stamp-idle">Isento</span>
+                                    ) : (
                                     <div className="flex items-center gap-3">
                                         <select
                                             className={`p-2 px-3 rounded-[2px] text-xs font-bold border-none focus:ring-2 focus:ring-primary outline-none transition-colors cursor-pointer ${isPaid ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'}`}
@@ -914,6 +919,7 @@ export const ClassDetails = () => {
                                             placeholder="R$ 0,00"
                                         />
                                     </div>
+                                    )}
                                 </div>
                             );
                         })}

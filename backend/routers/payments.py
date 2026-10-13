@@ -75,8 +75,9 @@ def generate_monthly_report(
     payments = payment_crud.get_payments(db, user_id=current_user.id, year=year, month=month, limit=1000)
     
     # 3. Calculate Stats
-    total_students = len(all_students)
+    total_students = sum(1 for s in all_students if not s.exempt)
     paid_count = 0
+    exempt_count = 0
     total_received = 0.0
     
     student_status_list = []
@@ -85,10 +86,13 @@ def generate_monthly_report(
         # Find payment for this student
         payment = next((p for p in payments if p.student_id == student.id), None)
         
-        is_paid = payment and payment.status == 'PAID'
-        status_label = 'PAGO' if is_paid else 'PENDENTE'
+        is_exempt = bool(student.exempt)
+        is_paid = not is_exempt and payment and payment.status == 'PAID'
+        status_label = 'ISENTO' if is_exempt else ('PAGO' if is_paid else 'PENDENTE')
         
-        if is_paid:
+        if is_exempt:
+            exempt_count += 1
+        elif is_paid:
             paid_count += 1
             total_received += (payment.amount or 0.0)
             
@@ -98,8 +102,8 @@ def generate_monthly_report(
             "school_year": student.school_year or "-",
             "class_type": student.class_type or "-",
             "status": status_label,
-            "amount": payment.amount if payment else 0.0,
-            "due_date": payment.due_date.strftime("%d/%m/%Y") if payment and payment.due_date else "-"
+            "amount": 0.0 if is_exempt else (payment.amount if payment else 0.0),
+            "due_date": payment.due_date.strftime("%d/%m/%Y") if payment and payment.due_date and not is_exempt else "-"
         })
         
     pending_count = total_students - paid_count
@@ -113,13 +117,14 @@ def generate_monthly_report(
     
     # Summary
     document.add_heading('Resumo do Mês', level=1)
-    table_stats = document.add_table(rows=1, cols=4)
+    table_stats = document.add_table(rows=1, cols=5)
     table_stats.style = 'Table Grid'
     hdr_stats = table_stats.rows[0].cells
-    hdr_stats[0].text = 'Total Alunos'
+    hdr_stats[0].text = 'Alunos pagantes'
     hdr_stats[1].text = 'Pagos'
     hdr_stats[2].text = 'Pendentes'
-    hdr_stats[3].text = 'Total Recebido'
+    hdr_stats[3].text = 'Isentos'
+    hdr_stats[4].text = 'Total Recebido'
     
     for cell in hdr_stats:
         cell.paragraphs[0].runs[0].bold = True
@@ -128,7 +133,8 @@ def generate_monthly_report(
     row_stats[0].text = str(total_students)
     row_stats[1].text = str(paid_count)
     row_stats[2].text = str(pending_count)
-    row_stats[3].text = f"R$ {total_received:.2f}"
+    row_stats[3].text = str(exempt_count)
+    row_stats[4].text = f"R$ {total_received:.2f}"
     
     # Detailed List
     document.add_heading('Detalhamento por Aluno', level=1)

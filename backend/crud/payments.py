@@ -50,14 +50,16 @@ def update_payment(db: Session, payment_id: int, payment_data: PaymentCreate, ow
     return payment
     
 def get_payment_stats(db: Session, user_id: int, month: int, year: int):
+    # Alunos isentes não pagam mensalidade: ficam fora de todos os números do financeiro.
     # Total Active Students for the user
     # Ideally should we count inactive? The original code counted ALL students owned by user from API
-    total_students = db.query(Student).filter(Student.owner_id == user_id).count()
+    total_students = db.query(Student).filter(Student.owner_id == user_id, Student.exempt.isnot(True)).count()
     
     # Paid Payments for this month/year for students owned by user
     # Note: Join Student to ensure ownership
     paid_query = db.query(Payment).join(Student).filter(
         Student.owner_id == user_id,
+        Student.exempt.isnot(True),
         Payment.month == month,
         Payment.year == year,
         Payment.status == 'PAID'
@@ -68,6 +70,7 @@ def get_payment_stats(db: Session, user_id: int, month: int, year: int):
     from sqlalchemy import func
     total_received = db.query(func.sum(Payment.amount)).join(Student).filter(
         Student.owner_id == user_id,
+        Student.exempt.isnot(True),
         Payment.month == month,
         Payment.year == year,
         Payment.status == 'PAID'
@@ -75,6 +78,7 @@ def get_payment_stats(db: Session, user_id: int, month: int, year: int):
     
     overdue_query = db.query(func.count(Payment.id), func.coalesce(func.sum(Payment.amount), 0.0)).join(Student).filter(
         Student.owner_id == user_id,
+        Student.exempt.isnot(True),
         Payment.month == month,
         Payment.year == year,
         overdue_clause(date.today())
