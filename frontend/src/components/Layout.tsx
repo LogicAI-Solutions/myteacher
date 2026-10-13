@@ -4,6 +4,7 @@ import { LogOut, LayoutDashboard, GraduationCap, ChevronLeft, ChevronRight, Sett
 import { useAuth, type Permission } from '../context/AuthContext';
 import { openSupportWhatsApp } from '../utils/support';
 import api from '../api';
+import { NotificationBell } from './NotificationBell';
 
 // Avisos no topo do painel: teste grátis (com atalho para os planos) e e-mail não confirmado.
 const AccountBanners = () => {
@@ -272,6 +273,10 @@ export const Layout = () => {
 
             <main className="flex-1 overflow-auto px-3 py-4 sm:p-4 md:p-6 lg:p-8 pb-28 md:pb-6 lg:pb-8 w-full h-screen">
                 <div className={location.pathname === '/dashboard/agenda' ? 'w-full min-w-0' : 'container mx-auto max-w-6xl'}>
+                    {/* Barra do topo: sininho de alertas à direita */}
+                    <div className="flex justify-end -mt-1 mb-1">
+                        <NotificationBell />
+                    </div>
                     <AccountBanners />
                     <Outlet />
                 </div>

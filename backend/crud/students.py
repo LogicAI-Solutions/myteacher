@@ -168,6 +168,8 @@ def delete_student(db: Session, student_id: int):
     if student:
         db.query(AttendanceLog).filter(AttendanceLog.student_id == student_id).delete()
         db.query(Enrollment).filter(Enrollment.student_id == student_id).delete()
+        from backend.models.reports import ReportSend
+        db.query(ReportSend).filter(ReportSend.student_id == student_id).delete()
         db.delete(student)
         db.commit()
     return student

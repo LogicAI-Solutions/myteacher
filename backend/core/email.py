@@ -15,7 +15,9 @@ def email_enabled() -> bool:
     return bool(settings.SMTP_HOST)
 
 
-def send_email(to: str, subject: str, text: str, html: str | None = None) -> bool:
+def send_email(to: str, subject: str, text: str, html: str | None = None,
+               attachments: list[tuple[str, bytes, str]] | None = None, reply_to: str | None = None) -> bool:
+    """attachments: [(nome_do_arquivo, conteúdo, "tipo/subtipo")]."""
     if not email_enabled():
         logger.warning(f"[email não configurado] Para: {to} | Assunto: {subject}\n{text}")
         return False
@@ -25,8 +27,13 @@ def send_email(to: str, subject: str, text: str, html: str | None = None) -> boo
     msg["To"] = to
     msg["Subject"] = subject
     msg.set_content(text)
+    if reply_to:
+        msg["Reply-To"] = reply_to
     if html:
         msg.add_alternative(html, subtype="html")
+    for filename, content, mime in attachments or []:
+        maintype, subtype = mime.split("/", 1)
+        msg.add_attachment(content, maintype=maintype, subtype=subtype, filename=filename)
 
     try:
         if settings.SMTP_PORT == 465:
@@ -71,3 +78,12 @@ def send_password_reset_email(to: str, url: str) -> bool:
         f"{body}\n\n{url}",
         _layout("Redefinir senha", body, "Criar nova senha", url),
     )
+
+
+DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+
+
+def send_monthly_report_email(to: str, summary: dict, docx: bytes, filename: str, reply_to: str | None = None) -> bool:
+    """Resumo do mês para os pais, com o relatório em Word anexo. Responder vai para o professor/escola."""
+    return send_email(to, summary["subject"], summary["text"], summary["html"],
+                      attachments=[(filename, docx, DOCX_MIME)], reply_to=reply_to)

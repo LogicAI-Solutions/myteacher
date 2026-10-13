@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.core import database
-from backend.models import users, classes, students, enrollments, attendance, payments, plans, config, calendar, schools
+from backend.models import users, classes, students, enrollments, attendance, payments, plans, config, calendar, schools, reports
 from backend.core.router_loader import include_routers
 from backend.core.logger import logger, log_error_with_traceback
 from backend.core.config import settings
