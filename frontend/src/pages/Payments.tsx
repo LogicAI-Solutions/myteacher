@@ -21,6 +21,8 @@ interface Payment {
     year: number;
     status: string; // 'PENDING', 'PAID', 'LATE'
     amount: number;
+    due_date?: string | null;
+    is_overdue?: boolean;
 }
 
 interface PaymentInput {
@@ -29,13 +31,14 @@ interface PaymentInput {
     amount: number;
     id?: number;
     paid_at?: string | null;
+    due_date?: string | null;
 }
 
 export const Payments = () => {
 
 
     const [students, setStudents] = useState<Student[]>([]);
-    const [stats, setStats] = useState({ total_students: 0, paid_count: 0, pending_count: 0, total_received: 0 });
+    const [stats, setStats] = useState({ total_students: 0, paid_count: 0, pending_count: 0, total_received: 0, overdue_count: 0, overdue_amount: 0 });
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
     const [loading, setLoading] = useState(true);
@@ -48,7 +51,7 @@ export const Payments = () => {
 
     // Filter & Sort
     const [sortDesc, setSortDesc] = useState(false);
-    const [filterStatus, setFilterStatus] = useState<'all' | 'PAID' | 'PENDING'>('all');
+    const [filterStatus, setFilterStatus] = useState<'all' | 'PAID' | 'PENDING' | 'LATE'>('all');
 
     // Local State for Batch Edits
     const [localPayments, setLocalPayments] = useState<Record<number, PaymentInput>>({});
@@ -149,6 +152,7 @@ export const Payments = () => {
                     year: selectedYear,
                     status: p.status,
                     amount: Number(p.amount),
+                    due_date: p.due_date || null,
                     paid_at: p.status === 'PAID' ? new Date().toISOString().split('T')[0] : null
                 };
 
@@ -174,6 +178,9 @@ export const Payments = () => {
 
 
 
+
+    const todayIso = new Date().toLocaleDateString('en-CA');
+    const isOverdue = (p: PaymentInput) => p.status !== 'PAID' && !!p.due_date && p.due_date < todayIso;
 
     const showToast = (msg: string, type: 'success' | 'error') => {
         setToast({ msg, type });
@@ -217,12 +224,13 @@ export const Payments = () => {
                         <span className="label-print">Situação</span>
                         <select
                             value={filterStatus}
-                            onChange={e => { setFilterStatus(e.target.value as 'all' | 'PAID' | 'PENDING'); setPage(0); }}
+                            onChange={e => { setFilterStatus(e.target.value as 'all' | 'PAID' | 'PENDING' | 'LATE'); setPage(0); }}
                             className="input py-1.5 text-sm"
                         >
                             <option value="all">Todas</option>
                             <option value="PAID">Pagas</option>
                             <option value="PENDING">Pendentes</option>
+                            <option value="LATE">Em atraso</option>
                         </select>
                     </label>
 
@@ -253,7 +261,7 @@ export const Payments = () => {
 
             {/* O quadro do mês: números do registro divididos por fios. */}
             <div className="sheet overflow-hidden mb-5">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-px" style={{ background: 'var(--rule)' }}>
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-px" style={{ background: 'var(--rule)' }}>
                     <div className="px-4 py-3.5" style={{ background: 'var(--sheet)' }}>
                         <p className="label-print">Alunos no mês</p>
                         <p className="mt-1.5 text-2xl font-bold text-text-main tabular">{totalStudentsCount}</p>
@@ -267,6 +275,13 @@ export const Payments = () => {
                         <p className="mt-1.5 text-2xl font-bold tabular" style={{ color: pendingCount > 0 ? 'var(--ochre)' : 'var(--ink-muted)' }}>
                             {pendingCount}
                         </p>
+                    </div>
+                    <div className="px-4 py-3.5" style={{ background: 'var(--sheet)' }}>
+                        <p className="label-print">Em atraso</p>
+                        <p className="mt-1.5 text-2xl font-bold tabular" style={{ color: stats.overdue_count > 0 ? 'var(--margin-red)' : 'var(--ink-muted)' }}>
+                            {stats.overdue_count}
+                        </p>
+                        {stats.overdue_count > 0 && <p className="text-xs text-text-muted tabular">{formatCurrency(stats.overdue_amount)}</p>}
                     </div>
                     <div className="px-4 py-3.5" style={{ background: 'var(--sheet)' }}>
                         <p className="label-print">Total recebido</p>
@@ -307,16 +322,25 @@ export const Payments = () => {
                                 </div>
                                 <select
                                     aria-label={`Situação da mensalidade de ${student.name}`}
-                                    className={`stamp cursor-pointer ${isPaid ? 'stamp-paid' : 'stamp-pending'}`}
+                                    className={`stamp cursor-pointer ${isPaid ? 'stamp-paid' : isOverdue(payment) ? 'stamp-late' : 'stamp-pending'}`}
                                     value={payment.status}
                                     onChange={e => updateLocalPayment(student.id, 'status', e.target.value)}
                                 >
-                                    <option value="PENDING">Pendente</option>
+                                    <option value="PENDING">{isOverdue(payment) ? 'Atrasado' : 'Pendente'}</option>
                                     <option value="PAID">Pago</option>
                                 </select>
                             </div>
                             <div className="flex items-center justify-between gap-3">
-                                <span className="text-xs text-text-muted truncate">{student.school_year || ''} {student.class_type ? `• ${student.class_type}` : ''}</span>
+                                <label className="flex items-center gap-1.5 text-xs text-text-muted">
+                                    Vence
+                                    <input
+                                        type="date"
+                                        aria-label={`Vencimento da mensalidade de ${student.name}`}
+                                        className={`bg-transparent border-b border-rule-strong outline-none py-1 text-xs focus:border-primary tabular ${isOverdue(payment) ? 'text-[var(--margin-red)] font-semibold' : 'text-text-main'}`}
+                                        value={payment.due_date || ''}
+                                        onChange={e => updateLocalPayment(student.id, 'due_date', e.target.value || null)}
+                                    />
+                                </label>
                                 <input
                                     type="text"
                                     aria-label={`Valor da mensalidade de ${student.name}`}
@@ -381,6 +405,7 @@ export const Payments = () => {
                                 <th className="whitespace-nowrap min-w-[150px]">Responsável</th>
                                 <th className="whitespace-nowrap min-w-[110px]">Ano</th>
                                 <th className="whitespace-nowrap min-w-[110px]">Tipo</th>
+                                <th className="w-[150px]">Vencimento</th>
                                 <th className="w-[150px]">Situação</th>
                                 <th className="w-[140px] text-right">Valor</th>
                             </tr>
@@ -396,13 +421,22 @@ export const Payments = () => {
                                         <td className="text-sm text-text-muted whitespace-nowrap">{student.school_year || '—'}</td>
                                         <td className="text-sm text-text-muted whitespace-nowrap">{student.class_type || '—'}</td>
                                         <td>
+                                            <input
+                                                type="date"
+                                                aria-label={`Vencimento da mensalidade de ${student.name}`}
+                                                className={`bg-transparent border-b border-rule-strong outline-none py-1 text-sm focus:border-primary tabular ${isOverdue(payment) ? 'text-[var(--margin-red)] font-semibold' : 'text-text-main'}`}
+                                                value={payment.due_date || ''}
+                                                onChange={e => updateLocalPayment(student.id, 'due_date', e.target.value || null)}
+                                            />
+                                        </td>
+                                        <td>
                                             <select
                                                 aria-label={`Situação da mensalidade de ${student.name}`}
-                                                className={`stamp cursor-pointer ${isPaid ? 'stamp-paid' : 'stamp-pending'}`}
+                                                className={`stamp cursor-pointer ${isPaid ? 'stamp-paid' : isOverdue(payment) ? 'stamp-late' : 'stamp-pending'}`}
                                                 value={payment.status}
                                                 onChange={e => updateLocalPayment(student.id, 'status', e.target.value)}
                                             >
-                                                <option value="PENDING">Pendente</option>
+                                                <option value="PENDING">{isOverdue(payment) ? 'Atrasado' : 'Pendente'}</option>
                                                 <option value="PAID">Pago</option>
                                             </select>
                                         </td>
@@ -421,7 +455,7 @@ export const Payments = () => {
                             })}
                             {students.length === 0 && !loading && (
                                 <tr>
-                                    <td colSpan={6} className="py-10 text-center">
+                                    <td colSpan={7} className="py-10 text-center">
                                         <p className="text-text-main font-semibold">Nenhum aluno encontrado</p>
                                         <p className="text-text-muted text-sm mt-1.5">
                                             {search ? 'Tente outro nome ou limpe a busca.' : 'Cadastre alunos para lançar as mensalidades do mês.'}

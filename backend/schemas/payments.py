@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, computed_field
 from typing import Optional
 from datetime import date
 
@@ -9,6 +9,7 @@ class PaymentBase(BaseModel):
     status: str = "PENDING"
     amount: float
     paid_at: Optional[date] = None
+    due_date: Optional[date] = None
 
 class PaymentCreate(PaymentBase):
     pass
@@ -16,6 +17,11 @@ class PaymentCreate(PaymentBase):
 class Payment(PaymentBase):
     id: int
     student: Optional['StudentBase'] = None # To display student name if needed
+
+    @computed_field
+    @property
+    def is_overdue(self) -> bool:
+        return self.status != "PAID" and self.due_date is not None and self.due_date < date.today()
 
     class Config:
         from_attributes = True

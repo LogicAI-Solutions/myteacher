@@ -44,6 +44,15 @@ def get_students(db: Session, user_id: int, skip: int = 0, limit: int = 100, sea
                 Payment.year == payment_year,
                 Payment.status == 'PAID'
             )).filter(Payment.id == None)
+        elif payment_status == 'LATE':
+            # Mensalidade do mês não paga e com vencimento já passado
+            from datetime import date
+            from backend.models.payments import overdue_clause
+            query = query.filter(Student.payments.any(and_(
+                Payment.month == payment_month,
+                Payment.year == payment_year,
+                overdue_clause(date.today())
+            )))
 
     if sort_by == 'name':
         if sort_desc:
@@ -94,6 +103,15 @@ def count_students(db: Session, user_id: int, search: str = None, active_status:
                 Payment.year == payment_year,
                 Payment.status == 'PAID'
             )).filter(Payment.id == None)
+        elif payment_status == 'LATE':
+            # Mensalidade do mês não paga e com vencimento já passado
+            from datetime import date
+            from backend.models.payments import overdue_clause
+            query = query.filter(Student.payments.any(and_(
+                Payment.month == payment_month,
+                Payment.year == payment_year,
+                overdue_clause(date.today())
+            )))
 
     return query.count()
 

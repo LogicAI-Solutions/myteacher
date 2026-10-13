@@ -60,6 +60,7 @@ interface Payment {
     status: string; // 'PENDING', 'PAID', 'LATE'
     amount: number;
     paid_at?: string;
+    due_date?: string | null;
     student?: Student;
 }
 
@@ -69,6 +70,7 @@ interface PaymentInput {
     amount: number;
     id?: number;
     paid_at?: string | null;
+    due_date?: string | null;
 }
 
 export const ClassDetails = () => {
@@ -255,6 +257,7 @@ export const ClassDetails = () => {
                     year: selectedYear,
                     status: p.status,
                     amount: Number(p.amount),
+                    due_date: p.due_date || null,
                     paid_at: p.status === 'PAID' ? new Date().toISOString().split('T')[0] : null
                 };
 
@@ -610,7 +613,8 @@ export const ClassDetails = () => {
 
             <div className="animate-slide-up">
                 {activeTab === 'students' && (
-                    <div className="sheet sheet-p relative overflow-hidden">                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-border pb-4 gap-3">
+                    <div className="sheet sheet-p relative overflow-hidden">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-border pb-4 gap-3">
                             <h2 className="text-xl font-bold flex items-center gap-3 text-text-main">
                                 <div className="bg-primary/15 p-2 rounded-[2px] border border-primary/20">
                                     <GraduationCap size={20} className="text-primary-light" />
@@ -676,7 +680,8 @@ export const ClassDetails = () => {
                 )}
 
                 {activeTab === 'attendance' && (
-                    <div className="sheet sheet-p relative overflow-hidden">                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 p-4 rounded-[2px] border border-border bg-bg-card gap-3 shadow-sm">
+                    <div className="sheet sheet-p relative overflow-hidden">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 p-4 rounded-[2px] border border-border bg-bg-card gap-3 shadow-sm">
                             <h2 className="text-lg font-bold flex items-center gap-3 text-text-main">
                                 <div className="bg-primary/15 p-2 rounded-[2px] border border-primary/20 shadow-sm">
                                     <ClipboardList size={20} className="text-primary" />
@@ -851,7 +856,8 @@ export const ClassDetails = () => {
             )}
 
             {activeTab === 'payments' && (
-                <div className="sheet sheet-p relative overflow-hidden">                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-border pb-4 gap-3">
+                <div className="sheet sheet-p relative overflow-hidden">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-border pb-4 gap-3">
                         <h2 className="text-xl font-bold flex items-center gap-3 text-text-main">
                             <div className="bg-success/15 p-2 rounded-[2px] border border-success/20">
                                 <DollarSign size={20} className="text-success" />

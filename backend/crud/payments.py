@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from backend.models.payments import Payment
+from backend.models.payments import Payment, overdue_clause
+from datetime import date
 from backend.schemas.payments import PaymentCreate
 from typing import List, Optional
 
@@ -26,7 +27,8 @@ def create_payment(db: Session, payment: PaymentCreate):
         year=payment.year,
         status=payment.status,
         amount=payment.amount,
-        paid_at=payment.paid_at
+        paid_at=payment.paid_at,
+        due_date=payment.due_date
     )
     db.add(db_payment)
     db.commit()
@@ -39,6 +41,9 @@ def update_payment(db: Session, payment_id: int, payment_data: PaymentCreate):
         payment.status = payment_data.status
         payment.amount = payment_data.amount
         payment.paid_at = payment_data.paid_at
+        # Clientes que não enviam due_date (ex.: aba de pagamentos da turma) não apagam o vencimento
+        if "due_date" in payment_data.model_fields_set:
+            payment.due_date = payment_data.due_date
         db.commit()
         db.refresh(payment)
     return payment
@@ -67,9 +72,19 @@ def get_payment_stats(db: Session, user_id: int, month: int, year: int):
         Payment.status == 'PAID'
     ).scalar() or 0.0
     
+    overdue_query = db.query(func.count(Payment.id), func.coalesce(func.sum(Payment.amount), 0.0)).join(Student).filter(
+        Student.owner_id == user_id,
+        Payment.month == month,
+        Payment.year == year,
+        overdue_clause(date.today())
+    )
+    overdue_count, overdue_amount = overdue_query.one()
+
     return {
         "total_students": total_students,
         "paid_count": paid_count,
         "pending_count": total_students - paid_count,
-        "total_received": total_received
+        "total_received": total_received,
+        "overdue_count": overdue_count,
+        "overdue_amount": float(overdue_amount)
     }

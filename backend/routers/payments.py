@@ -96,7 +96,8 @@ def generate_monthly_report(
             "school_year": student.school_year or "-",
             "class_type": student.class_type or "-",
             "status": status_label,
-            "amount": payment.amount if payment else 0.0
+            "amount": payment.amount if payment else 0.0,
+            "due_date": payment.due_date.strftime("%d/%m/%Y") if payment and payment.due_date else "-"
         })
         
     pending_count = total_students - paid_count
@@ -130,15 +131,16 @@ def generate_monthly_report(
     # Detailed List
     document.add_heading('Detalhamento por Aluno', level=1)
     
-    table = document.add_table(rows=1, cols=6)
+    table = document.add_table(rows=1, cols=7)
     table.style = 'Table Grid'
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = 'Aluno'
     hdr_cells[1].text = 'Responsável'
     hdr_cells[2].text = 'Ano Escolar'
     hdr_cells[3].text = 'Tipo de Aula'
-    hdr_cells[4].text = 'Status'
-    hdr_cells[5].text = 'Valor Pago'
+    hdr_cells[4].text = 'Vencimento'
+    hdr_cells[5].text = 'Status'
+    hdr_cells[6].text = 'Valor Pago'
     
     for cell in hdr_cells:
         cell.paragraphs[0].runs[0].bold = True
@@ -149,8 +151,9 @@ def generate_monthly_report(
         row_cells[1].text = item["parent"]
         row_cells[2].text = item["school_year"]
         row_cells[3].text = item["class_type"]
-        row_cells[4].text = item["status"]
-        row_cells[5].text = f"R$ {item['amount']:.2f}" if item["amount"] > 0 else "-"
+        row_cells[4].text = item["due_date"]
+        row_cells[5].text = item["status"]
+        row_cells[6].text = f"R$ {item['amount']:.2f}" if item["amount"] > 0 else "-"
         
     # Save to stream
     file_stream = io.BytesIO()
