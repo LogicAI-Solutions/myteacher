@@ -321,3 +321,23 @@ def test_aplicar_plano_define_tipo_de_conta():
     assert u.role == "school"
     P.role = "autonomous_teacher"; _apply_plan(None, u, P)
     assert u.role == "autonomous_teacher"
+
+
+def test_sininho_respeita_escopo_e_financeiro(client, school):
+    from backend.models.payments import Payment
+    db = TestingSession()
+    # s1 (turma do T1) e s2 (turma do T2) com mensalidade atrasada
+    for sid in (school["s1"], school["s2"]):
+        db.add(Payment(student_id=sid, month=1, year=2020, status="PENDING", amount=50, due_date=date(2020, 1, 10)))
+    db.commit(); db.close()
+    # T1 lança 2 aulas recentes com s1 faltando
+    for days in (9, 2):
+        d = (TODAY - timedelta(days=days)).isoformat()
+        assert client.post(f"/classes/{school['c1']}/attendance", json={"date": d, "logs": [{"student_id": school["s1"], "status": "absent"}]}, headers=school["t1"]).status_code == 200
+
+    diretor = client.get("/alerts", headers=school["d"]).json()
+    assert {a["student_name"] for a in diretor} == {"Aluno 1", "Aluno 2"}
+    prof = client.get("/alerts", headers=school["t1"]).json()
+    assert [a["student_name"] for a in prof] == ["Aluno 1"]
+    assert [r["type"] for r in prof[0]["reasons"]] == ["absence"]      # professor não vê atraso de mensalidade
+    assert client.get("/alerts", headers=school["t2"]).json() == []

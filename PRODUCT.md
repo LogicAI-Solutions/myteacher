@@ -65,6 +65,12 @@ Fluxos confirmados no código:
   (`owner_id` = diretor); o professor vê só as turmas em que é responsável e não
   vê o financeiro; a secretaria age conforme as permissões marcadas pela direção.
   Regras centralizadas em `backend/core/access.py`.
+- **Alertas** (sininho no topo): alunos em risco de desistência — sem presença nas
+  aulas das últimas 2 semanas ou com mensalidade atrasada (`backend/crud/alerts.py`).
+- **Relatório mensal aos pais**: resumo do mês por e-mail (Word anexo) ou WhatsApp,
+  individual ou em lote (`backend/routers/reports.py`).
+- **Mensalidade automática**: valor e dia de vencimento no aluno geram a cobrança
+  de cada mês (`ensure_monthly_payments` em `backend/crud/payments.py`).
 - **Conta**: confirmação de e-mail (`/confirmar-email`), recuperação e redefinição
   de senha (`/esqueci-senha`, `/redefinir-senha`), via SMTP (`backend/core/email.py`).
 - **Administração** (`/dashboard/admin`, planos, configurações): visível apenas

@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
-import { Plus, Search, Pencil, Trash, X, AlertTriangle, UserCircle, LineChart as LineChartIcon, Download, MoreVertical, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
+import { Plus, Search, Pencil, Trash, X, AlertTriangle, UserCircle, LineChart as LineChartIcon, Download, MoreVertical, ArrowUp, ArrowDown, ArrowUpDown, Mail } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { formatPhone, unmaskPhone, formatCurrency, parseCurrency } from '../utils/masks';
 import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
 import { Loading } from '../components/Loading';
+import { StudentMonthlyReportModal, BulkMonthlyReportModal } from '../components/MonthlyReports';
 
 import { Toast, type ToastType } from '../components/Toast';
 
@@ -77,6 +78,7 @@ interface ClassModel {
 export const Students = () => {
     const { can } = useAuth();
     const canManage = can('students.manage');
+    const canReports = can('reports.view');
     const [students, setStudents] = useState<Student[]>([]);
     // const [filteredStudents, setFilteredStudents] = useState<Student[]>([]); // Removed: Server side filtering
     const [classes, setClasses] = useState<ClassModel[]>([]);
@@ -116,6 +118,10 @@ export const Students = () => {
 
     // Toast State
     const [toast, setToast] = useState<{ message: string, type: ToastType } | null>(null);
+    // Relatório mensal aos pais (individual e em lote)
+    const [reportFor, setReportFor] = useState<Student | null>(null);
+    const [showBulkReport, setShowBulkReport] = useState(false);
+    const notify = useCallback((message: string, type: ToastType) => setToast({ message, type }), []);
 
     const showToast = (message: string, type: ToastType) => {
         setToast({ message, type });
@@ -353,6 +359,8 @@ export const Students = () => {
     return (
         <div className="animate-fade-in">
             {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+            {reportFor && <StudentMonthlyReportModal studentId={reportFor.id} studentName={reportFor.name} onClose={() => setReportFor(null)} notify={notify} />}
+            {showBulkReport && <BulkMonthlyReportModal onClose={() => setShowBulkReport(false)} notify={notify} />}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-2 sm:gap-4">
                 <div>
                     <h1 className="text-lg sm:text-2xl md:text-3xl font-bold text-text-main flex items-center gap-1.5 sm:gap-2">
@@ -360,12 +368,20 @@ export const Students = () => {
                     </h1>
                     <p className="text-text-muted mt-0.5 text-xs sm:text-sm">Gerencie todos os alunos cadastrados.</p>
                 </div>
-                {canManage && <button
-                    onClick={() => setShowCreateModal(true)}
-                    className="btn btn-outline text-text-main px-3 py-1.5 sm:px-4 sm:py-2 rounded-[2px] flex items-center gap-1.5 transition-all text-xs sm:text-sm w-full sm:w-auto justify-center"
-                >
-                    <Plus size={16} /> Novo Aluno
-                </button>}
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    {canManage && <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="btn btn-outline text-text-main px-3 py-1.5 sm:px-4 sm:py-2 rounded-[2px] flex items-center gap-1.5 transition-all text-xs sm:text-sm w-full sm:w-auto justify-center"
+                    >
+                        <Plus size={16} /> Novo Aluno
+                    </button>}
+                    {canReports && <button
+                        onClick={() => setShowBulkReport(true)}
+                        className="btn btn-outline text-primary px-3 py-1.5 sm:px-4 sm:py-2 rounded-[2px] flex items-center gap-1.5 text-xs sm:text-sm w-full sm:w-auto justify-center"
+                    >
+                        <Mail size={16} /> Relatório aos pais
+                    </button>}
+                </div>
             </div>
 
             {/* Search Bar & Filters */}
@@ -456,6 +472,9 @@ export const Students = () => {
                                 <button onClick={() => { handleViewEvolution(student); setOpenMenuId(null); }} className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-primary/10 flex items-center gap-2 transition-colors">
                                     <LineChartIcon size={16} /> Ver Evolução
                                 </button>
+                                {canReports && <button onClick={() => { setReportFor(student); setOpenMenuId(null); }} className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-primary/10 flex items-center gap-2 transition-colors">
+                                    <Mail size={16} /> Relatório aos pais
+                                </button>}
                                 {canManage && <><button onClick={async () => {
                                     setEditingStudent(student);
                                     setEditStudentData({ name: student.name, phone: student.phone || '', parent_name: student.parent_name || '', parent_phone: student.parent_phone || '', parent_email: student.parent_email || '', school_year: student.school_year || '', school: student.school || '', intended_profession: student.intended_profession || '', class_type: student.class_type || '', active: student.active ?? true, exempt: !!student.exempt, monthly_fee: student.monthly_fee ?? null, due_day: student.due_day ?? null });
@@ -617,6 +636,12 @@ export const Students = () => {
                                                     >
                                                         <LineChartIcon size={16} /> Ver Evolução
                                                     </button>
+                                                    {canReports && <button
+                                                        onClick={() => { setReportFor(student); setOpenMenuId(null); }}
+                                                        className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-primary/10 flex items-center gap-2 transition-colors"
+                                                    >
+                                                        <Mail size={16} /> Relatório aos pais
+                                                    </button>}
                                                     {canManage && <><button
                                                         onClick={async () => {
                                                             setEditingStudent(student);
