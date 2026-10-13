@@ -83,7 +83,7 @@ def init_db(db: Session):
         {
             "name": "Escola",
             "description": "Para escolas e cursos: diretor, professores e secretaria na mesma conta.",
-            "price": "Sob consulta",
+            "price": "R$ 297,90",
             "period": "/mês",
             "stripe_price_id": os.getenv("STRIPE_PRICE_ESCOLA"),
             "role": "school",

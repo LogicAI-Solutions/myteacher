@@ -76,6 +76,11 @@ class Settings(BaseSettings):
             problems.append("CORS_ORIGINS não definida")
         if self.GOOGLE_CLIENT_ID and not self.GOOGLE_CALLBACK_URL:
             problems.append("GOOGLE_CALLBACK_URL não definida (Google OAuth ativo)")
+        if self.STRIPE_SECRET_KEY:
+            if self.STRIPE_SECRET_KEY.startswith(("sk_test", "rk_test")):
+                problems.append("STRIPE_SECRET_KEY é chave de teste")
+            if not self.STRIPE_WEBHOOK_SECRET:
+                problems.append("STRIPE_WEBHOOK_SECRET não definida (sem ela nenhuma assinatura é ativada pelo webhook)")
         if problems:
             raise ValueError("Configuração de produção inválida: " + "; ".join(problems))
         return self

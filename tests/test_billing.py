@@ -188,7 +188,42 @@ def test_webhook_cancelamento_desativa_a_conta():
         st.return_value.Webhook.construct_event.return_value = event
         asyncio.run(billing.stripe_webhook(req, db))
     assert user.is_active is False
+    assert user.stripe_subscription_id is None  # senão o /checkout mandaria para o portal e não dá para reassinar
     assert db.committed
+
+
+def test_webhook_pagamento_em_retentativa_mantem_acesso():
+    """Cartão recusado na renovação -> past_due enquanto o Stripe retenta. Acesso continua."""
+    import asyncio
+    user = _User()
+    user.stripe_subscription_id = "sub_1"
+    db = _DB(user=user, cfg={"stripe_price_id": "whsec"})  # _DB devolve stripe_price_id para qualquer config
+    event = {"type": "customer.subscription.updated",
+             "data": {"object": {"id": "sub_1", "status": "past_due", "metadata": {}, "items": {"data": []}}}}
+    req = type("R", (), {"headers": {"stripe-signature": "sig"}, "body": lambda self: _async(b"{}")})()
+    with patch.object(billing, "_stripe") as st:
+        st.return_value.Webhook.construct_event.return_value = event
+        asyncio.run(billing.stripe_webhook(req, db))
+    assert user.is_active is True
+    event["data"]["object"]["status"] = "unpaid"
+    with patch.object(billing, "_stripe") as st:
+        st.return_value.Webhook.construct_event.return_value = event
+        asyncio.run(billing.stripe_webhook(req, db))
+    assert user.is_active is False
+
+
+def test_checkout_plano_sem_price_nao_usa_price_padrao():
+    """Plano Escola sem price não pode cair no price padrão (cobraria o valor do Profissional)."""
+    plan = _Plan()
+    plan.stripe_price_id = None
+    db = _DB(plan=plan, cfg={"stripe_price_id": "price_padrao"})
+    with patch.object(billing, "_stripe") as st:
+        try:
+            billing.create_checkout_session(type("R", (), {"base_url": "http://app/"})(), 3, db, _User())
+            assert False, "devia recusar"
+        except billing.HTTPException as e:
+            assert e.status_code == 503
+        st.return_value.checkout.Session.create.assert_not_called()
 
 
 def test_webhook_troca_de_plano_no_portal_ajusta_o_limite():

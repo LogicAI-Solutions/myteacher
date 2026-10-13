@@ -33,6 +33,8 @@ PLANS = [
      "description": "Acesso ao MyTeacher com até 5 turmas", "amount": 4790},
     {"key": "profissional", "env": "STRIPE_PRICE_PROFISSIONAL", "name": "MyTeacher - Profissional",
      "description": "Acesso completo ao MyTeacher, turmas ilimitadas", "amount": 9790},
+    {"key": "escola", "env": "STRIPE_PRICE_ESCOLA", "name": "MyTeacher - Escola",
+     "description": "Diretor, até 10 professores e secretaria na mesma conta", "amount": 29790},
 ]
 
 
@@ -107,7 +109,7 @@ def main():
     print("\n# Cole no .env deste ambiente:")
     for plan, price in zip(PLANS, prices):
         print(f"{plan['env']}={price.id}")
-    print(f"STRIPE_PRICE_ID={prices[-1].id}")
+    print(f"STRIPE_PRICE_ID={prices[1].id}")  # padrão sem plano escolhido: Profissional
     if secret:
         print(f"STRIPE_WEBHOOK_SECRET={secret}")
     elif webhook:

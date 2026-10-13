@@ -93,7 +93,8 @@ def create_checkout_session(
     if user.stripe_subscription_id and user.stripe_customer_id:
         return create_portal_session(request, db, user)
 
-    price_id = (plan.stripe_price_id if plan else None) or _cfg(db, "stripe_price_id")
+    # Plano sem price não cai no price padrão: cobraria o valor de outro plano.
+    price_id = plan.stripe_price_id if plan else _cfg(db, "stripe_price_id")
     if not price_id:
         raise HTTPException(status_code=503, detail="Preço da assinatura não configurado.")
     try:
@@ -174,9 +175,14 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     elif event["type"] in ("customer.subscription.deleted", "customer.subscription.updated"):
         user = db.query(User).filter(User.stripe_subscription_id == obj["id"]).first()
         if user:
-            user.is_active = obj["status"] in ("active", "trialing")
-            # Troca de plano no Stripe reflete no limite de turmas
-            _apply_plan(db, user, _plan_of_subscription(db, obj))
+            # past_due: o Stripe ainda está retentando a cobrança; o acesso cai só em unpaid/canceled.
+            user.is_active = obj["status"] in ("active", "trialing", "past_due")
+            if event["type"] == "customer.subscription.deleted":
+                # Sem isso o /checkout mandaria para o portal, onde não dá para assinar de novo.
+                user.stripe_subscription_id = None
+            else:
+                # Troca de plano no Stripe reflete no limite de turmas
+                _apply_plan(db, user, _plan_of_subscription(db, obj))
             db.commit()
 
     return {"received": True}
