@@ -73,7 +73,8 @@ async def get_current_user(user = Depends(get_user_from_token), db: Session = De
     if user.school_id and user.school_role in ("teacher", "secretary"):
         from backend.models.schools import School
         school = db.query(School).filter(School.id == user.school_id).first()
-        if not user.is_active or not school or not _has_paid_access(school.owner):
+        owner = school.owner if school else None
+        if not user.is_active or not owner or owner.role != "school" or not _has_paid_access(owner):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="SCHOOL_INACTIVE")
         return user
 

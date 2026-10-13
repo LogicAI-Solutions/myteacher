@@ -51,6 +51,10 @@ def register(payload: users_schemas.UserRegister, background: BackgroundTasks, d
     user.email_verified = False
     db.commit()
     db.refresh(user)
+    if payload.account_type == "school":
+        from backend.crud.schools import create_school_for
+        create_school_for(db, user, payload.school_name)
+        db.refresh(user)
     background.add_task(email_service.send_verification_email, user.email, _verification_url(user))
     return user
 

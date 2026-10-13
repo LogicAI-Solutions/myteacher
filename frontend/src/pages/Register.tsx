@@ -5,6 +5,7 @@ import { Alert, Box, Button, CircularProgress, Divider, IconButton, InputAdornme
 import { AuthLayout, GoogleButton } from '../components/AuthLayout';
 import api from '../api';
 import { useAuth } from '../context/AuthContext';
+import { setPendingSchool } from '../utils/invite';
 
 const TRIAL_DAYS = 14;
 
@@ -15,9 +16,12 @@ export const Register = () => {
 
     // A landing e a página de preços mandam o plano escolhido; é só contexto, o
     // pagamento acontece quando o teste acaba.
-    const planName = (location.state as { planName?: string } | null)?.planName;
+    const planState = location.state as { planName?: string; role?: string } | null;
+    const planName = planState?.planName;
+    // Plano Escola: a conta já nasce como escola (direção), com o nome informado aqui
+    const isSchool = planState?.role === 'school';
 
-    const [form, setForm] = useState({ first_name: '', last_name: '', email: '', password: '' });
+    const [form, setForm] = useState({ first_name: '', last_name: '', email: '', password: '', school_name: '' });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -26,6 +30,13 @@ export const Register = () => {
         setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
     const handleGoogleLogin = () => {
+        if (isSchool) {
+            if (form.school_name.trim().length < 2) {
+                setError('Informe o nome da escola antes de continuar com o Google.');
+                return;
+            }
+            setPendingSchool(form.school_name.trim());
+        }
         const apiUrl = import.meta.env.VITE_API_URL || '/api';
         window.location.href = `${apiUrl}/auth/google`;
     };
@@ -34,6 +45,11 @@ export const Register = () => {
         e.preventDefault();
         setError('');
 
+        if (isSchool && form.school_name.trim().length < 2) {
+            setError('Informe o nome da escola.');
+            return;
+        }
+
         if (form.password.length < 8) {
             setError('A senha precisa ter pelo menos 8 caracteres.');
             return;
@@ -41,10 +57,11 @@ export const Register = () => {
 
         setLoading(true);
         try {
-            await api.post('/register', form);
+            const { school_name, ...rest } = form;
+            await api.post('/register', isSchool ? { ...rest, account_type: 'school', school_name: school_name.trim() } : rest);
             // Entra direto com email e senha
             await login(form.email, form.password);
-            navigate('/dashboard');
+            navigate(isSchool ? '/dashboard/escola' : '/dashboard');
         } catch (err: any) {
             if (err.code === 'ERR_NETWORK' || !err.response) {
                 setError('Sistema offline. Verifique sua conexão e tente de novo.');
@@ -75,6 +92,22 @@ export const Register = () => {
                 </Alert>
             )}
 
+            {isSchool && (
+                <Box sx={{ mt: 2 }}>
+                    <TextField
+                        label="Nome da escola"
+                        value={form.school_name}
+                        onChange={set('school_name')}
+                        required
+                        autoFocus
+                        fullWidth
+                        name="school_name"
+                        placeholder="Colégio Aprender"
+                        helperText="Você será a direção e poderá convidar professores e secretaria."
+                        slotProps={{ htmlInput: { minLength: 2, maxLength: 120 } }}
+                    />
+                </Box>
+            )}
             <Box sx={{ mt: 2 }}>
                 <GoogleButton onClick={handleGoogleLogin} />
             </Box>
@@ -91,7 +124,7 @@ export const Register = () => {
                         onChange={set('first_name')}
                         required
                         fullWidth
-                        autoFocus
+                        autoFocus={!isSchool}
                         name="first_name"
                         autoComplete="given-name"
                         placeholder="Maria"

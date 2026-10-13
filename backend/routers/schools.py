@@ -12,7 +12,7 @@ from backend.core.access import (
 )
 from backend.crud import schools as school_crud
 from backend.crud import users as users_crud
-from backend.models.schools import School, SchoolInvite
+from backend.models.schools import SchoolInvite
 from backend.models.users import User
 from backend.schemas import users as users_schemas
 
@@ -91,6 +91,8 @@ def read_my_school(db: Session = Depends(database.get_db), ctx: Access = Depends
     out = {
         "school": {"id": ctx.school.id, "name": ctx.school.name} if ctx.school else None,
         "role": ctx.role,
+        "account_type": ctx.user.account_type,
+        "can_create": ctx.role == "autonomous" and (school_crud.is_school_account(ctx.user) or bool(ctx.user.is_trial)),
         "permissions": sorted(ctx.perms),
         "catalog": {
             "all": sorted(ALL_PERMS),
@@ -107,14 +109,10 @@ def read_my_school(db: Session = Depends(database.get_db), ctx: Access = Depends
 def create_school(payload: SchoolCreate, db: Session = Depends(database.get_db), ctx: Access = Depends(get_access)):
     if ctx.role != "autonomous":
         raise HTTPException(status_code=409, detail="Esta conta já faz parte de uma escola.")
-    user = ctx.user
-    school = School(name=payload.name.strip(), owner_user_id=user.id)
-    db.add(school)
-    db.flush()
-    user.school_id = school.id
-    user.school_role = "owner"
-    user.school_permissions = None
-    db.commit()
+    # Escola é do plano Escola. No teste grátis dá para experimentar (a conta vira Escola).
+    if not (school_crud.is_school_account(ctx.user) or ctx.user.is_trial):
+        raise HTTPException(status_code=403, detail="A gestão de escola faz parte do plano Escola.")
+    school = school_crud.create_school_for(db, ctx.user, payload.name)
     return {"id": school.id, "name": school.name}
 
 
