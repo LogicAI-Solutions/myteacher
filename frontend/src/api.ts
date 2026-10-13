@@ -24,11 +24,12 @@ api.interceptors.response.use(
     // ali, senão quem acabou de pagar volta pro paywall.
     if (
       error.response?.status === 403 &&
-      error.response?.data?.detail === 'TRIAL_EXPIRED' &&
+      ['TRIAL_EXPIRED', 'SCHOOL_INACTIVE'].includes(error.response?.data?.detail) &&
       !window.location.pathname.startsWith('/trial-expired') &&
       !window.location.pathname.startsWith('/checkout/success')
     ) {
-      window.location.href = '/trial-expired';
+      // Membro de escola: a assinatura é da direção, a tela não oferece checkout
+      window.location.href = error.response.data.detail === 'SCHOOL_INACTIVE' ? '/trial-expired?escola=1' : '/trial-expired';
       return Promise.reject(error);
     }
     if (error.response && error.response.status === 401) {

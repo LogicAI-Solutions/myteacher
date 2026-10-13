@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 
 from backend.core import database, security
+from backend.core.access import Access, build_access
+from backend.crud.classes import scoped_classes, get_class_for_owner
 from backend.core.config import settings
 from backend.core.logger import logger
 from backend.models.users import User
@@ -21,6 +23,12 @@ from backend.schemas.calendar import (
 )
 
 router = APIRouter()
+
+
+def _check_event_class(db: Session, ctx: Access, class_id: Optional[int]):
+    """Evento só pode apontar para turma visível a quem cria (mesmo tenant/escopo do professor)."""
+    if class_id is not None and not get_class_for_owner(db, class_id, ctx.tenant_id, ctx.teacher_scope):
+        raise HTTPException(status_code=404, detail="Class not found")
 
 
 def get_easter_date(year: int) -> date:
@@ -201,7 +209,8 @@ async def list_calendar_events(
 
     # 2. Buscar sessões de turmas do professor (AttendanceSession)
     try:
-        classes_owned = [] if google_only else db.query(Class).filter(Class.owner_id == current_user.id).all()
+        ctx = build_access(db, current_user)
+        classes_owned = [] if google_only else scoped_classes(db, ctx.tenant_id, ctx.teacher_scope).all()
         class_map = {c.id: c.name for c in classes_owned}
         class_ids = list(class_map.keys())
 
@@ -330,6 +339,7 @@ async def create_calendar_event(
     current_user: User = Depends(security.get_current_user),
 ):
     """Cria um novo evento na agenda local e opcionalmente sincroniza com o Google Calendar."""
+    _check_event_class(db, build_access(db, current_user), payload.class_id)
     google_event_id = None
     location_or_link = payload.location_or_link
 
@@ -429,6 +439,7 @@ async def create_recurring_calendar_events(
     current_user: User = Depends(security.get_current_user),
 ):
     """Cria eventos recorrentes para uma turma ou compromisso semanal."""
+    _check_event_class(db, build_access(db, current_user), payload.class_id)
     if not payload.days_of_week:
         raise HTTPException(status_code=400, detail="Selecione pelo menos um dia da semana.")
 
@@ -557,6 +568,7 @@ async def update_calendar_event(
     current_user: User = Depends(security.get_current_user),
 ):
     """Atualiza um evento da agenda."""
+    _check_event_class(db, build_access(db, current_user), payload.class_id)
     # Extrair ID numérico se vier formatado como local_X
     clean_id = event_id.replace("local_", "")
     if not clean_id.isdigit():

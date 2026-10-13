@@ -7,7 +7,7 @@ class ClassBase(BaseModel):
     schedule: str
 
 class ClassCreate(ClassBase):
-    pass
+    teacher_id: Optional[int] = None
 
 class ClassReorder(BaseModel):
     id: int
@@ -17,6 +17,8 @@ class Class(ClassBase):
     id: int
     owner_id: int
     display_order: Optional[int] = 0
+    teacher_id: Optional[int] = None
+    teacher_name: Optional[str] = None
 
     # students: List[Student] = [] # Removed to avoid mismatch with ORM model which has 'enrollments'
     class Config:

@@ -36,7 +36,7 @@ class _DB:
 
 class _User:
     id, email = 7, "prof@escola.com"
-    stripe_customer_id = stripe_subscription_id = plan_id = None
+    stripe_customer_id = stripe_subscription_id = plan_id = school_role = None
     is_trial, is_active = True, True
     max_classes = 9999
 

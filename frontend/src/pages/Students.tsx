@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../api';
+import { useAuth } from '../context/AuthContext';
 import { Plus, Search, Pencil, Trash, X, AlertTriangle, UserCircle, LineChart as LineChartIcon, Download, MoreVertical, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { formatPhone, unmaskPhone } from '../utils/masks';
@@ -35,6 +36,8 @@ interface ClassModel {
 }
 
 export const Students = () => {
+    const { can } = useAuth();
+    const canManage = can('students.manage');
     const [students, setStudents] = useState<Student[]>([]);
     // const [filteredStudents, setFilteredStudents] = useState<Student[]>([]); // Removed: Server side filtering
     const [classes, setClasses] = useState<ClassModel[]>([]);
@@ -316,12 +319,12 @@ export const Students = () => {
                     </h1>
                     <p className="text-text-muted mt-0.5 text-xs sm:text-sm">Gerencie todos os alunos cadastrados.</p>
                 </div>
-                <button
+                {canManage && <button
                     onClick={() => setShowCreateModal(true)}
                     className="btn btn-outline text-text-main px-3 py-1.5 sm:px-4 sm:py-2 rounded-[2px] flex items-center gap-1.5 transition-all text-xs sm:text-sm w-full sm:w-auto justify-center"
                 >
                     <Plus size={16} /> Novo Aluno
-                </button>
+                </button>}
             </div>
 
             {/* Search Bar & Filters */}
@@ -373,6 +376,7 @@ export const Students = () => {
                             </div>
                             <div className="flex items-center gap-2">
                                 <select
+                                    disabled={!canManage}
                                     className={`px-2 py-1 rounded-[2px] text-xs font-medium border focus:ring-2 focus:ring-primary/40 outline-none transition-all cursor-pointer  ${student.active
                                         ? 'bg-success/10 text-success border-success/20'
                                         : 'bg-primary/5 text-text-muted border-border'}`}
@@ -411,7 +415,7 @@ export const Students = () => {
                                 <button onClick={() => { handleViewEvolution(student); setOpenMenuId(null); }} className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-primary/10 flex items-center gap-2 transition-colors">
                                     <LineChartIcon size={16} /> Ver Evolução
                                 </button>
-                                <button onClick={async () => {
+                                {canManage && <><button onClick={async () => {
                                     setEditingStudent(student);
                                     setEditStudentData({ name: student.name, phone: student.phone || '', parent_name: student.parent_name || '', parent_phone: student.parent_phone || '', parent_email: student.parent_email || '', school_year: student.school_year || '', school: student.school || '', intended_profession: student.intended_profession || '', class_type: student.class_type || '', active: student.active ?? true, exempt: !!student.exempt });
                                     try { const res = await api.get(`/students/${student.id}/enrollment`); setEditClassId(res.data.class_id || ''); setOriginalClassId(res.data.class_id); } catch { setEditClassId(''); setOriginalClassId(null); }
@@ -422,7 +426,7 @@ export const Students = () => {
                                 <div className="h-[1px] mx-2 my-1" style={{ background: 'var(--color-border)' }} />
                                 <button onClick={() => { setDeletingStudent(student); setOpenMenuId(null); }} className="w-full text-left px-4 py-3 text-sm text-danger hover:bg-danger/10 flex items-center gap-2 transition-colors">
                                     <Trash size={16} /> Excluir
-                                </button>
+                                </button></>}
                             </div>
                         )}
                     </div>
@@ -529,6 +533,7 @@ export const Students = () => {
                                         <td className="p-3 sm:p-4 text-text-muted text-sm whitespace-nowrap">{student.class_type || '-'}</td>
                                         <td className="p-3 sm:p-4 text-center">
                                             <select
+                                                disabled={!canManage}
                                                 className={`px-2 sm:px-3 py-1 sm:py-1.5 rounded-[2px] text-xs font-medium border focus:ring-2 focus:ring-primary/40 outline-none transition-all cursor-pointer  ${student.active
                                                     ? 'bg-success/10 text-success border-success/20'
                                                     : 'bg-primary/5 text-text-muted border-border'}`}
@@ -571,7 +576,7 @@ export const Students = () => {
                                                     >
                                                         <LineChartIcon size={16} /> Ver Evolução
                                                     </button>
-                                                    <button
+                                                    {canManage && <><button
                                                         onClick={async () => {
                                                             setEditingStudent(student);
                                                             setEditStudentData({
@@ -611,7 +616,7 @@ export const Students = () => {
                                                         className="w-full text-left px-4 py-3 text-sm text-danger hover:bg-danger/10 flex items-center gap-2 transition-colors"
                                                     >
                                                         <Trash size={16} /> Excluir
-                                                    </button>
+                                                    </button></>}
                                                 </div>
                                             )}
                                         </td>

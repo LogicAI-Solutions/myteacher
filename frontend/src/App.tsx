@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider, useAuth, type Permission } from './context/AuthContext';
 import { Loading } from './components/Loading';
 
 // Pages — carregadas por rota. Cada página traz sua própria dependência pesada
@@ -23,17 +23,34 @@ const Register = lazy(() => import('./pages/Register'));
 const CheckoutSuccess = lazy(() => import('./pages/CheckoutSuccess').then(m => ({ default: m.CheckoutSuccess })));
 const OAuthCallback = lazy(() => import('./pages/OAuthCallback'));
 const Privacy = lazy(() => import('./pages/Privacy').then(m => ({ default: m.Privacy })));
+const School = lazy(() => import('./pages/School').then(m => ({ default: m.School })));
+const AcceptInvite = lazy(() => import('./pages/AcceptInvite').then(m => ({ default: m.AcceptInvite })));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail'));
 const Terms = lazy(() => import('./pages/Terms').then(m => ({ default: m.Terms })));
 
 // Layouts
 import { Layout } from './components/Layout';
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
-  const { user, isLoading, isTrialExpired } = useAuth();
+  const { user, isLoading, isTrialExpired, accessBlock } = useAuth();
   if (isLoading) return <Loading variant="fullscreen" text="Carregando..." />;
-  if (isTrialExpired) return <Navigate to="/trial-expired" />;
+  if (isTrialExpired) return <Navigate to={accessBlock === 'SCHOOL_INACTIVE' ? '/trial-expired?escola=1' : '/trial-expired'} />;
   if (!user) return <Navigate to="/login" />;
   return children;
+};
+
+// Esconder o menu não basta: a rota também respeita a permissão (o backend já devolve 403).
+const RequirePerm = ({ perm, children }: { perm: Permission; children: ReactNode }) => {
+  const { can } = useAuth();
+  return can(perm) ? children : <Navigate to="/dashboard" replace />;
+};
+
+const RequireSchoolOwner = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth();
+  // Autônomo também entra: é onde ele cria a escola
+  return !user?.school_role || user.school_role === 'owner' ? children : <Navigate to="/dashboard" replace />;
 };
 
 import { ThemeProvider } from './context/ThemeContext';
@@ -80,6 +97,10 @@ function AppRoutes() {
       <Route path="/checkout/success" element={<CheckoutSuccess />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
+      <Route path="/convite/:token" element={<AcceptInvite />} />
+      <Route path="/esqueci-senha" element={<ForgotPassword />} />
+      <Route path="/redefinir-senha" element={<ResetPassword />} />
+      <Route path="/confirmar-email" element={<VerifyEmail />} />
 
       {/* Protected Admin Routes */}
       <Route path="/dashboard" element={
@@ -92,7 +113,8 @@ function AppRoutes() {
         <Route path="classes" element={<Classes />} />
         <Route path="class/:id" element={<ClassDetails />} />
         <Route path="students" element={<Students />} />
-        <Route path="payments" element={<Payments />} />
+        <Route path="payments" element={<RequirePerm perm="finance"><Payments /></RequirePerm>} />
+        <Route path="escola" element={<RequireSchoolOwner><School /></RequireSchoolOwner>} />
         <Route path="admin" element={<Admin />} />
         <Route path="profile" element={<Profile />} />
       </Route>

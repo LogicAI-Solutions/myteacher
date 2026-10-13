@@ -60,6 +60,13 @@ Fluxos confirmados no código:
   pendente, visão do mês e do ano.
 - **Dashboard** (`/dashboard`): contagem de alunos ativos/inativos, pagos e
   pendentes do mês, em cartões e dois gráficos (Recharts).
+- **Escola** (`/dashboard/escola`): o professor vira direção e convida professores
+  e secretaria por link (`/convite/:token`). Alunos e turmas são da escola
+  (`owner_id` = diretor); o professor vê só as turmas em que é responsável e não
+  vê o financeiro; a secretaria age conforme as permissões marcadas pela direção.
+  Regras centralizadas em `backend/core/access.py`.
+- **Conta**: confirmação de e-mail (`/confirmar-email`), recuperação e redefinição
+  de senha (`/esqueci-senha`, `/redefinir-senha`), via SMTP (`backend/core/email.py`).
 - **Administração** (`/dashboard/admin`, planos, configurações): visível apenas
   para `is_admin`; gerencia usuários, planos e configurações do sistema.
 - **Suporte:** o canal de suporte e de venda consultiva é WhatsApp

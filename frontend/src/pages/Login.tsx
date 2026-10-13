@@ -3,7 +3,6 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
 import { Alert, Box, Button, CircularProgress, Divider, IconButton, InputAdornment, Link, Stack, TextField, Typography } from '@mui/material';
-import { openSupportWhatsApp } from '../utils/support';
 import { AuthLayout, GoogleButton } from '../components/AuthLayout';
 
 export const Login = () => {
@@ -74,6 +73,10 @@ export const Login = () => {
             // Se trial expirou, redirecionar para tela de trial expirado
             if (err.response?.status === 403 && err.response?.data?.detail === 'TRIAL_EXPIRED') {
                 navigate('/trial-expired');
+                return;
+            }
+            if (err.response?.status === 403 && err.response?.data?.detail === 'SCHOOL_INACTIVE') {
+                navigate('/trial-expired?escola=1');
                 return;
             }
             if (err.code === 'ERR_NETWORK' || !err.response) {
@@ -170,7 +173,7 @@ export const Login = () => {
                     variant="body2"
                     underline="hover"
                     sx={{ alignSelf: 'center' }}
-                    onClick={() => openSupportWhatsApp('Olá! Esqueci a senha do MyTeacherApp e preciso de ajuda para recuperar.')}
+                    onClick={() => navigate('/esqueci-senha')}
                 >
                     Esqueceu a senha?
                 </Link>

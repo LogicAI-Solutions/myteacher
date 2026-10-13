@@ -76,6 +76,9 @@ def create_checkout_session(
     user: User = Depends(get_user_from_token),
 ):
     """Cria a sessão de pagamento da assinatura mensal e devolve a URL do Stripe Checkout."""
+    # Membro de escola não paga: o acesso segue a assinatura do diretor
+    if user.school_role in ("teacher", "secretary"):
+        raise HTTPException(status_code=403, detail="Sua conta faz parte de uma escola. A assinatura é da direção.")
     plan = db.query(Plan).filter(Plan.id == plan_id).first() if plan_id else None
     if plan_id and not plan:
         raise HTTPException(status_code=404, detail="Plano não encontrado")

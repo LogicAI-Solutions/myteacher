@@ -1,8 +1,9 @@
+from datetime import datetime
 from sqlalchemy.orm import Session, joinedload
 from backend.models.attendance import AttendanceSession, AttendanceLog
 from backend.schemas.attendance import AttendanceSessionCreate
 
-def create_attendance_session(db: Session, session: AttendanceSessionCreate, class_id: int):
+def create_attendance_session(db: Session, session: AttendanceSessionCreate, class_id: int, user_id: int = None):
     # Calculate next lesson number
     last_session = db.query(AttendanceSession)\
         .filter(AttendanceSession.class_id == class_id)\
@@ -29,7 +30,8 @@ def create_attendance_session(db: Session, session: AttendanceSessionCreate, cla
         class_id=class_id,
         date=session.date,
         description=description,
-        lesson_number=next_number
+        lesson_number=next_number,
+        created_by_id=user_id
     )
     db.add(db_session)
     db.commit()
@@ -52,7 +54,7 @@ def create_attendance_session(db: Session, session: AttendanceSessionCreate, cla
     db.refresh(db_session)
     return db_session
 
-def update_attendance_session(db: Session, session_id: int, session_data: AttendanceSessionCreate, class_id: int):
+def update_attendance_session(db: Session, session_id: int, session_data: AttendanceSessionCreate, class_id: int, user_id: int = None):
     # class_id no filtro: a posse é verificada na turma, então a sessão tem que ser dela
     db_session = db.query(AttendanceSession).filter(AttendanceSession.id == session_id, AttendanceSession.class_id == class_id).first()
     if not db_session:
@@ -60,6 +62,8 @@ def update_attendance_session(db: Session, session_id: int, session_data: Attend
     
     # Update Session Details (Date/Description)
     db_session.date = session_data.date
+    db_session.updated_by_id = user_id
+    db_session.updated_at = datetime.utcnow()
     if session_data.description:
         db_session.description = session_data.description
         

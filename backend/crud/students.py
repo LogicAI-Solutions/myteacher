@@ -4,10 +4,19 @@ from backend.models.attendance import AttendanceLog
 from backend.models.enrollments import Enrollment
 from backend.schemas.students import StudentCreate
 
-from sqlalchemy import or_
+from sqlalchemy import or_, select
+from backend.models.classes import Class
 
-def get_students(db: Session, user_id: int, skip: int = 0, limit: int = 100, search: str = None, sort_by: str = "name", sort_desc: bool = False, active_status: bool = None, payment_status: str = None, payment_month: int = None, payment_year: int = None):
-    query = db.query(Student).filter(Student.owner_id == user_id)
+def scoped_students(db: Session, owner_id: int, teacher_id: int = None):
+    """Alunos visíveis: todos do tenant, ou só os matriculados nas turmas do professor."""
+    query = db.query(Student).filter(Student.owner_id == owner_id)
+    if teacher_id is not None:
+        teacher_classes = select(Class.id).where(Class.owner_id == owner_id, Class.teacher_id == teacher_id)
+        query = query.filter(Student.enrollments.any(Enrollment.class_id.in_(teacher_classes)))
+    return query
+
+def get_students(db: Session, user_id: int, skip: int = 0, limit: int = 100, search: str = None, sort_by: str = "name", sort_desc: bool = False, active_status: bool = None, payment_status: str = None, payment_month: int = None, payment_year: int = None, teacher_id: int = None):
+    query = scoped_students(db, user_id, teacher_id)
     
     if active_status is not None:
         query = query.filter(Student.active == active_status)
@@ -74,8 +83,8 @@ def get_students(db: Session, user_id: int, skip: int = 0, limit: int = 100, sea
 
     return query.offset(skip).limit(limit).all()
 
-def count_students(db: Session, user_id: int, search: str = None, active_status: bool = None, payment_status: str = None, payment_month: int = None, payment_year: int = None):
-    query = db.query(Student).filter(Student.owner_id == user_id)
+def count_students(db: Session, user_id: int, search: str = None, active_status: bool = None, payment_status: str = None, payment_month: int = None, payment_year: int = None, teacher_id: int = None):
+    query = scoped_students(db, user_id, teacher_id)
     
     if active_status is not None:
         query = query.filter(Student.active == active_status)
@@ -120,15 +129,15 @@ def count_students(db: Session, user_id: int, search: str = None, active_status:
     return query.count()
 
 
-def get_student_for_owner(db: Session, student_id: int, owner_id: int):
-    """None quando o aluno não existe ou é de outro professor — o router responde 404 nos dois casos."""
-    return db.query(Student).filter(Student.id == student_id, Student.owner_id == owner_id).first()
+def get_student_for_owner(db: Session, student_id: int, owner_id: int, teacher_id: int = None):
+    """None quando o aluno não existe, é de outro tenant ou fora das turmas do professor — o router responde 404."""
+    return scoped_students(db, owner_id, teacher_id).filter(Student.id == student_id).first()
 
-def owns_all_students(db: Session, student_ids, owner_id: int) -> bool:
+def owns_all_students(db: Session, student_ids, owner_id: int, teacher_id: int = None) -> bool:
     ids = set(student_ids)
     if not ids:
         return True
-    return db.query(Student).filter(Student.id.in_(ids), Student.owner_id == owner_id).count() == len(ids)
+    return scoped_students(db, owner_id, teacher_id).filter(Student.id.in_(ids)).count() == len(ids)
 
 def create_student(db: Session, student: StudentCreate, user_id: int):
     db_student = Student(**student.model_dump(), owner_id=user_id)

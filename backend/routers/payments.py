@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from backend.schemas import payments as payment_schemas
-from backend.schemas import users as user_schemas
 from backend.crud import payments as payment_crud
 from backend.crud import students as student_crud
-from backend.core import database, security
+from backend.core import database
+from backend.core.access import Access, require, FINANCE
 
 router = APIRouter()
 
@@ -18,18 +18,18 @@ def read_payments(
     limit: int = 100,
     search: Optional[str] = None,
     db: Session = Depends(database.get_db), 
-    current_user: user_schemas.User = Depends(security.get_current_user)
+    ctx: Access = Depends(require(FINANCE))
 ):
     # In a real app, restrict to students owned by user, but skipping complex join for brevity
-    return payment_crud.get_payments(db, user_id=current_user.id, student_id=student_id, year=year, month=month, skip=skip, limit=limit, search=search)
+    return payment_crud.get_payments(db, user_id=ctx.tenant_id, student_id=student_id, year=year, month=month, skip=skip, limit=limit, search=search)
 
 @router.post("/payments/", response_model=payment_schemas.Payment)
 def create_payment(
     payment: payment_schemas.PaymentCreate, 
     db: Session = Depends(database.get_db), 
-    current_user: user_schemas.User = Depends(security.get_current_user)
+    ctx: Access = Depends(require(FINANCE))
 ):
-    if not student_crud.get_student_for_owner(db, student_id=payment.student_id, owner_id=current_user.id):
+    if not student_crud.get_student_for_owner(db, student_id=payment.student_id, owner_id=ctx.tenant_id):
         raise HTTPException(status_code=404, detail="Student not found")
     return payment_crud.create_payment(db=db, payment=payment)
 
@@ -38,9 +38,9 @@ def update_payment(
     payment_id: int, 
     payment: payment_schemas.PaymentCreate, 
     db: Session = Depends(database.get_db), 
-    current_user: user_schemas.User = Depends(security.get_current_user)
+    ctx: Access = Depends(require(FINANCE))
 ):
-    updated = payment_crud.update_payment(db, payment_id=payment_id, payment_data=payment, owner_id=current_user.id)
+    updated = payment_crud.update_payment(db, payment_id=payment_id, payment_data=payment, owner_id=ctx.tenant_id)
     if not updated:
         raise HTTPException(status_code=404, detail="Payment not found")
     return updated
@@ -50,9 +50,9 @@ def get_payment_stats(
     month: int,
     year: int,
     db: Session = Depends(database.get_db),
-    current_user: user_schemas.User = Depends(security.get_current_user)
+    ctx: Access = Depends(require(FINANCE))
 ):
-    return payment_crud.get_payment_stats(db, user_id=current_user.id, month=month, year=year)
+    return payment_crud.get_payment_stats(db, user_id=ctx.tenant_id, month=month, year=year)
 
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
@@ -65,14 +65,14 @@ def generate_monthly_report(
     month: int,
     year: int,
     db: Session = Depends(database.get_db),
-    current_user: user_schemas.User = Depends(security.get_current_user)
+    ctx: Access = Depends(require(FINANCE))
 ):
     # 1. Get all students (limit 1000 to be safe)
     # We reuse functionality, but ideally we'd have a lighter query for just names/IDs
-    all_students = student_crud.get_students(db, user_id=current_user.id, limit=1000)
+    all_students = student_crud.get_students(db, user_id=ctx.tenant_id, limit=1000)
     
     # 2. Get payments for the month
-    payments = payment_crud.get_payments(db, user_id=current_user.id, year=year, month=month, limit=1000)
+    payments = payment_crud.get_payments(db, user_id=ctx.tenant_id, year=year, month=month, limit=1000)
     
     # 3. Calculate Stats
     total_students = sum(1 for s in all_students if not s.exempt)

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from backend.schemas import users as user_schemas
 from backend.crud import users as user_crud
+from backend.core.access import Access, get_access
 from backend.core import database, security
 
 router = APIRouter()
@@ -24,8 +25,12 @@ def read_users(skip: int = 0, limit: int = 100, search: str = None, db: Session 
     return user_crud.get_users(db, skip=skip, limit=limit, search=search)
 
 @router.get("/users/me", response_model=user_schemas.User)
-async def read_users_me(current_user: user_schemas.User = Depends(security.get_current_user)):
-    return current_user
+async def read_users_me(ctx: Access = Depends(get_access)):
+    user = ctx.user
+    # Atributos não mapeados: só para a resposta (o front decide menus/botões por eles)
+    user.school_name = ctx.school.name if ctx.school else None
+    user.permissions = sorted(ctx.perms)
+    return user
 
 @router.put("/users/me", response_model=user_schemas.User)
 def update_own_profile(user_update: user_schemas.UserSelfUpdate, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):

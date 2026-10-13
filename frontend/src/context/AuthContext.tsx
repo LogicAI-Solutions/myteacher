@@ -1,5 +1,7 @@
 import { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
 import api from '../api';
+import { apiDetail, apiStatus } from '../utils/apiError';
+import { PENDING_INVITE_KEY, clearPendingInvite } from '../utils/invite';
 
 interface User {
     id: number;
@@ -16,7 +18,31 @@ interface User {
     nickname?: string;
     avatar?: string;
     has_password?: boolean;
+    email_verified?: boolean | null;
+    school_id?: number | null;
+    school_role?: 'owner' | 'teacher' | 'secretary' | null;
+    school_name?: string | null;
+    permissions?: string[];
 }
+
+// Permissões efetivas vêm do backend (core/access.py). Conta autônoma recebe todas.
+export type Permission = 'attendance.edit' | 'students.manage' | 'classes.manage' | 'finance' | 'reports.view';
+
+const consumePendingInvite = async () => {
+    let token: string | null = null;
+    try { token = sessionStorage.getItem(PENDING_INVITE_KEY); } catch { return; }
+    if (!token) return;
+    try {
+        await api.post(`/invites/${token}/accept`);
+        clearPendingInvite();
+    } catch (err) {
+        // Mantém o token: a página /convite/:token mostra o motivo (e-mail diferente, limite...)
+        console.warn('Convite pendente não aceito', err);
+    }
+};
+
+const isAccessBlock = (err: unknown) =>
+    apiStatus(err) === 403 && ['TRIAL_EXPIRED', 'SCHOOL_INACTIVE'].includes(apiDetail(err, ''));
 
 interface AuthContextType {
     user: User | null;
@@ -26,6 +52,10 @@ interface AuthContextType {
     refreshUser: () => Promise<void>;
     isLoading: boolean;
     isTrialExpired: boolean;
+    /** Motivo do bloqueio: teste/assinatura própria vencida ou escola sem assinatura. */
+    accessBlock: 'TRIAL_EXPIRED' | 'SCHOOL_INACTIVE' | null;
+    can: (perm: Permission) => boolean;
+    isSchoolOwner: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,12 +63,16 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [isTrialExpired, setIsTrialExpired] = useState(false);
+    const [accessBlock, setAccessBlock] = useState<AuthContextType['accessBlock']>(null);
+    const isTrialExpired = accessBlock !== null;
+    const setIsTrialExpired = (blocked: boolean, err?: unknown) =>
+        setAccessBlock(blocked ? (apiDetail(err, '') === 'SCHOOL_INACTIVE' ? 'SCHOOL_INACTIVE' : 'TRIAL_EXPIRED') : null);
 
     const refreshUser = async () => {
         const token = localStorage.getItem('token');
         if (token) {
             try {
+                await consumePendingInvite();
                 const res = await api.get('/users/me');
                 setUser(res.data);
                 if (res.data.trial_expired) {
@@ -47,8 +81,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     setIsTrialExpired(false);
                 }
             } catch (err: any) {
-                if (err.response?.status === 403 && err.response?.data?.detail === 'TRIAL_EXPIRED') {
-                    setIsTrialExpired(true);
+                if (isAccessBlock(err)) {
+                    setIsTrialExpired(true, err);
                 } else {
                     localStorage.removeItem('token');
                 }
@@ -86,16 +120,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             // Fetch user immediately
             try {
+                await consumePendingInvite();
                 const userRes = await api.get('/users/me');
                 setUser(userRes.data);
                 setIsTrialExpired(false);
             } catch (err: any) {
                 // Conta válida mas sem acesso (teste vencido ou assinatura cancelada):
                 // MANTÉM o token — o paywall precisa dele para abrir o checkout e reassinar.
-                if (err.response?.status === 403 && err.response?.data?.detail === 'TRIAL_EXPIRED') {
-                    setIsTrialExpired(true);
+                if (isAccessBlock(err)) {
+                    setIsTrialExpired(true, err);
                     setUser(null);
-                    return;
+                    throw err;
                 }
                 console.error("Failed to fetch user profile after login", err);
                 logout();
@@ -117,8 +152,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(prev => prev ? { ...prev, ...userData } : null);
     };
 
+    const can = (perm: Permission) => !!user?.permissions?.includes(perm);
+    const isSchoolOwner = user?.school_role === 'owner';
+
     return (
-        <AuthContext.Provider value={{ user, login, logout, updateUser, refreshUser, isLoading, isTrialExpired }}>
+        <AuthContext.Provider value={{ user, login, logout, updateUser, refreshUser, isLoading, isTrialExpired, accessBlock, can, isSchoolOwner }}>
             {children}
         </AuthContext.Provider>
     );

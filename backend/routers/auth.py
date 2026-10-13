@@ -2,7 +2,7 @@ import secrets
 import urllib.parse
 from typing import Optional
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, status
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import or_
@@ -15,12 +15,16 @@ from backend.models.users import User
 from backend.core import database, security
 from backend.core.config import settings
 from backend.core.logger import logger
+from backend.core import email as email_service
+import hashlib
+from datetime import datetime
+from pydantic import BaseModel, EmailStr, Field
 
 router = APIRouter()
 
 
 @router.post("/register", response_model=users_schemas.User, status_code=status.HTTP_201_CREATED)
-def register(payload: users_schemas.UserRegister, db: Session = Depends(database.get_db)):
+def register(payload: users_schemas.UserRegister, background: BackgroundTasks, db: Session = Depends(database.get_db)):
     """Cadastro público: cria a conta com Nome, Sobrenome, E-mail e Senha."""
     email_clean = payload.email.strip().lower()
     
@@ -33,7 +37,7 @@ def register(payload: users_schemas.UserRegister, db: Session = Depends(database
 
     full_name = f"{payload.first_name.strip()} {payload.last_name.strip()}".strip()
 
-    return users_crud.create_user(
+    user = users_crud.create_user(
         db=db,
         user=users_schemas.UserCreate(
             email=email_clean,
@@ -44,6 +48,11 @@ def register(payload: users_schemas.UserRegister, db: Session = Depends(database
             auth_provider="local",
         ),
     )
+    user.email_verified = False
+    db.commit()
+    db.refresh(user)
+    background.add_task(email_service.send_verification_email, user.email, _verification_url(user))
+    return user
 
 
 @router.post("/token", response_model=auth_schemas.Token)
@@ -259,6 +268,9 @@ async def google_callback(
             user.google_access_token = access_token_google
             if refresh_token_google:
                 user.google_refresh_token = refresh_token_google
+            if google_profile.get("verified_email", False):
+                user.email_verified = True
+                user.email_verified_at = datetime.utcnow()
             db.commit()
             db.refresh(user)
         else:
@@ -267,6 +279,10 @@ async def google_callback(
                 user.google_id = google_id
             if not user.avatar and picture:
                 user.avatar = picture
+            # Login com Google de e-mail verificado comprova a posse do e-mail
+            if google_profile.get("verified_email", False) and not user.email_verified:
+                user.email_verified = True
+                user.email_verified_at = datetime.utcnow()
             user.google_access_token = access_token_google
             if refresh_token_google:
                 user.google_refresh_token = refresh_token_google
@@ -296,3 +312,80 @@ async def google_callback(
         logger.error(f"Exception during Google OAuth callback: {e}", exc_info=True)
         return RedirectResponse(url=f"{frontend_url}/login?error=oauth_failed")
 
+
+
+# ---- Confirmação de e-mail e recuperação de senha --------------------------------
+# Tokens assinados (JWT com "purpose", sem "sub": não servem como token de acesso).
+
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: str = Field(min_length=8, max_length=128)
+
+
+def _verification_url(user: User) -> str:
+    token = _sign({"purpose": "verify_email", "email": user.email}, settings.EMAIL_VERIFY_HOURS * 60)
+    return f"{_get_frontend_url()}/confirmar-email?token={token}"
+
+
+def _password_fingerprint(user: User) -> str:
+    # Muda quando a senha muda: o link de redefinição vale uma vez só.
+    return hashlib.sha256((user.hashed_password or f"sem-senha:{user.id}").encode()).hexdigest()[:16]
+
+
+@router.post("/auth/verify-email")
+def verify_email(payload: VerifyEmailRequest, db: Session = Depends(database.get_db)):
+    data = _unsign(payload.token, "verify_email")
+    user = users_crud.get_user_by_email(db, email=data["email"]) if data else None
+    if not user:
+        raise HTTPException(status_code=400, detail="Link de confirmação inválido ou expirado.")
+    if not user.email_verified:
+        user.email_verified = True
+        user.email_verified_at = datetime.utcnow()
+        db.commit()
+    return {"detail": "E-mail confirmado.", "email": user.email}
+
+
+@router.post("/auth/resend-verification")
+def resend_verification(background: BackgroundTasks, user: User = Depends(security.get_user_from_token)):
+    if user.email_verified is not False:
+        return {"detail": "E-mail já confirmado."}
+    background.add_task(email_service.send_verification_email, user.email, _verification_url(user))
+    return {"detail": "Enviamos um novo link de confirmação."}
+
+
+@router.post("/auth/forgot-password")
+def forgot_password(payload: ForgotPasswordRequest, background: BackgroundTasks, db: Session = Depends(database.get_db)):
+    # Resposta igual exista ou não a conta: não revela quais e-mails estão cadastrados.
+    user = users_crud.get_user_by_email(db, email=payload.email.strip().lower())
+    if user:
+        token = _sign(
+            {"purpose": "reset_password", "email": user.email, "fp": _password_fingerprint(user)},
+            settings.PASSWORD_RESET_MINUTES,
+        )
+        background.add_task(
+            email_service.send_password_reset_email, user.email, f"{_get_frontend_url()}/redefinir-senha?token={token}"
+        )
+    return {"detail": "Se houver uma conta com este e-mail, enviamos um link para redefinir a senha."}
+
+
+@router.post("/auth/reset-password")
+def reset_password(payload: ResetPasswordRequest, db: Session = Depends(database.get_db)):
+    data = _unsign(payload.token, "reset_password")
+    user = users_crud.get_user_by_email(db, email=data["email"]) if data else None
+    if not user or data.get("fp") != _password_fingerprint(user):
+        raise HTTPException(status_code=400, detail="Link inválido, expirado ou já usado. Peça um novo.")
+    users_crud.update_user_password(db, user_id=user.id, password=payload.password)
+    # Quem recebeu o link no e-mail comprovou a posse dele
+    if not user.email_verified:
+        user.email_verified = True
+        user.email_verified_at = datetime.utcnow()
+    db.commit()
+    return {"detail": "Senha redefinida. Entre com a nova senha."}

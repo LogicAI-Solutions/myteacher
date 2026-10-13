@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from backend.core.database import Base
-from backend.models import users, students, payments, classes, enrollments, attendance, calendar, config, plans  # noqa: F401  (registra tabelas)
+from backend.models import users, students, payments, classes, enrollments, attendance, calendar, config, plans, schools  # noqa: F401  (registra tabelas)
 from backend.models.users import User
 from backend.models.students import Student
 from backend.models.payments import Payment

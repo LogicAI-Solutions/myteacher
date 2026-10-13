@@ -56,7 +56,7 @@ def init_db(db: Session):
                 {"text": "Alunos ilimitados", "included": True},
                 {"text": "Gestão financeira completa", "included": True},
                 {"text": "Controle de presenças e notas", "included": True},
-                {"text": "Dashboard do aluno", "included": True},
+                {"text": "Relatórios em Word", "included": True},
                 {"text": "Turmas ilimitadas", "included": False},
             ],
         },
@@ -76,8 +76,27 @@ def init_db(db: Session):
                 {"text": "Alunos ilimitados", "included": True},
                 {"text": "Gestão financeira completa", "included": True},
                 {"text": "Controle de presenças e notas", "included": True},
-                {"text": "Dashboard do aluno", "included": True},
+                {"text": "Relatórios em Word", "included": True},
                 {"text": "Suporte prioritário", "included": True},
+            ],
+        },
+        {
+            "name": "Escola",
+            "description": "Para escolas e cursos: diretor, professores e secretaria na mesma conta.",
+            "price": "Sob consulta",
+            "period": "/mês",
+            "stripe_price_id": os.getenv("STRIPE_PRICE_ESCOLA"),
+            "role": "school",
+            "max_classes": 9999,
+            "max_teachers": 10,
+            "popular": False,
+            "button_text": "Falar com consultor",
+            "features": [
+                {"text": "Até 10 professores", "included": True},
+                {"text": "Secretaria com permissões configuráveis", "included": True},
+                {"text": "Chamadas de todas as turmas", "included": True},
+                {"text": "Financeiro centralizado", "included": True},
+                {"text": "Turmas e alunos ilimitados", "included": True},
             ],
         },
     ]:
@@ -88,7 +107,7 @@ def init_db(db: Session):
             setattr(db_plan, key, value)
         db.add(db_plan)
     db.commit()
-    print("Stripe plans (Essencial/Profissional) synced")
+    print("Stripe plans (Essencial/Profissional/Escola) synced")
 
     # Seed config
     from backend.models.config import AppConfig as AppConfigModel

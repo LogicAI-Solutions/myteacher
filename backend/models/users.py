@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, Date, DateTime
+from sqlalchemy import Boolean, Column, Integer, String, Date, DateTime, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from backend.core.database import Base
 
@@ -11,11 +11,17 @@ class User(Base):
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
     is_trial = Column(Boolean, default=False)
+    # NULL = conta anterior à confirmação de e-mail (tratada como confirmada); False = pendente
+    email_verified = Column(Boolean, nullable=True)
+    email_verified_at = Column(DateTime, nullable=True)
     trial_started_at = Column(DateTime, nullable=True)
     
     # Role and Plan Logic
     role = Column(String, default="autonomous_teacher")
-    school_id = Column(Integer, nullable=True)
+    school_id = Column(Integer, ForeignKey("schools.id"), nullable=True, index=True)
+    # Papel na escola: "owner" (diretor) | "teacher" | "secretary"; NULL = professor autônomo
+    school_role = Column(String, nullable=True)
+    school_permissions = Column(JSON, nullable=True)  # lista de permissões (ver core/access.py)
     stripe_customer_id = Column(String, nullable=True)
     stripe_subscription_id = Column(String, nullable=True)
     plan_id = Column(String, nullable=True)
@@ -30,7 +36,7 @@ class User(Base):
     google_access_token = Column(String, nullable=True)
     google_refresh_token = Column(String, nullable=True)
 
-    owned_classes = relationship("Class", back_populates="owner")
+    owned_classes = relationship("Class", back_populates="owner", foreign_keys="Class.owner_id")
     students = relationship("Student", back_populates="owner")
     calendar_events = relationship("CalendarEvent", back_populates="user", cascade="all, delete-orphan")
 

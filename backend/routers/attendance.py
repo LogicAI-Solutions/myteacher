@@ -3,11 +3,11 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from docx import Document
 import io
-from backend.schemas import users as user_schemas
 from backend.crud import attendance as attendance_crud
 from backend.crud import classes as class_crud
 from backend.crud import students as student_crud
-from backend.core import database, security
+from backend.core import database
+from backend.core.access import Access, get_access, ATTENDANCE_EDIT, REPORTS_VIEW
 
 from backend.schemas import attendance as attendance_schemas
 
@@ -19,14 +19,15 @@ def update_attendance_session(
     session_id: int, 
     session: attendance_schemas.AttendanceSessionCreate, 
     db: Session = Depends(database.get_db), 
-    current_user: user_schemas.User = Depends(security.get_current_user)
+    ctx: Access = Depends(get_access)
 ):
-    if not class_crud.get_class_for_owner(db, class_id=class_id, owner_id=current_user.id):
+    if not class_crud.get_class_for_owner(db, class_id=class_id, owner_id=ctx.tenant_id, teacher_id=ctx.teacher_scope):
         raise HTTPException(status_code=404, detail="Class not found")
-    if not student_crud.owns_all_students(db, [log.student_id for log in session.logs], current_user.id):
+    ctx.require(ATTENDANCE_EDIT)
+    if not student_crud.owns_all_students(db, [log.student_id for log in session.logs], ctx.tenant_id):
         raise HTTPException(status_code=404, detail="Student not found")
 
-    updated_session = attendance_crud.update_attendance_session(db, session_id=session_id, session_data=session, class_id=class_id)
+    updated_session = attendance_crud.update_attendance_session(db, session_id=session_id, session_data=session, class_id=class_id, user_id=ctx.user.id)
     if not updated_session:
         raise HTTPException(status_code=404, detail="Session not found")
     return updated_session
@@ -36,10 +37,11 @@ def delete_attendance_session(
     class_id: int, 
     session_id: int, 
     db: Session = Depends(database.get_db), 
-    current_user: user_schemas.User = Depends(security.get_current_user)
+    ctx: Access = Depends(get_access)
 ):
-    if not class_crud.get_class_for_owner(db, class_id=class_id, owner_id=current_user.id):
+    if not class_crud.get_class_for_owner(db, class_id=class_id, owner_id=ctx.tenant_id, teacher_id=ctx.teacher_scope):
         raise HTTPException(status_code=404, detail="Class not found")
+    ctx.require(ATTENDANCE_EDIT)
 
     deleted_session = attendance_crud.delete_attendance_session(db, session_id=session_id, class_id=class_id)
     if not deleted_session:
@@ -47,23 +49,24 @@ def delete_attendance_session(
     return {"message": "Session deleted successfully"}
 
 @router.get("/attendance-sessions/{session_id}")
-def read_attendance_session(session_id: int, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
+def read_attendance_session(session_id: int, db: Session = Depends(database.get_db), ctx: Access = Depends(get_access)):
     session = attendance_crud.get_attendance_session(db, session_id=session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
-    if not class_crud.get_class_for_owner(db, class_id=session.class_id, owner_id=current_user.id):
+    if not class_crud.get_class_for_owner(db, class_id=session.class_id, owner_id=ctx.tenant_id, teacher_id=ctx.teacher_scope):
         raise HTTPException(status_code=404, detail="Session not found")
     return session
 
 @router.get("/attendance-sessions/{session_id}/report/docx")
-def generate_session_report(session_id: int, db: Session = Depends(database.get_db), current_user: user_schemas.User = Depends(security.get_current_user)):
+def generate_session_report(session_id: int, db: Session = Depends(database.get_db), ctx: Access = Depends(get_access)):
     session = attendance_crud.get_attendance_session(db, session_id=session_id)
     if not session:
         raise HTTPException(status_code=404, detail="Session not found")
     
-    db_class = class_crud.get_class_for_owner(db, class_id=session.class_id, owner_id=current_user.id)
+    db_class = class_crud.get_class_for_owner(db, class_id=session.class_id, owner_id=ctx.tenant_id, teacher_id=ctx.teacher_scope)
     if not db_class:
         raise HTTPException(status_code=404, detail="Session not found")
+    ctx.require(REPORTS_VIEW)
 
     document = Document()
     document.add_heading(f'Relatório de Aula', 0)

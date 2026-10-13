@@ -1,10 +1,17 @@
 from sqlalchemy.orm import Session
 from backend.models.classes import Class
 from backend.schemas.classes import ClassCreate, ClassReorder
-from typing import List
+from typing import List, Optional
 
-def get_classes(db: Session, user_id: int, skip: int = 0, limit: int = 100):
-    return db.query(Class).filter(Class.owner_id == user_id).order_by(Class.display_order, Class.id).offset(skip).limit(limit).all()
+def scoped_classes(db: Session, owner_id: int, teacher_id: Optional[int] = None):
+    """Turmas visíveis: todas do tenant, ou só as do professor quando teacher_id é dado."""
+    query = db.query(Class).filter(Class.owner_id == owner_id)
+    if teacher_id is not None:
+        query = query.filter(Class.teacher_id == teacher_id)
+    return query
+
+def get_classes(db: Session, user_id: int, skip: int = 0, limit: int = 100, teacher_id: Optional[int] = None):
+    return scoped_classes(db, user_id, teacher_id).order_by(Class.display_order, Class.id).offset(skip).limit(limit).all()
 
 def reorder_classes(db: Session, user_id: int, order_data: List[ClassReorder]):
     """Update the display_order for multiple classes"""
@@ -16,16 +23,7 @@ def reorder_classes(db: Session, user_id: int, order_data: List[ClassReorder]):
     return get_classes(db, user_id)
 
 def create_class(db: Session, class_: ClassCreate, user_id: int):
-    # **class_.dict() is deprecated in Pydantic v2, using class_.model_dump() is better or strict dict()
-    # Keeping dict() for compatibility if v1, but instructions said v2 typically.
-    # User didn't specify pydantic version but standardizing.
-    # requirements.txt has `pydantic`. Assuming v2 if installed consistently.
-    # Using `model_dump()` would be safer for v2, but strictly `dict()` usually works in v2 migration layer.
-    # I'll use `model_dump` if possible, but let's stick to what was there or `dict()` if unsure.
-    # Original code used `dict()`. I'll use `model_dump()` as it's cleaner for v2, but `dict()` is fine.
-    # Let's use `model_dump()` to be modern.
-    # Using .dict() for compatibility with Pydantic v1 and v2
-    db_class = Class(**class_.dict(), owner_id=user_id)
+    db_class = Class(**class_.model_dump(), owner_id=user_id)
     db.add(db_class)
     db.commit()
     db.refresh(db_class)
@@ -34,15 +32,18 @@ def create_class(db: Session, class_: ClassCreate, user_id: int):
 def get_class(db: Session, class_id: int):
     return db.query(Class).filter(Class.id == class_id).first()
 
-def get_class_for_owner(db: Session, class_id: int, owner_id: int):
-    """None quando a turma não existe ou é de outro professor — o router responde 404 nos dois casos."""
-    return db.query(Class).filter(Class.id == class_id, Class.owner_id == owner_id).first()
+def get_class_for_owner(db: Session, class_id: int, owner_id: int, teacher_id: Optional[int] = None):
+    """None quando a turma não existe, é de outro tenant ou de outro professor da escola —
+    o router responde 404 em todos os casos."""
+    return scoped_classes(db, owner_id, teacher_id).filter(Class.id == class_id).first()
 
 def update_class(db: Session, class_id: int, class_data: ClassCreate):
     db_class = db.query(Class).filter(Class.id == class_id).first()
     if db_class:
         db_class.name = class_data.name
         db_class.schedule = class_data.schedule
+        if "teacher_id" in class_data.model_fields_set:
+            db_class.teacher_id = class_data.teacher_id
         db.commit()
         db.refresh(db_class)
     return db_class

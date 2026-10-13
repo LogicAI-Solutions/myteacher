@@ -15,6 +15,7 @@ def _user(days_ago, is_trial=True):
     return dict(
         id=1, email="t@t.com", is_active=True, is_admin=False, is_trial=is_trial,
         trial_started_at=datetime.utcnow() - timedelta(days=days_ago),
+        school_id=None, school_role=None,
     )
 
 
@@ -47,12 +48,12 @@ def test_rotas_protegidas_bloqueiam_assinatura_cancelada():
     """Assinante que cancelou (is_active=False, sem trial) não pode mais usar nada.
     Mesmo sinal do trial vencido: o front redireciona pro paywall."""
     cancelado = _Obj(id=1, email="c@c.com", is_active=False, is_admin=False,
-                     is_trial=False, trial_started_at=None)
+                     is_trial=False, trial_started_at=None, school_id=None, school_role=None)
     with pytest.raises(HTTPException) as e:
         asyncio.run(get_current_user(cancelado))
     assert e.value.status_code == 403 and e.value.detail == "TRIAL_EXPIRED"
 
     # Assinante ativo passa livre.
     ativo = _Obj(id=2, email="a@a.com", is_active=True, is_admin=False,
-                 is_trial=False, trial_started_at=None)
+                 is_trial=False, trial_started_at=None, school_id=None, school_role=None)
     asyncio.run(get_current_user(ativo))  # não levanta

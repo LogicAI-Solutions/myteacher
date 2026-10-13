@@ -15,6 +15,11 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 120
     TRIAL_DAYS: int = 14
 
+    # Escola
+    SCHOOL_TRIAL_MAX_TEACHERS: int = 2  # professores que o diretor pode convidar durante o teste grátis
+    SCHOOL_MAX_SECRETARIES: int = 3     # secretaria não conta no limite de professores do plano
+    SCHOOL_INVITE_DAYS: int = 7
+
     # URLs e Portas
     FRONTEND_URL: Optional[str] = None
     PORT_BACKEND: Optional[int] = 8501
@@ -39,6 +44,17 @@ class Settings(BaseSettings):
     STRIPE_PRICE_ID: Optional[str] = None
     STRIPE_PRICE_ESSENCIAL: Optional[str] = None
     STRIPE_PRICE_PROFISSIONAL: Optional[str] = None
+    STRIPE_PRICE_ESCOLA: Optional[str] = None
+
+    # E-mail (SMTP). Sem SMTP_HOST, os e-mails vão para o log (desenvolvimento).
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    SMTP_FROM: Optional[str] = None  # ex.: "MyTeacherApp <nao-responda@myteacherapp.com.br>"
+    SMTP_STARTTLS: bool = True
+    EMAIL_VERIFY_HOURS: int = 48
+    PASSWORD_RESET_MINUTES: int = 60
 
     @property
     def is_production(self) -> bool:

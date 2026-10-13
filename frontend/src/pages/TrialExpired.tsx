@@ -12,7 +12,49 @@ const UNLIMITED_CLASSES = 9999;
 
 type Status = 'loading' | 'ready' | 'error';
 
+// Membro de escola sem acesso (escola sem assinatura ou membro suspenso):
+// não há o que assinar aqui, quem resolve é a direção.
+const SchoolInactive = () => {
+    const navigate = useNavigate();
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-bg-dark text-text-main p-6">
+            <div className="w-full max-w-lg animate-fade-in">
+                <div className="sheet sheet-p">
+                    <div className="flex items-center gap-3">
+                        <Lock size={20} className="text-danger shrink-0" aria-hidden="true" />
+                        <span className="stamp stamp-late">Acesso suspenso</span>
+                    </div>
+                    <h1 className="mt-5 text-2xl md:text-3xl font-bold text-text-main">Seu acesso pela escola está pausado</h1>
+                    <p className="mt-3 text-text-muted leading-relaxed">
+                        A assinatura da escola está inativa ou a direção suspendeu sua conta.
+                        Os dados continuam salvos. Fale com a direção da escola para liberar o acesso.
+                    </p>
+                    <div className="mt-6 pt-5 rule-t flex justify-end">
+                        <button
+                            onClick={() => {
+                                localStorage.removeItem('token');
+                                navigate('/login');
+                            }}
+                            className="btn btn-ghost"
+                        >
+                            <ArrowLeft size={15} />
+                            Voltar ao login
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export const TrialExpired = () => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('escola') === '1') return <SchoolInactive />;
+    // upgrade=1: ainda em teste grátis, escolhendo o plano antes de acabar
+    return <PlanPaywall upgrade={params.get('upgrade') === '1'} />;
+};
+
+const PlanPaywall = ({ upgrade = false }: { upgrade?: boolean }) => {
     const navigate = useNavigate();
     const [plans, setPlans] = useState<Plan[]>([]);
     const [status, setStatus] = useState<Status>('loading');
@@ -62,16 +104,17 @@ export const TrialExpired = () => {
                 <div className="sheet sheet-p">
                     <div className="flex items-center gap-3">
                         <Lock size={20} className="text-danger shrink-0" aria-hidden="true" />
-                        <span className="stamp stamp-late">Acesso encerrado</span>
+                        <span className={`stamp ${upgrade ? 'stamp-pending' : 'stamp-late'}`}>{upgrade ? 'Teste grátis' : 'Acesso encerrado'}</span>
                     </div>
 
                     <h1 className="mt-5 text-2xl md:text-3xl font-bold text-text-main">
-                        Seu teste de 14 dias acabou
+                        {upgrade ? 'Escolha seu plano' : 'Seu teste de 14 dias acabou'}
                     </h1>
 
                     <p className="mt-3 text-text-muted leading-relaxed">
-                        Seus dados continuam salvos. Escolha um plano para voltar a usar o sistema,
-                        ou fale com a gente se tiver alguma dúvida.
+                        {upgrade
+                            ? 'Assine agora e continue sem interrupção quando o teste acabar. Seus dados ficam como estão.'
+                            : 'Seus dados continuam salvos. Escolha um plano para voltar a usar o sistema, ou fale com a gente se tiver alguma dúvida.'}
                     </p>
 
                     {/* Planos */}
@@ -153,16 +196,23 @@ export const TrialExpired = () => {
                             Tirar uma dúvida no WhatsApp
                         </a>
 
-                        <button
-                            onClick={() => {
-                                localStorage.removeItem('token');
-                                navigate('/login');
-                            }}
-                            className="btn btn-ghost"
-                        >
-                            <ArrowLeft size={15} />
-                            Voltar ao login
-                        </button>
+                        {upgrade ? (
+                            <button onClick={() => navigate('/dashboard')} className="btn btn-ghost">
+                                <ArrowLeft size={15} />
+                                Voltar ao painel
+                            </button>
+                        ) : (
+                            <button
+                                onClick={() => {
+                                    localStorage.removeItem('token');
+                                    navigate('/login');
+                                }}
+                                className="btn btn-ghost"
+                            >
+                                <ArrowLeft size={15} />
+                                Voltar ao login
+                            </button>
+                        )}
                     </div>
                 </div>
 

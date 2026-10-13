@@ -59,7 +59,24 @@ async def get_user_from_token(token: str = Depends(oauth2_scheme), db: Session =
     return user
 
 
-async def get_current_user(user = Depends(get_user_from_token)):
+def _has_paid_access(user) -> bool:
+    if not user.is_active:
+        return False
+    if user.is_trial and user.trial_started_at:
+        return (datetime.utcnow() - user.trial_started_at).days < settings.TRIAL_DAYS
+    return True
+
+
+async def get_current_user(user = Depends(get_user_from_token), db: Session = Depends(database.get_db)):
+    # Membro de escola (professor/secretaria) não tem assinatura própria: o acesso
+    # depende da assinatura do diretor e do próprio is_active (diretor suspende membro).
+    if user.school_id and user.school_role in ("teacher", "secretary"):
+        from backend.models.schools import School
+        school = db.query(School).filter(School.id == user.school_id).first()
+        if not user.is_active or not school or not _has_paid_access(school.owner):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="SCHOOL_INACTIVE")
+        return user
+
     # Portão de acesso das rotas de feature: bloqueia quem não tem direito de uso.
     # Dois motivos levam à mesma tela de "assine um plano" (front redireciona no 403
     # TRIAL_EXPIRED): teste grátis vencido, ou assinatura inativa/cancelada.

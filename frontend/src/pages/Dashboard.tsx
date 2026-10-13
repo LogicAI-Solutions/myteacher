@@ -33,7 +33,8 @@ interface DashboardStats {
         inactive: number;
         total: number;
     };
-    payments: {
+    // null quando a pessoa não tem acesso ao financeiro (professor de escola)
+    payments: null | {
         current_month: number;
         current_year: number;
         paid: number;
@@ -280,10 +281,13 @@ export const Dashboard = () => {
 
     if (!stats) return null;
 
-    const isFirstTime = !hideTutorial;
+    // Membro de escola não monta a operação (turmas/alunos vêm da direção): sem passo a passo
+    const isFirstTime = !hideTutorial && (!user?.school_role || user.school_role === 'owner');
     const firstName = user?.full_name?.split(' ')[0] || 'Professor(a)';
-    const monthName = MONTHS[stats.payments.current_month - 1] ?? '';
-    const { paid, pending, total_expected } = stats.payments;
+    const payments = stats.payments;
+    const monthName = MONTHS[(payments?.current_month ?? new Date().getMonth() + 1) - 1] ?? '';
+    const currentYear = payments?.current_year ?? new Date().getFullYear();
+    const { paid, pending, total_expected } = payments ?? { paid: 0, pending: 0, total_expected: 0 };
     const settled = total_expected > 0 && pending === 0;
 
     const formattedTodayDate = new Date().toLocaleDateString('pt-BR', {
@@ -300,7 +304,7 @@ export const Dashboard = () => {
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-bold text-text-main">Olá, {firstName}</h1>
                     <p className="text-text-muted mt-1.5 capitalize">
-                        {formattedTodayDate} • Situação de {monthName} de {stats.payments.current_year}.
+                        {formattedTodayDate} • Situação de {monthName} de {currentYear}.
                     </p>
                 </div>
                 {hideTutorial && (
@@ -557,6 +561,7 @@ export const Dashboard = () => {
 
             {/* O fechamento do mês: a pergunta que o professor abre o sistema
                 para responder, respondida antes de qualquer clique. */}
+            {payments && (
             <section className="sheet sheet-p">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                     <h2 className="text-lg font-semibold text-text-main">Fechamento de {monthName}</h2>
@@ -565,18 +570,18 @@ export const Dashboard = () => {
                     </Link>
                 </div>
 
-                {stats.payments.overdue_count > 0 && (
+                {payments.overdue_count > 0 && (
                     <div className="mt-4 rounded-[2px] border p-3" style={{ borderColor: 'var(--margin-red)', background: 'color-mix(in srgb, var(--margin-red) 7%, transparent)' }}>
                         <div className="flex flex-wrap items-center justify-between gap-2">
                             <span className="stamp stamp-late">
-                                {stats.payments.overdue_count} em atraso
+                                {payments.overdue_count} em atraso
                             </span>
                             <span className="text-sm font-semibold text-text-main tabular">
-                                {formatCurrency(stats.payments.overdue_amount)} a receber
+                                {formatCurrency(payments.overdue_amount)} a receber
                             </span>
                         </div>
                         <ul className="mt-3 divide-y list-none p-0 m-0" style={{ borderColor: 'var(--rule)' }}>
-                            {stats.payments.overdue_items.map(item => (
+                            {payments.overdue_items.map(item => (
                                 <li key={item.payment_id} className="flex items-center justify-between gap-3 py-1.5 text-sm">
                                     <span className="min-w-0 truncate font-medium text-text-main">{item.student_name}</span>
                                     <span className="shrink-0 text-text-muted tabular">
@@ -585,9 +590,9 @@ export const Dashboard = () => {
                                 </li>
                             ))}
                         </ul>
-                        {stats.payments.overdue_count > stats.payments.overdue_items.length && (
+                        {payments.overdue_count > payments.overdue_items.length && (
                             <p className="mt-2 text-xs text-text-muted">
-                                e mais {stats.payments.overdue_count - stats.payments.overdue_items.length}. Veja todas no financeiro.
+                                e mais {payments.overdue_count - payments.overdue_items.length}. Veja todas no financeiro.
                             </p>
                         )}
                     </div>
@@ -618,6 +623,7 @@ export const Dashboard = () => {
                     </>
                 )}
             </section>
+            )}
 
             {/* Os números do registro num quadro dividido por fios, não em
                 quatro cartões flutuando. */}

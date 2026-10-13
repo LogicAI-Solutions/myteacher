@@ -1,8 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from backend.core.database import get_db
-from backend.core.security import get_current_user
-from backend.models.users import User
+from backend.core.access import Access, get_access, FINANCE
 from backend.crud import dashboard as dashboard_crud
 
 router = APIRouter(
@@ -14,7 +13,8 @@ router = APIRouter(
 @router.get("/stats")
 def get_dashboard_stats(
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    ctx: Access = Depends(get_access)
 ):
-    stats = dashboard_crud.get_dashboard_stats(db, current_user.id)
-    return stats
+    return dashboard_crud.get_dashboard_stats(
+        db, ctx.tenant_id, teacher_id=ctx.teacher_scope, include_finance=ctx.can(FINANCE)
+    )

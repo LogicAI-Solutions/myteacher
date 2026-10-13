@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import api from '../api';
 import { Plus, Calendar, Pencil, Trash, X, AlertTriangle, GripVertical, ArrowUpDown, BookOpen, Users, Clock, Video, Sparkles, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { Loading } from '../components/Loading';
 import { Toast, type ToastType } from '../components/Toast';
 import {
@@ -29,7 +30,25 @@ interface ClassModel {
     display_order?: number;
     student_count?: number;
     session_count?: number;
+    teacher_id?: number | null;
+    teacher_name?: string | null;
 }
+
+interface TeacherOption {
+    id: number;
+    name: string;
+}
+
+// Escola: quem gerencia turmas escolhe o professor responsável (ele passa a ver só as turmas dele).
+const TeacherSelect = ({ value, onChange, teachers }: { value: string; onChange: (v: string) => void; teachers: TeacherOption[] }) => (
+    <div className="space-y-1">
+        <label className="label font-semibold text-xs text-text-main">Professor responsável</label>
+        <select className="input text-sm" value={value} onChange={e => onChange(e.target.value)}>
+            <option value="">Sem professor (só direção e secretaria veem)</option>
+            {teachers.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+        </select>
+    </div>
+);
 
 interface SortableClassCardProps {
     cls: ClassModel;
@@ -38,6 +57,8 @@ interface SortableClassCardProps {
     allClasses: ClassModel[];
     openEditModal: (e: React.MouseEvent, cls: ClassModel) => void;
     openDeleteModal: (e: React.MouseEvent, cls: ClassModel) => void;
+    canManage: boolean;
+    showTeacher: boolean;
 }
 
 const cardAccents = [
@@ -245,7 +266,7 @@ const findScheduleConflicts = (
     return conflicts;
 };
 
-const SortableClassCard = ({ cls, index, isReorderMode, allClasses, openEditModal, openDeleteModal }: SortableClassCardProps) => {
+const SortableClassCard = ({ cls, index, isReorderMode, allClasses, openEditModal, openDeleteModal, canManage, showTeacher }: SortableClassCardProps) => {
     const {
         attributes,
         listeners,
@@ -289,7 +310,7 @@ const SortableClassCard = ({ cls, index, isReorderMode, allClasses, openEditModa
                             <BookOpen size={22} className={accent.text} />
                         </div>
                     </div>
-                    {!isReorderMode && (
+                    {!isReorderMode && canManage && (
                         <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
                             <button onClick={(e) => openEditModal(e, cls)} className="bg-[var(--wash-1)] p-2 rounded-[2px] hover:bg-primary/20 text-text-muted hover:text-primary transition-all duration-200 border border-border hover:border-primary/30">
                                 <Pencil size={15} />
@@ -308,6 +329,14 @@ const SortableClassCard = ({ cls, index, isReorderMode, allClasses, openEditModa
                 <p className="text-text-muted text-sm flex items-center gap-1.5 mb-2">
                     <Clock size={13} className="text-text-muted/60" /> {cls.schedule}
                 </p>
+
+                {showTeacher && (
+                    <p className="text-sm mb-2">
+                        {cls.teacher_name
+                            ? <span className="text-text-muted">Prof. {cls.teacher_name}</span>
+                            : <span className="stamp stamp-pending">Sem professor</span>}
+                    </p>
+                )}
 
                 {cardConflicts.length > 0 && (
                     <div className="mb-3 px-2 py-1 rounded-[2px] bg-amber-500/10 border border-amber-500/25 text-[var(--ochre)] text-[11px] flex items-center gap-1.5 font-medium">
@@ -355,9 +384,14 @@ const SortableClassCard = ({ cls, index, isReorderMode, allClasses, openEditModa
 };
 
 export const Classes = () => {
+    const { user, can } = useAuth();
+    const canManage = can('classes.manage');
+    const isSchool = !!user?.school_id;
+    const [teachers, setTeachers] = useState<TeacherOption[]>([]);
     const [classes, setClasses] = useState<ClassModel[]>([]);
     const [showModal, setShowModal] = useState(false);
-    const [newClass, setNewClass] = useState({ name: '', schedule: '' });
+    const [newClass, setNewClass] = useState({ name: '', schedule: '', teacher_id: '' });
+    const [editTeacherId, setEditTeacherId] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [isReorderMode, setIsReorderMode] = useState(false);
     const [originalClasses, setOriginalClasses] = useState<ClassModel[]>([]);
@@ -412,6 +446,13 @@ export const Classes = () => {
             coordinateGetter: sortableKeyboardCoordinates,
         })
     );
+
+    useEffect(() => {
+        if (!isSchool || !canManage) return;
+        api.get('/schools/members', { params: { role: 'teacher' } })
+            .then(res => setTeachers(res.data))
+            .catch(() => setTeachers([]));
+    }, [isSchool, canManage]);
 
     const fetchClasses = async () => {
         setIsLoading(true);
@@ -537,7 +578,8 @@ export const Classes = () => {
         setAllowCreateConflict(false);
         setNewClass({
             name: '',
-            schedule: formatScheduleFromDays(initialDays, initialStart, initialEnd)
+            schedule: formatScheduleFromDays(initialDays, initialStart, initialEnd),
+            teacher_id: ''
         });
         setAutoScheduleCalendar(true);
         setShowModal(true);
@@ -559,6 +601,7 @@ export const Classes = () => {
             const res = await api.post('/classes/', {
                 name: newClass.name,
                 schedule: scheduleText,
+                ...(isSchool ? { teacher_id: newClass.teacher_id ? Number(newClass.teacher_id) : null } : {}),
             });
 
             const createdClass = res.data;
@@ -587,7 +630,7 @@ export const Classes = () => {
             }
 
             setShowModal(false);
-            setNewClass({ name: '', schedule: '' });
+            setNewClass({ name: '', schedule: '', teacher_id: '' });
             fetchClasses();
         } catch (error: any) {
             const errorMsg = error.response?.data?.detail || 'Erro ao criar turma';
@@ -609,7 +652,11 @@ export const Classes = () => {
                 ? addMinutes(editStartTime, 60)
                 : editEndTime;
 
-            await api.put(`/classes/${editingClass.id}`, { name: editClassName, schedule: editClassSchedule });
+            await api.put(`/classes/${editingClass.id}`, {
+                name: editClassName,
+                schedule: editClassSchedule,
+                ...(isSchool ? { teacher_id: editTeacherId ? Number(editTeacherId) : null } : {}),
+            });
 
             if (editAddToCalendar && editSelectedDays.length > 0) {
                 try {
@@ -656,6 +703,7 @@ export const Classes = () => {
         e.preventDefault(); // Prevent Link navigation
         setEditingClass(cls);
         setEditClassName(cls.name);
+        setEditTeacherId(cls.teacher_id ? String(cls.teacher_id) : '');
         setEditClassSchedule(cls.schedule);
         setAllowEditConflict(false);
 
@@ -741,7 +789,7 @@ export const Classes = () => {
             <div className="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h2 className="text-3xl font-bold text-text-main">
-                        Minhas Turmas
+                        {isSchool && user?.school_role !== 'teacher' ? 'Turmas da escola' : 'Minhas Turmas'}
                     </h2>
                     {!isLoading && classes.length > 0 && (
                         <p className="text-text-muted text-sm mt-1">
@@ -749,7 +797,7 @@ export const Classes = () => {
                         </p>
                     )}
                 </div>
-                {classes.length > 1 && (
+                {classes.length > 1 && canManage && (
                     <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                         {!isReorderMode ? (
                             <button
@@ -816,11 +864,13 @@ export const Classes = () => {
                                         allClasses={classes}
                                         openEditModal={openEditModal}
                                         openDeleteModal={openDeleteModal}
+                                        canManage={canManage}
+                                        showTeacher={isSchool && user?.school_role !== 'teacher'}
                                     />
                                 ))}
 
                                 {/* Add Class Card Button - only show when not in reorder mode */}
-                                {!isReorderMode && (
+                                {!isReorderMode && canManage && (
                                     <button
                                         onClick={openCreateModal}
                                         className="sheet sheet-p flex flex-col items-center justify-center gap-4 group hover:bg-[var(--wash-1)] transition-colors duration-150 border-dashed border-2 border-border hover:border-primary/40 cursor-pointer min-h-[200px] animate-slide-up"
@@ -843,18 +893,19 @@ export const Classes = () => {
                     <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[3px] border border-primary/20 bg-primary/10 text-primary">
                         <BookOpen size={30} />
                     </div>
-                    <h2 className="mb-2 text-xl font-bold text-text-main">Crie sua primeira turma</h2>
+                    <h2 className="mb-2 text-xl font-bold text-text-main">{canManage ? 'Crie sua primeira turma' : 'Nenhuma turma atribuída a você'}</h2>
                     <p className="mb-6 text-sm leading-relaxed text-text-muted">
-                        A turma é o ponto de partida: é nela que você lança presenças, notas e mensalidades.
-                        Configure os dias e horários para agendar tudo automaticamente no seu calendário.
+                        {canManage
+                            ? 'A turma é o ponto de partida: é nela que você lança presenças, notas e mensalidades. Configure os dias e horários para agendar tudo automaticamente no seu calendário.'
+                            : 'Quando a direção definir você como professor responsável de uma turma, ela aparece aqui.'}
                     </p>
-                    <button
+                    {canManage && <button
                         onClick={openCreateModal}
                         className="btn btn-primary inline-flex items-center gap-2 rounded-[2px] px-6 py-3 font-bold focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 cursor-pointer"
                     >
                         <Plus size={18} />
                         Criar turma
-                    </button>
+                    </button>}
                 </div>
             )}
 
@@ -892,6 +943,9 @@ export const Classes = () => {
                                     autoFocus
                                 />
                             </div>
+                            {isSchool && (
+                                <TeacherSelect value={newClass.teacher_id} onChange={v => setNewClass({ ...newClass, teacher_id: v })} teachers={teachers} />
+                            )}
 
                             {/* Seletor de Dias da Semana */}
                             <div className="space-y-1.5">
@@ -1141,6 +1195,9 @@ export const Classes = () => {
                                     required
                                 />
                             </div>
+                            {isSchool && (
+                                <TeacherSelect value={editTeacherId} onChange={setEditTeacherId} teachers={teachers} />
+                            )}
 
                             {/* Seletor de Dias da Semana (Edição) */}
                             <div className="space-y-1.5">

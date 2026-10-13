@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional
-from datetime import date
+from datetime import date, datetime
 
 class AttendanceLogBase(BaseModel):
     student_id: int
@@ -32,5 +32,10 @@ class AttendanceSession(AttendanceSessionBase):
     id: int
     class_id: int
     logs: List[AttendanceLog] = []
+    created_by_id: Optional[int] = None
+    created_by_name: Optional[str] = None
+    updated_by_id: Optional[int] = None
+    updated_by_name: Optional[str] = None
+    updated_at: Optional[datetime] = None
     class Config:
         from_attributes = True

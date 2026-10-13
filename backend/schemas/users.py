@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field, computed_field, field_validator
 from datetime import date, datetime
-from typing import Optional
+from typing import List, Optional
 from backend.core.config import settings
 
 class UserBase(BaseModel):
@@ -69,6 +69,12 @@ class User(UserBase):
     plan_id: Optional[str] = None
     max_classes: Optional[int] = None
     has_password: bool = False
+    email_verified: Optional[bool] = None
+    # Escola (preenchidos em /users/me a partir de core/access.py)
+    school_id: Optional[int] = None
+    school_role: Optional[str] = None
+    school_name: Optional[str] = None
+    permissions: List[str] = []
 
     @computed_field
     @property

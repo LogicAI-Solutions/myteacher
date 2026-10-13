@@ -5,6 +5,7 @@ import { Plus, Save, Calendar, Users, X, FileText, Pencil, Trash2, AlertTriangle
 import { formatPhone, unmaskPhone, formatCurrency, parseCurrency } from '../utils/masks';
 import { Loading } from '../components/Loading';
 import { ManageStudentsModal } from '../components/ManageStudentsModal';
+import { useAuth } from '../context/AuthContext';
 import { Toast } from '../components/Toast';
 
 interface Student {
@@ -29,6 +30,9 @@ interface AttendanceSession {
     date: string;
     description: string;
     lesson_number: number;
+    created_by_name?: string | null;
+    updated_by_name?: string | null;
+    updated_at?: string | null;
 }
 
 interface LogInput {
@@ -76,6 +80,11 @@ interface PaymentInput {
 
 export const ClassDetails = () => {
     const { id } = useParams<{ id: string }>();
+    const { can } = useAuth();
+    const canEditAttendance = can('attendance.edit');
+    const canManageStudents = can('students.manage');
+    const canReports = can('reports.view');
+    const canFinance = can('finance');
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [classData, setClassData] = useState<ClassModel | null>(null);
@@ -85,16 +94,16 @@ export const ClassDetails = () => {
 
     const initialTab = searchParams.get('tab');
     const [activeTab, setActiveTab] = useState<'attendance' | 'students' | 'history' | 'payments'>(
-        initialTab === 'history' || initialTab === 'students' || initialTab === 'payments' ? initialTab : 'attendance'
+        initialTab === 'history' || initialTab === 'students' || (initialTab === 'payments' && canFinance) ? initialTab : 'attendance'
     );
     const [showEnrollModal, setShowEnrollModal] = useState(false);
 
     useEffect(() => {
         const tab = searchParams.get('tab');
-        if (tab === 'history' || tab === 'students' || tab === 'payments' || tab === 'attendance') {
+        if (tab === 'history' || tab === 'students' || (tab === 'payments' && canFinance) || tab === 'attendance') {
             setActiveTab(tab);
         }
-    }, [searchParams]);
+    }, [searchParams, canFinance]);
 
     // Payments Local State
     const [localPayments, setLocalPayments] = useState<Record<number, PaymentInput>>({});
@@ -625,8 +634,8 @@ export const ClassDetails = () => {
                                 <span className="bg-primary/10 text-primary text-xs font-bold px-2.5 py-1 rounded-[2px] border border-primary/20">{students.length}</span>
                             </h2>
                             <div className="flex items-center gap-3">
-                                <button onClick={loadAllStudents} className="btn btn-outline"><Users size={16} /> Gerenciar</button>
-                                <button onClick={() => setShowCreateStudentModal(true)} className="btn btn-primary flex items-center gap-2"><Plus size={16} /> Novo Aluno</button>
+                                {canManageStudents && <button onClick={loadAllStudents} className="btn btn-outline"><Users size={16} /> Gerenciar</button>}
+                                {canManageStudents && <button onClick={() => setShowCreateStudentModal(true)} className="btn btn-primary flex items-center gap-2"><Plus size={16} /> Novo Aluno</button>}
                             </div>
                         </div>
                         <div className="space-y-2">
@@ -647,9 +656,10 @@ export const ClassDetails = () => {
                                         </div>
                                     </div>
                                     <div className="flex gap-1 opacity-40 group-hover:opacity-100 transition-opacity">
-                                        <button onClick={() => handleGenerateReport(s.id)} className="p-2 hover:bg-primary/20 text-text-muted hover:text-primary rounded-[2px] transition-colors" title="Relatório">
+                                        {canReports && <button onClick={() => handleGenerateReport(s.id)} className="p-2 hover:bg-primary/20 text-text-muted hover:text-primary rounded-[2px] transition-colors" title="Relatório">
                                             <FileText size={15} />
-                                        </button>
+                                        </button>}
+                                        {canManageStudents && <>
                                         <button onClick={() => {
                                             setEditingStudent(s);
                                             setEditStudentData({
@@ -665,6 +675,7 @@ export const ClassDetails = () => {
                                         <button onClick={() => setDeletingStudent(s)} className="p-2 hover:bg-danger/20 text-text-muted hover:text-danger rounded-[2px] transition-colors" title="Excluir">
                                             <Trash2 size={15} />
                                         </button>
+                                        </>}
                                     </div>
                                 </div>
                             ))}
@@ -691,9 +702,9 @@ export const ClassDetails = () => {
                                 {editingSessionId ? 'Editando Chamada' : 'Nova Chamada'}
                             </h2>
                             <div className="flex items-center gap-3 w-full sm:w-auto mt-3 sm:mt-0">
-                                <button onClick={loadAllStudents} className="btn flex-1 sm:flex-none justify-center px-4 py-2 border border-primary/40 bg-primary/10 hover:border-primary/60 hover:bg-primary/20 rounded-[2px] transition-all text-primary font-semibold shadow-sm">
+                                {canManageStudents && <button onClick={loadAllStudents} className="btn flex-1 sm:flex-none justify-center px-4 py-2 border border-primary/40 bg-primary/10 hover:border-primary/60 hover:bg-primary/20 rounded-[2px] transition-all text-primary font-semibold shadow-sm">
                                     <Users size={16} /> Gerenciar Alunos
-                                </button>
+                                </button>}
                                 <div className="text-sm whitespace-nowrap text-text-muted px-4 py-2 rounded-[2px] border border-border bg-bg-card shadow-sm">
                                     {new Date().toLocaleDateString()}
                                 </div>
@@ -783,7 +794,10 @@ export const ClassDetails = () => {
                                 </table>
                             </div>
                         </div>
-                        {students.length > 0 && (
+                        {students.length > 0 && !canEditAttendance && (
+                            <p className="mt-6 text-sm text-text-muted text-right">Você pode consultar, mas não lançar chamadas nesta turma.</p>
+                        )}
+                        {students.length > 0 && canEditAttendance && (
                             <div className="mt-8 flex justify-end">
                                 <button
                                     onClick={handleSaveAttendance}
@@ -836,6 +850,14 @@ export const ClassDetails = () => {
                                                 <p className="text-text-muted text-sm flex items-center gap-1.5">
                                                     <Calendar size={12} /> {new Date(sess.date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}
                                                 </p>
+                                                {(sess.created_by_name || sess.updated_by_name) && (
+                                                    <p className="text-text-muted text-xs mt-0.5">
+                                                        {sess.created_by_name && <>Lançada por {sess.created_by_name}</>}
+                                                        {sess.updated_by_name && sess.updated_at && (
+                                                            <>{sess.created_by_name ? ' • ' : ''}Editada por {sess.updated_by_name} em {new Date(sess.updated_at + 'Z').toLocaleDateString('pt-BR')}</>
+                                                        )}
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                         <button onClick={() => handleViewSession(sess.id)} disabled={loadingSession} className="text-primary hover:text-text-main cursor-pointer transition-all px-4 py-2 bg-[var(--wash-1)] hover:bg-primary/20 rounded-[2px] text-sm flex items-center gap-2 border border-border hover:border-primary/30 font-medium">
@@ -1199,6 +1221,7 @@ export const ClassDetails = () => {
 
                         {/* Footer */}
                         <div className="p-6 border-t border-border flex flex-col-reverse sm:flex-row justify-end gap-3 bg-[var(--wash-1)] z-10">
+                            {canEditAttendance && <>
                             <button
                                 onClick={() => {
                                     requestConfirmation(
@@ -1218,9 +1241,10 @@ export const ClassDetails = () => {
                             >
                                 <Pencil size={16} /> Editar
                             </button>
-                            <button onClick={() => handleGenerateSessionReport(viewingSession.id)} className="px-4 py-2 rounded-[2px] text-xs font-medium bg-primary hover:bg-primary-hover text-[var(--on-institution)] transition-all flex items-center justify-center gap-2">
+                            </>}
+                            {canReports && <button onClick={() => handleGenerateSessionReport(viewingSession.id)} className="px-4 py-2 rounded-[2px] text-xs font-medium bg-primary hover:bg-primary-hover text-[var(--on-institution)] transition-all flex items-center justify-center gap-2">
                                 <Download size={16} /> Relatório
-                            </button>
+                            </button>}
                         </div>
                     </div>
                 </div>
