@@ -1,7 +1,7 @@
 import { createContext, useState, useContext, useEffect, type ReactNode } from 'react';
 import api from '../api';
 import { apiDetail, apiStatus } from '../utils/apiError';
-import { PENDING_INVITE_KEY, clearPendingInvite } from '../utils/invite';
+import { PENDING_INVITE_KEY, PENDING_SCHOOL_KEY, clearPendingInvite } from '../utils/invite';
 
 interface User {
     id: number;
@@ -19,6 +19,7 @@ interface User {
     avatar?: string;
     has_password?: boolean;
     email_verified?: boolean | null;
+    account_type?: 'school' | 'autonomous_teacher' | null;
     school_id?: number | null;
     school_role?: 'owner' | 'teacher' | 'secretary' | null;
     school_name?: string | null;
@@ -38,6 +39,19 @@ const consumePendingInvite = async () => {
     } catch (err) {
         // Mantém o token: a página /convite/:token mostra o motivo (e-mail diferente, limite...)
         console.warn('Convite pendente não aceito', err);
+    }
+};
+
+const consumePendingSchool = async () => {
+    let name: string | null = null;
+    try { name = sessionStorage.getItem(PENDING_SCHOOL_KEY); } catch { return; }
+    if (!name) return;
+    try {
+        await api.post('/schools', { name });
+    } catch (err) {
+        console.warn('Escola pendente não criada', err);
+    } finally {
+        try { sessionStorage.removeItem(PENDING_SCHOOL_KEY); } catch { /* ok */ }
     }
 };
 
@@ -73,6 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (token) {
             try {
                 await consumePendingInvite();
+                await consumePendingSchool();
                 const res = await api.get('/users/me');
                 setUser(res.data);
                 if (res.data.trial_expired) {

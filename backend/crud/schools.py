@@ -15,9 +15,32 @@ def hash_token(token: str) -> str:
     return hashlib.sha256(token.encode()).hexdigest()
 
 
+SCHOOL_ACCOUNT = "school"
+
+
+def is_school_account(user: User) -> bool:
+    """Conta do plano Escola: escolheu Escola no cadastro (teste grátis) ou assina o plano Escola."""
+    return user.role == SCHOOL_ACCOUNT
+
+
+def create_school_for(db: Session, user: User, name: str) -> School:
+    school = School(name=name.strip(), owner_user_id=user.id)
+    db.add(school)
+    db.flush()
+    user.role = SCHOOL_ACCOUNT
+    user.school_id = school.id
+    user.school_role = "owner"
+    user.school_permissions = None
+    db.commit()
+    db.refresh(school)
+    return school
+
+
 def max_teachers(db: Session, owner: User) -> int:
     """Limite de professores vem do plano do diretor, lido na hora (sem cópia no usuário).
-    Teste grátis: limite pequeno; plano de professor autônomo: não convida professores."""
+    Teste grátis do plano Escola: limite pequeno; sem plano Escola: não convida professores."""
+    if not is_school_account(owner):
+        return 0
     if owner.is_trial:
         return settings.SCHOOL_TRIAL_MAX_TEACHERS
     plan = None
@@ -61,7 +84,10 @@ def usage(db: Session, school: School) -> dict:
 
 
 def has_seat(db: Session, school: School, role: str, counting_invites: bool) -> bool:
-    """Ao convidar contam convites pendentes; ao aceitar, só quem já é membro."""
+    """Ao convidar contam convites pendentes; ao aceitar, só quem já é membro.
+    Sem plano Escola não entra ninguém (nem secretaria)."""
+    if not is_school_account(school.owner):
+        return False
     u = usage(db, school)
     if role == "teacher":
         used = u["teachers"] + (u["pending_teacher_invites"] if counting_invites else 0)

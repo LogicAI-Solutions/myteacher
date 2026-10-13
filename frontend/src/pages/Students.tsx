@@ -3,7 +3,7 @@ import api from '../api';
 import { useAuth } from '../context/AuthContext';
 import { Plus, Search, Pencil, Trash, X, AlertTriangle, UserCircle, LineChart as LineChartIcon, Download, MoreVertical, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react';
 import html2canvas from 'html2canvas';
-import { formatPhone, unmaskPhone } from '../utils/masks';
+import { formatPhone, unmaskPhone, formatCurrency, parseCurrency } from '../utils/masks';
 import { LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Area } from 'recharts';
 import { Loading } from '../components/Loading';
 
@@ -22,7 +22,46 @@ interface Student {
     class_type?: string;
     active: boolean;
     exempt?: boolean;
+    monthly_fee?: number | null;
+    due_day?: number | null;
 }
+
+// Mensalidade automática: com valor preenchido, o financeiro cria a mensalidade de cada mês sozinho.
+const FeeFields = ({ data, onChange }: { data: Partial<Student>; onChange: (patch: Partial<Student>) => void }) => (
+    <div className="grid grid-cols-2 gap-4">
+        <div>
+            <label className="label">Mensalidade</label>
+            <input
+                className="input"
+                inputMode="numeric"
+                value={data.monthly_fee ? formatCurrency(data.monthly_fee) : ''}
+                onChange={e => onChange({ monthly_fee: parseCurrency(e.target.value) || null })}
+                placeholder="R$ 0,00"
+                disabled={data.exempt}
+            />
+        </div>
+        <div>
+            <label className="label">Dia do vencimento</label>
+            <select
+                className="input"
+                value={data.due_day ?? ''}
+                onChange={e => onChange({ due_day: e.target.value ? Number(e.target.value) : null })}
+                disabled={data.exempt}
+            >
+                <option value="">Sem vencimento</option>
+                {Array.from({ length: 31 }, (_, i) => i + 1).map(d => <option key={d} value={d}>Dia {d}</option>)}
+            </select>
+        </div>
+        <p className="col-span-2 text-xs text-text-muted -mt-2">
+            {data.exempt
+                ? 'Aluno isento: nenhuma mensalidade é gerada.'
+                : 'Com valor preenchido, a mensalidade de cada mês aparece sozinha no financeiro. Vencimento em dia 29–31 cai no último dia dos meses mais curtos.'}
+        </p>
+    </div>
+);
+
+/** Campo vazio vai como null: tira a geração automática em vez de manter o valor antigo. */
+const feePayload = (data: Partial<Student>) => ({ monthly_fee: data.monthly_fee || null, due_day: data.due_day || null });
 
 interface EvolutionPoint {
     date: string;
@@ -56,11 +95,11 @@ export const Students = () => {
 
     // Modal States
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [newStudentData, setNewStudentData] = useState<Partial<Student>>({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, exempt: false });
+    const [newStudentData, setNewStudentData] = useState<Partial<Student>>({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, exempt: false, monthly_fee: null, due_day: null });
     const [selectedClassId, setSelectedClassId] = useState<number | ''>(''); // For enrollment
 
     const [editingStudent, setEditingStudent] = useState<Student | null>(null);
-    const [editStudentData, setEditStudentData] = useState<Partial<Student>>({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, exempt: false });
+    const [editStudentData, setEditStudentData] = useState<Partial<Student>>({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, exempt: false, monthly_fee: null, due_day: null });
     const [editClassId, setEditClassId] = useState<number | ''>(''); // Turma atual do aluno no editar
     const [originalClassId, setOriginalClassId] = useState<number | null>(null); // Para detectar mudança
 
@@ -151,6 +190,7 @@ export const Students = () => {
         try {
             const payload = {
                 ...newStudentData,
+                ...feePayload(newStudentData),
                 name,
                 phone: unmaskPhone(newStudentData.phone),
                 parent_phone: unmaskPhone(newStudentData.parent_phone),
@@ -160,7 +200,7 @@ export const Students = () => {
                 await api.post(`/classes/${selectedClassId}/enroll/${res.data.id}`);
             }
             setShowCreateModal(false);
-            setNewStudentData({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, exempt: false });
+            setNewStudentData({ name: '', phone: '', parent_name: '', parent_phone: '', parent_email: '', school_year: '', school: '', intended_profession: '', class_type: '', active: true, exempt: false, monthly_fee: null, due_day: null });
             setSelectedClassId('');
             showToast('Aluno criado com sucesso!', 'success');
             fetchData();
@@ -184,6 +224,7 @@ export const Students = () => {
         try {
             const payload = {
                 ...editStudentData,
+                ...feePayload(editStudentData),
                 name,
                 phone: unmaskPhone(editStudentData.phone),
                 parent_phone: unmaskPhone(editStudentData.parent_phone),
@@ -417,7 +458,7 @@ export const Students = () => {
                                 </button>
                                 {canManage && <><button onClick={async () => {
                                     setEditingStudent(student);
-                                    setEditStudentData({ name: student.name, phone: student.phone || '', parent_name: student.parent_name || '', parent_phone: student.parent_phone || '', parent_email: student.parent_email || '', school_year: student.school_year || '', school: student.school || '', intended_profession: student.intended_profession || '', class_type: student.class_type || '', active: student.active ?? true, exempt: !!student.exempt });
+                                    setEditStudentData({ name: student.name, phone: student.phone || '', parent_name: student.parent_name || '', parent_phone: student.parent_phone || '', parent_email: student.parent_email || '', school_year: student.school_year || '', school: student.school || '', intended_profession: student.intended_profession || '', class_type: student.class_type || '', active: student.active ?? true, exempt: !!student.exempt, monthly_fee: student.monthly_fee ?? null, due_day: student.due_day ?? null });
                                     try { const res = await api.get(`/students/${student.id}/enrollment`); setEditClassId(res.data.class_id || ''); setOriginalClassId(res.data.class_id); } catch { setEditClassId(''); setOriginalClassId(null); }
                                     setOpenMenuId(null);
                                 }} className="w-full text-left px-4 py-3 text-sm text-text-muted hover:text-text-main hover:bg-primary/10 flex items-center gap-2 transition-colors">
@@ -590,7 +631,9 @@ export const Students = () => {
                                                                 intended_profession: student.intended_profession || '',
                                                                 class_type: student.class_type || '',
                                                                 active: student.active ?? true,
-                                                                exempt: !!student.exempt
+                                                                exempt: !!student.exempt,
+                                                                monthly_fee: student.monthly_fee ?? null,
+                                                                due_day: student.due_day ?? null
                                                             });
                                                             // Buscar turma atual do aluno
                                                             try {
@@ -749,6 +792,7 @@ export const Students = () => {
                                     <p className="text-xs text-text-muted mt-0.5">Não entra nas cobranças nem nos totais do financeiro.</p>
                                 </div>
                             </div>
+                            <FeeFields data={newStudentData} onChange={patch => setNewStudentData({ ...newStudentData, ...patch })} />
 
 
                                 <div className="pt-2 border-t border-border mt-2">
@@ -881,6 +925,7 @@ export const Students = () => {
                                     <p className="text-xs text-text-muted mt-0.5">Não entra nas cobranças nem nos totais do financeiro.</p>
                                 </div>
                             </div>
+                            <FeeFields data={editStudentData} onChange={patch => setEditStudentData({ ...editStudentData, ...patch })} />
                             <div className="flex justify-end gap-3 mt-6">
                                 <button type="button" onClick={() => setEditingStudent(null)} className="px-5 py-2.5 text-text-muted hover:text-text-main hover:bg-[var(--wash-1)] rounded-[2px] transition-all font-medium">Cancelar</button>
                                 <button type="submit" className="btn btn-primary px-6 py-2.5 text-text-main rounded-[2px] font-medium">Salvar</button>

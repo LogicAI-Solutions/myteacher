@@ -41,6 +41,9 @@ def _apply_plan(db: Session, user: User, plan: Plan | None):
     if plan:
         user.plan_id = str(plan.id)
         user.max_classes = plan.max_classes
+        # Tipo da conta segue o plano: assinar Escola libera a gestão de escola;
+        # voltar a um plano de professor tira (membros perdem o acesso — ver security.py).
+        user.role = plan.role or "autonomous_teacher"
         # Turmas já criadas acima do novo limite continuam existindo; só bloqueia criar novas.
 
 

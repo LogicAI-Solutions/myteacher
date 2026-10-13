@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation, Outlet } from 'react-router-dom';
-import { LogOut, LayoutDashboard, GraduationCap, ChevronLeft, ChevronRight, Settings, UserCircle, DollarSign, MessageCircle, Users, Calendar, Building2 } from 'lucide-react';
+import { LogOut, LayoutDashboard, GraduationCap, ChevronLeft, ChevronRight, Settings, UserCircle, DollarSign, MessageCircle, Users, Calendar, Building2, ShieldCheck } from 'lucide-react';
 import { useAuth, type Permission } from '../context/AuthContext';
 import { openSupportWhatsApp } from '../utils/support';
 import api from '../api';
@@ -68,9 +68,14 @@ type NavEntry = {
     match: (path: string) => boolean;
     adminOnly?: boolean;
     perm?: Permission;        // some quando a pessoa não tem a permissão
-    schoolOwner?: boolean;    // diretor (ou autônomo, que pode criar a escola)
+    visible?: (user: AuthUser) => boolean;
     secondary?: boolean;      // no celular fica no menu do perfil, não na barra
 };
+
+type AuthUser = NonNullable<ReturnType<typeof useAuth>['user']>;
+
+// Escola só existe no plano Escola; funcionários (professor/secretaria) não administram a escola.
+const isSchoolAccount = (u: AuthUser) => u.account_type === 'school' && (!u.school_role || u.school_role === 'owner');
 
 // Uma lista só: a sidebar e a barra inferior liam o mesmo destino de dois
 // lugares diferentes, e foi assim que o "Painel" do mobile acabou apontando
@@ -81,7 +86,8 @@ const NAV: NavEntry[] = [
     { to: '/dashboard/classes', label: 'Turmas', short: 'Turmas', icon: GraduationCap, match: p => p.includes('/classes') || p.includes('/class/') },
     { to: '/dashboard/students', label: 'Alunos', short: 'Alunos', icon: Users, match: p => p.includes('/students') },
     { to: '/dashboard/payments', label: 'Financeiro', short: 'Financeiro', icon: DollarSign, match: p => p.includes('/payments'), perm: 'finance' },
-    { to: '/dashboard/escola', label: 'Escola', short: 'Escola', icon: Building2, match: p => p.includes('/escola'), schoolOwner: true, secondary: true },
+    { to: '/dashboard/escola', label: 'Escola', short: 'Escola', icon: Building2, match: p => p.includes('/escola'), visible: isSchoolAccount, secondary: true },
+    { to: '/dashboard/equipe', label: 'Equipe e acessos', short: 'Equipe', icon: ShieldCheck, match: p => p.includes('/equipe'), visible: u => isSchoolAccount(u) && u.school_role === 'owner', secondary: true },
     { to: '/dashboard/admin', label: 'Administração', short: 'Admin', icon: Settings, match: p => p.includes('/admin'), adminOnly: true, secondary: true },
 ];
 
@@ -95,7 +101,7 @@ export const Layout = () => {
     const entries = NAV.filter(e =>
         (!e.adminOnly || user?.is_admin) &&
         (!e.perm || can(e.perm)) &&
-        (!e.schoolOwner || !user?.school_role || user.school_role === 'owner')
+        (!e.visible || (!!user && e.visible(user)))
     );
 
     const handleLogout = () => {

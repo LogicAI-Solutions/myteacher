@@ -8,6 +8,7 @@ import io
 import pydantic
 from backend.schemas import students as student_schemas
 from backend.crud import students as student_crud
+from backend.crud import payments as payment_crud
 from backend.crud import enrollments as enrollment_crud
 from backend.crud import classes as class_crud
 from backend.core import database
@@ -39,6 +40,7 @@ def read_students(
 ):
     if payment_status:
         ctx.require(FINANCE)
+        payment_crud.ensure_monthly_payments(db, ctx.tenant_id)
     students = student_crud.get_students(
         db, 
         user_id=ctx.tenant_id, 

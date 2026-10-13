@@ -24,6 +24,7 @@ const CheckoutSuccess = lazy(() => import('./pages/CheckoutSuccess').then(m => (
 const OAuthCallback = lazy(() => import('./pages/OAuthCallback'));
 const Privacy = lazy(() => import('./pages/Privacy').then(m => ({ default: m.Privacy })));
 const School = lazy(() => import('./pages/School').then(m => ({ default: m.School })));
+const Team = lazy(() => import('./pages/Team').then(m => ({ default: m.Team })));
 const AcceptInvite = lazy(() => import('./pages/AcceptInvite').then(m => ({ default: m.AcceptInvite })));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
@@ -47,10 +48,18 @@ const RequirePerm = ({ perm, children }: { perm: Permission; children: ReactNode
   return can(perm) ? children : <Navigate to="/dashboard" replace />;
 };
 
+// Página Escola: direção, ou conta do plano Escola (ou em teste grátis) que ainda vai criar a escola
+const RequireSchoolAccount = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth();
+  const allowed = user?.school_role
+    ? user.school_role === 'owner'
+    : user?.account_type === 'school' || !!user?.is_trial;
+  return allowed ? children : <Navigate to="/dashboard" replace />;
+};
+
 const RequireSchoolOwner = ({ children }: { children: ReactNode }) => {
   const { user } = useAuth();
-  // Autônomo também entra: é onde ele cria a escola
-  return !user?.school_role || user.school_role === 'owner' ? children : <Navigate to="/dashboard" replace />;
+  return user?.school_role === 'owner' ? children : <Navigate to="/dashboard" replace />;
 };
 
 import { ThemeProvider } from './context/ThemeContext';
@@ -114,7 +123,8 @@ function AppRoutes() {
         <Route path="class/:id" element={<ClassDetails />} />
         <Route path="students" element={<Students />} />
         <Route path="payments" element={<RequirePerm perm="finance"><Payments /></RequirePerm>} />
-        <Route path="escola" element={<RequireSchoolOwner><School /></RequireSchoolOwner>} />
+        <Route path="escola" element={<RequireSchoolAccount><School /></RequireSchoolAccount>} />
+        <Route path="equipe" element={<RequireSchoolOwner><Team /></RequireSchoolOwner>} />
         <Route path="admin" element={<Admin />} />
         <Route path="profile" element={<Profile />} />
       </Route>

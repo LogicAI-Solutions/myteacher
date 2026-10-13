@@ -272,3 +272,52 @@ def test_conta_autonoma_nao_muda(client):
     me = client.get("/users/me", headers=x).json()
     assert me["school_role"] is None and "finance" in me["permissions"]
     assert client.get("/schools/me", headers=x).json()["school"] is None
+
+
+def test_escola_so_no_plano_escola(client):
+    # Assinante de plano de professor (sem teste grátis) não cria escola
+    pago = _user("pago@x.com", is_trial=False, trial_started_at=None, role="autonomous_teacher")
+    r = client.post("/schools", json={"name": "Não"}, headers=pago)
+    assert r.status_code == 403
+    assert client.get("/schools/me", headers=pago).json()["can_create"] is False
+    # Assinou o plano Escola: libera
+    _update_user("pago@x.com", role="school")
+    assert client.get("/schools/me", headers=pago).json()["can_create"] is True
+    assert client.post("/schools", json={"name": "Agora sim"}, headers=pago).status_code == 201
+
+
+def test_cadastro_pelo_plano_escola_ja_cria_a_escola(client):
+    body = {"first_name": "Rosa", "last_name": "Dir", "email": "rosa@x.com", "password": "senha12345"}
+    assert client.post("/register", json={**body, "account_type": "school"}).status_code == 422  # sem nome da escola
+    r = client.post("/register", json={**body, "account_type": "school", "school_name": "Colégio Rosa"})
+    assert r.status_code == 201
+    me = client.get("/users/me", headers=_headers("rosa@x.com")).json()
+    assert me["account_type"] == "school" and me["school_role"] == "owner" and me["school_name"] == "Colégio Rosa"
+    assert me["is_trial"] is True
+    # Cadastro comum continua autônomo
+    client.post("/register", json={**body, "email": "comum@x.com"})
+    me = client.get("/users/me", headers=_headers("comum@x.com")).json()
+    assert me["account_type"] == "autonomous_teacher" and me["school_role"] is None
+
+
+def test_diretor_sai_do_plano_escola(client, school):
+    # Trocou para plano de professor (billing._apply_plan muda role): equipe perde o acesso, sem novos convites
+    _update_user("diretor@x.com", role="autonomous_teacher", is_trial=False)
+    r = client.get("/classes/", headers=school["t1"])
+    assert r.status_code == 403 and r.json()["detail"] == "SCHOOL_INACTIVE"
+    assert client.post("/schools/invites", json={"email": "z@x.com", "school_role": "secretary"}, headers=school["d"]).status_code == 403
+    assert client.post("/schools/invites", json={"email": "y@x.com", "school_role": "teacher"}, headers=school["d"]).status_code == 403
+    # Os dados continuam com o diretor
+    assert len(client.get("/classes/", headers=school["d"]).json()) == 2
+
+
+def test_aplicar_plano_define_tipo_de_conta():
+    from backend.routers.billing import _apply_plan
+
+    class P:  # plano fake
+        id, max_classes = 3, 9999
+    u = User(email="a@a.com")
+    P.role = "school"; _apply_plan(None, u, P)
+    assert u.role == "school"
+    P.role = "autonomous_teacher"; _apply_plan(None, u, P)
+    assert u.role == "autonomous_teacher"

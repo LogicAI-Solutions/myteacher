@@ -1,3 +1,4 @@
+from datetime import date
 from sqlalchemy.orm import Session
 from backend.models.students import Student
 from backend.models.attendance import AttendanceLog
@@ -139,8 +140,14 @@ def owns_all_students(db: Session, student_ids, owner_id: int, teacher_id: int =
         return True
     return scoped_students(db, owner_id, teacher_id).filter(Student.id.in_(ids)).count() == len(ids)
 
+def _start_billing_if_needed(student: Student):
+    # Primeira vez que o aluno ganha mensalidade: a geração automática conta a partir de hoje
+    if student.monthly_fee and not student.billing_start:
+        student.billing_start = date.today()
+
 def create_student(db: Session, student: StudentCreate, user_id: int):
     db_student = Student(**student.model_dump(), owner_id=user_id)
+    _start_billing_if_needed(db_student)
     db.add(db_student)
     db.commit()
     db.refresh(db_student)
@@ -151,6 +158,7 @@ def update_student(db: Session, student_id: int, student_data: StudentCreate):
     if student:
         for key, value in student_data.model_dump(exclude_unset=True).items():
             setattr(student, key, value)
+        _start_billing_if_needed(student)
         db.commit()
         db.refresh(student)
     return student

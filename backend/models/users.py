@@ -41,6 +41,11 @@ class User(Base):
     calendar_events = relationship("CalendarEvent", back_populates="user", cascade="all, delete-orphan")
 
     @property
+    def account_type(self) -> str:
+        # "school" quando escolheu/assina o plano Escola; senão professor autônomo
+        return self.role or "autonomous_teacher"
+
+    @property
     def has_password(self) -> bool:
         # Exposto no schema para o Perfil saber se pede a senha atual (conta só-Google não tem).
         return bool(self.hashed_password)

@@ -44,6 +44,7 @@ class _User:
 class _Plan:
     """Plano Essencial: R$ 47,90 com teto de 5 turmas."""
     id, stripe_price_id, max_classes = 3, "price_essencial", 5
+    role = "autonomous_teacher"
 
 
 def test_checkout_usa_o_price_configurado():

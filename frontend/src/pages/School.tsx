@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Building2, Copy, MessageCircle, Send, Trash2, UserPlus } from 'lucide-react';
+import { Building2, Copy, MessageCircle, Send, ShieldCheck, UserPlus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import api from '../api';
 import { apiDetail } from '../utils/apiError';
+import { PERM_LABELS, PERM_ORDER, ROLE_LABELS } from '../utils/permissions';
 import { useAuth, type Permission } from '../context/AuthContext';
 import { Loading } from '../components/Loading';
 import { Toast, type ToastType } from '../components/Toast';
@@ -11,6 +13,7 @@ type Role = 'teacher' | 'secretary';
 interface SchoolInfo {
     school: { id: number; name: string } | null;
     role: string;
+    can_create: boolean;
     usage?: {
         teachers: number;
         max_teachers: number;
@@ -22,15 +25,6 @@ interface SchoolInfo {
     catalog: { all: Permission[]; teacher: Permission[]; secretary_default: Permission[] };
 }
 
-interface Member {
-    id: number;
-    name: string;
-    email: string;
-    school_role: 'owner' | Role;
-    is_active: boolean;
-    permissions: Permission[];
-}
-
 interface Invite {
     id: number;
     email: string;
@@ -40,23 +34,13 @@ interface Invite {
     token?: string;
 }
 
-const PERM_LABELS: Record<Permission, string> = {
-    'attendance.edit': 'Lançar e editar chamada',
-    'students.manage': 'Cadastrar e editar alunos',
-    'classes.manage': 'Criar turmas e definir professor',
-    'finance': 'Financeiro (mensalidades)',
-    'reports.view': 'Gerar relatórios',
-};
-
-const ROLE_LABELS: Record<string, string> = { owner: 'Direção', teacher: 'Professor', secretary: 'Secretaria' };
-
 const inviteUrl = (token: string) => `${window.location.origin}/convite/${token}`;
 
 const errorDetail = apiDetail;
 
 const PermissionChecks = ({ value, onChange, disabled }: { value: Permission[]; onChange: (p: Permission[]) => void; disabled?: boolean }) => (
     <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1.5">
-        {(Object.keys(PERM_LABELS) as Permission[]).map(perm => (
+        {PERM_ORDER.map(perm => (
             <label key={perm} className="flex items-center gap-2 text-sm text-text-main cursor-pointer">
                 <input
                     type="checkbox"
@@ -65,7 +49,7 @@ const PermissionChecks = ({ value, onChange, disabled }: { value: Permission[]; 
                     disabled={disabled}
                     onChange={e => onChange(e.target.checked ? [...value, perm] : value.filter(p => p !== perm))}
                 />
-                {PERM_LABELS[perm]}
+                <span>{PERM_LABELS[perm].label} <span className="text-text-muted text-xs">— {PERM_LABELS[perm].hint}</span></span>
             </label>
         ))}
     </div>
@@ -74,7 +58,6 @@ const PermissionChecks = ({ value, onChange, disabled }: { value: Permission[]; 
 export const School = () => {
     const { refreshUser } = useAuth();
     const [info, setInfo] = useState<SchoolInfo | null>(null);
-    const [members, setMembers] = useState<Member[]>([]);
     const [invites, setInvites] = useState<Invite[]>([]);
     const [loading, setLoading] = useState(true);
     const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
@@ -96,9 +79,8 @@ export const School = () => {
             setInfo(data);
             setInvitePerms(data.catalog.secretary_default);
             if (data.school && data.role === 'owner') {
-                const [m, i] = await Promise.all([api.get('/schools/members'), api.get('/schools/invites')]);
-                setMembers(m.data);
-                setInvites(i.data);
+                const { data: pending } = await api.get('/schools/invites');
+                setInvites(pending);
                 setSchoolName(data.school.name);
             }
         } catch (e) {
@@ -172,28 +154,6 @@ export const School = () => {
         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank', 'noopener,noreferrer');
     };
 
-    const updateMember = async (member: Member, patch: Partial<Pick<Member, 'permissions' | 'is_active'>>) => {
-        setMembers(prev => prev.map(m => (m.id === member.id ? { ...m, ...patch } : m)));
-        try {
-            const { data } = await api.patch(`/schools/members/${member.id}`, patch);
-            setMembers(prev => prev.map(m => (m.id === member.id ? data : m)));
-        } catch (err) {
-            showToast(errorDetail(err, 'Não foi possível salvar.'), 'error');
-            load();
-        }
-    };
-
-    const removeMember = async (member: Member) => {
-        if (!window.confirm(`Remover ${member.name} da escola? As turmas dele continuam na escola, sem professor responsável.`)) return;
-        try {
-            await api.delete(`/schools/members/${member.id}`);
-            showToast('Membro removido.');
-            load();
-        } catch (err) {
-            showToast(errorDetail(err, 'Não foi possível remover.'), 'error');
-        }
-    };
-
     const revokeInvite = async (invite: Invite) => {
         try {
             await api.delete(`/schools/invites/${invite.id}`);
@@ -205,6 +165,19 @@ export const School = () => {
     };
 
     if (loading) return <Loading variant="section" text="Carregando escola..." />;
+
+    // Sem plano Escola: a gestão de escola não está disponível
+    if (!info?.school && !info?.can_create) {
+        return (
+            <div className="animate-fade-in max-w-2xl">
+                <h1 className="text-2xl sm:text-3xl font-bold text-text-main">Escola</h1>
+                <div className="sheet sheet-p mt-5">
+                    <p className="text-text-main">A gestão de escola (professores, secretaria e acessos) faz parte do plano Escola.</p>
+                    <Link to="/trial-expired?upgrade=1" className="btn btn-primary mt-4 no-underline">Ver o plano Escola</Link>
+                </div>
+            </div>
+        );
+    }
 
     // Ainda não é escola: explica o que muda e cria.
     if (!info?.school) {
@@ -322,44 +295,17 @@ export const School = () => {
                 )}
             </section>
 
-            {/* Equipe */}
-            <section className="sheet overflow-hidden">
-                <div className="px-4 py-3 rule-b" style={{ background: 'var(--desk)' }}>
-                    <h2 className="label-print">Equipe</h2>
-                </div>
-                {members.filter(m => m.school_role !== 'owner').length === 0 ? (
-                    <p className="p-4 text-sm text-text-muted">Ninguém na equipe ainda. Gere um convite acima.</p>
-                ) : (
-                    <ul className="list-none m-0 p-0">
-                        {members.filter(m => m.school_role !== 'owner').map(m => (
-                            <li key={m.id} className="p-4 rule-b last:border-b-0">
-                                <div className="flex flex-wrap items-center justify-between gap-3">
-                                    <div className="min-w-0">
-                                        <p className="font-semibold text-text-main text-sm truncate">
-                                            {m.name} <span className="stamp stamp-idle ml-1">{ROLE_LABELS[m.school_role]}</span>
-                                            {!m.is_active && <span className="stamp stamp-late ml-1">Suspenso</span>}
-                                        </p>
-                                        <p className="text-xs text-text-muted truncate">{m.email}</p>
-                                    </div>
-                                    <div className="flex items-center gap-2">
-                                        <button className="btn btn-outline text-xs" onClick={() => updateMember(m, { is_active: !m.is_active })}>
-                                            {m.is_active ? 'Suspender' : 'Reativar'}
-                                        </button>
-                                        <button className="btn btn-ghost text-xs" onClick={() => removeMember(m)} aria-label={`Remover ${m.name}`}>
-                                            <Trash2 size={15} />
-                                        </button>
-                                    </div>
-                                </div>
-                                {m.school_role === 'secretary' && (
-                                    <div className="mt-3">
-                                        <PermissionChecks value={m.permissions} onChange={perms => updateMember(m, { permissions: perms })} />
-                                    </div>
-                                )}
-                            </li>
-                        ))}
-                    </ul>
-                )}
-            </section>
+            {/* Acessos da equipe ficam numa tela própria */}
+            <Link to="/dashboard/equipe" className="sheet sheet-p sheet-link flex items-center justify-between gap-3 no-underline text-inherit">
+                <span className="flex items-center gap-3">
+                    <ShieldCheck size={20} className="text-primary shrink-0" />
+                    <span>
+                        <span className="block font-semibold text-text-main">Equipe e acessos</span>
+                        <span className="block text-sm text-text-muted">Defina o que cada professor e secretária pode fazer, suspenda ou remova acessos.</span>
+                    </span>
+                </span>
+                <span className="text-primary text-sm font-semibold whitespace-nowrap">Gerenciar →</span>
+            </Link>
 
             {/* Convites pendentes */}
             {invites.length > 0 && (

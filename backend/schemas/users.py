@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr, Field, computed_field, field_validator
+from pydantic import BaseModel, EmailStr, Field, computed_field, field_validator, model_validator
 from datetime import date, datetime
-from typing import List, Optional
+from typing import List, Literal, Optional
 from backend.core.config import settings
 
 class UserBase(BaseModel):
@@ -23,11 +23,20 @@ class UserRegister(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
     nickname: Optional[str] = None
+    # Cadastro pelo plano Escola: a conta já nasce como escola (direção)
+    account_type: Literal["autonomous_teacher", "school"] = "autonomous_teacher"
+    school_name: Optional[str] = Field(default=None, max_length=120)
 
     @field_validator("email")
     @classmethod
     def normalize_email(cls, value: str) -> str:
         return value.strip().lower()
+
+    @model_validator(mode="after")
+    def school_needs_name(self):
+        if self.account_type == "school" and not (self.school_name or "").strip():
+            raise ValueError("Informe o nome da escola.")
+        return self
 
     @field_validator("first_name", "last_name")
     @classmethod
@@ -70,6 +79,7 @@ class User(UserBase):
     max_classes: Optional[int] = None
     has_password: bool = False
     email_verified: Optional[bool] = None
+    account_type: Optional[str] = None  # "school" | "autonomous_teacher"
     # Escola (preenchidos em /users/me a partir de core/access.py)
     school_id: Optional[int] = None
     school_role: Optional[str] = None

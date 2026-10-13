@@ -90,7 +90,7 @@ def init_db(db: Session):
             "max_classes": 9999,
             "max_teachers": 10,
             "popular": False,
-            "button_text": "Falar com consultor",
+            "button_text": "Começar 14 dias grátis",
             "features": [
                 {"text": "Até 10 professores", "included": True},
                 {"text": "Secretaria com permissões configuráveis", "included": True},
