@@ -4,13 +4,13 @@ services:
     container_name: myteacher_db
     restart: always
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_USER: ${POSTGRES_USER:?defina POSTGRES_USER no .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
       POSTGRES_DB: ${POSTGRES_DB:-student_management}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-student_management}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?defina POSTGRES_USER no .env} -d ${POSTGRES_DB:-student_management}" ]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -30,8 +30,9 @@ services:
       - .env
     environment:
       - POSTGRES_SERVER=db
-      - POSTGRES_USER=${POSTGRES_USER:-postgres}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - ENVIRONMENT=production
+      - POSTGRES_USER=${POSTGRES_USER:?defina POSTGRES_USER no .env}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
       - POSTGRES_DB=${POSTGRES_DB:-student_management}
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://127.0.0.1:8501/health || exit 1" ]
@@ -69,10 +70,11 @@ services:
     container_name: myteacher_pgadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@admin.com}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
     ports:
-      - "5150:80"
+      # Só localhost: acessar via túnel SSH (ssh -L 5150:127.0.0.1:5150 ...)
+      - "127.0.0.1:5150:80"
     depends_on:
       - db
     volumes:

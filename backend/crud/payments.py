@@ -35,8 +35,9 @@ def create_payment(db: Session, payment: PaymentCreate):
     db.refresh(db_payment)
     return db_payment
 
-def update_payment(db: Session, payment_id: int, payment_data: PaymentCreate):
-    payment = db.query(Payment).filter(Payment.id == payment_id).first()
+def update_payment(db: Session, payment_id: int, payment_data: PaymentCreate, owner_id: int):
+    payment = db.query(Payment).join(Student, Payment.student_id == Student.id)\
+        .filter(Payment.id == payment_id, Student.owner_id == owner_id).first()
     if payment:
         payment.status = payment_data.status
         payment.amount = payment_data.amount

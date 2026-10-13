@@ -119,6 +119,16 @@ def count_students(db: Session, user_id: int, search: str = None, active_status:
 # Need to import pwd_context
 from backend.core.security import pwd_context
 
+def get_student_for_owner(db: Session, student_id: int, owner_id: int):
+    """None quando o aluno não existe ou é de outro professor — o router responde 404 nos dois casos."""
+    return db.query(Student).filter(Student.id == student_id, Student.owner_id == owner_id).first()
+
+def owns_all_students(db: Session, student_ids, owner_id: int) -> bool:
+    ids = set(student_ids)
+    if not ids:
+        return True
+    return db.query(Student).filter(Student.id.in_(ids), Student.owner_id == owner_id).count() == len(ids)
+
 def get_student_by_username(db: Session, username: str):
     return db.query(Student).filter(Student.username == username).first()
 

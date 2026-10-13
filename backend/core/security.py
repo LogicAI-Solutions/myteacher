@@ -45,7 +45,9 @@ async def get_user_from_token(token: str = Depends(oauth2_scheme), db: Session =
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
-        if email is None:
+        # Token de aluno tem sub=username, que o professor escolhe livremente: sem este
+        # filtro, um aluno com username igual ao e-mail de outro professor viraria esse professor.
+        if email is None or payload.get("role") == "student":
             raise credentials_exception
         token_data = auth_schemas.TokenData(email=email)
     except JWTError:

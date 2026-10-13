@@ -311,24 +311,33 @@ export const Agenda = () => {
   }, [loadCalendarData]);
 
   // Conectar com Google
-  const handleConnectGoogle = () => {
+  const handleConnectGoogle = async () => {
     const rawApiUrl = import.meta.env.VITE_API_URL || '/api';
     const apiUrl = rawApiUrl.endsWith('/') ? rawApiUrl.slice(0, -1) : rawApiUrl;
-    const token = localStorage.getItem('token') || '';
     const width = 500;
     const height = 650;
     const left = window.screenX + (window.outerWidth - width) / 2;
     const top = window.screenY + (window.outerHeight - height) / 2;
 
+    // Abre o popup ainda no clique (depois do await o navegador bloquearia) e só então
+    // busca o link de vínculo: o JWT de sessão não vai mais na URL.
     const popup = window.open(
-      `${apiUrl}/auth/google?token=${encodeURIComponent(token)}&state=agenda`,
+      'about:blank',
       'google_auth_popup',
       `width=${width},height=${height},left=${left},top=${top},status=no,menubar=no,toolbar=no`
     );
 
-    // Se popup for bloqueado pelo navegador, redireciona diretamente
-    if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-      window.location.href = `${apiUrl}/auth/google?token=${encodeURIComponent(token)}&state=agenda`;
+    try {
+      const { data } = await api.post('/auth/google/link');
+      const url = `${apiUrl}${data.path}`;
+      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+        window.location.href = url; // popup bloqueado: segue na mesma aba
+      } else {
+        popup.location.href = url;
+      }
+    } catch {
+      popup?.close();
+      setToast({ message: 'Não foi possível iniciar a conexão com o Google.', type: 'error' });
     }
   };
 

@@ -40,7 +40,11 @@ app = FastAPI(
     title="MyTeacher API",
     description="API para gerenciamento de alunos e turmas",
     version="2.0.2",
-    lifespan=lifespan
+    lifespan=lifespan,
+    # Em produção não expõe o mapa completo da API.
+    docs_url=None if settings.is_production else "/docs",
+    redoc_url=None if settings.is_production else "/redoc",
+    openapi_url=None if settings.is_production else "/openapi.json",
 )
 
 cors_origins_env = settings.CORS_ORIGINS or os.getenv("CORS_ORIGINS", "")
@@ -48,7 +52,7 @@ if cors_origins_env:
     # Produção: usa origens específicas do .env
     origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
 else:
-    # Desenvolvimento: permite todas as origens
+    # Desenvolvimento: permite todas as origens (produção sem CORS_ORIGINS nem sobe; ver config.py)
     origins = ["*"]
 
 app.add_middleware(

@@ -45,6 +45,21 @@ class UserUpdate(BaseModel):
     is_active: Optional[bool] = None
     is_trial: Optional[bool] = None
 
+class UserSelfUpdate(BaseModel):
+    """O que o próprio usuário pode mudar em PUT /users/me. Sem is_trial/is_active/email:
+    com eles, quem está no teste grátis mandava is_trial=false e usava sem pagar."""
+    full_name: Optional[str] = None
+    birth_date: Optional[date] = None
+    nickname: Optional[str] = None
+    avatar: Optional[str] = None
+
+
+class PasswordUpdate(BaseModel):
+    password: str = Field(min_length=8, max_length=128)
+    # Obrigatória quando a conta já tem senha; conta só-Google pode definir a primeira.
+    current_password: Optional[str] = None
+
+
 class User(UserBase):
     id: int
     is_active: bool
@@ -53,6 +68,7 @@ class User(UserBase):
     trial_started_at: Optional[datetime] = None
     plan_id: Optional[str] = None
     max_classes: Optional[int] = None
+    has_password: bool = False
 
     @computed_field
     @property

@@ -33,3 +33,8 @@ class User(Base):
     owned_classes = relationship("Class", back_populates="owner")
     students = relationship("Student", back_populates="owner")
     calendar_events = relationship("CalendarEvent", back_populates="user", cascade="all, delete-orphan")
+
+    @property
+    def has_password(self) -> bool:
+        # Exposto no schema para o Perfil saber se pede a senha atual (conta só-Google não tem).
+        return bool(self.hashed_password)

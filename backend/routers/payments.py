@@ -29,9 +29,8 @@ def create_payment(
     db: Session = Depends(database.get_db), 
     current_user: user_schemas.User = Depends(security.get_current_user)
 ):
-    # Verify student belongs to user
-    # student = student_crud.get_student(db, payment.student_id)
-    # verify ownership...
+    if not student_crud.get_student_for_owner(db, student_id=payment.student_id, owner_id=current_user.id):
+        raise HTTPException(status_code=404, detail="Student not found")
     return payment_crud.create_payment(db=db, payment=payment)
 
 @router.put("/payments/{payment_id}", response_model=payment_schemas.Payment)
@@ -41,7 +40,10 @@ def update_payment(
     db: Session = Depends(database.get_db), 
     current_user: user_schemas.User = Depends(security.get_current_user)
 ):
-    return payment_crud.update_payment(db, payment_id=payment_id, payment_data=payment)
+    updated = payment_crud.update_payment(db, payment_id=payment_id, payment_data=payment, owner_id=current_user.id)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Payment not found")
+    return updated
 
 @router.get("/payments/stats")
 def get_payment_stats(

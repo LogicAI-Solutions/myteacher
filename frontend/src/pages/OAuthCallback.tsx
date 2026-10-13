@@ -1,18 +1,30 @@
-import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 export const OAuthCallback = () => {
-    const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    // O backend entrega no fragmento (#) para o token não ir a logs nem ao Referer.
+    // Lido uma vez: o efeito limpa o hash e, no StrictMode, roda duas vezes.
+    const [params] = useState(() => new URLSearchParams(window.location.hash.slice(1)));
     const { refreshUser } = useAuth();
 
     useEffect(() => {
-        const token = searchParams.get('token');
-        const redirect = searchParams.get('redirect') || '/dashboard';
+        window.history.replaceState(null, '', window.location.pathname);
+        const token = params.get('token');
+        const linked = params.get('linked') === '1';
+        const redirect = params.get('redirect') || '/dashboard';
 
-        if (token) {
+        if (linked) {
+            // Google conectado a uma conta já logada: não há token novo.
+            if (window.opener && !window.opener.closed) {
+                window.opener.postMessage({ type: 'GOOGLE_AUTH_SUCCESS', redirect }, window.location.origin);
+                window.close();
+                return;
+            }
+            navigate(redirect, { replace: true });
+        } else if (token) {
             localStorage.setItem('token', token);
             window.dispatchEvent(new Event('storage'));
 
@@ -43,7 +55,7 @@ export const OAuthCallback = () => {
             }
             navigate('/login?error=oauth_failed', { replace: true });
         }
-    }, [searchParams, navigate, refreshUser]);
+    }, [params, navigate, refreshUser]);
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-bg-dark text-text-main p-4">

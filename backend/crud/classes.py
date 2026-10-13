@@ -34,6 +34,10 @@ def create_class(db: Session, class_: ClassCreate, user_id: int):
 def get_class(db: Session, class_id: int):
     return db.query(Class).filter(Class.id == class_id).first()
 
+def get_class_for_owner(db: Session, class_id: int, owner_id: int):
+    """None quando a turma não existe ou é de outro professor — o router responde 404 nos dois casos."""
+    return db.query(Class).filter(Class.id == class_id, Class.owner_id == owner_id).first()
+
 def update_class(db: Session, class_id: int, class_data: ClassCreate):
     db_class = db.query(Class).filter(Class.id == class_id).first()
     if db_class:

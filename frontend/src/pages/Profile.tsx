@@ -29,6 +29,7 @@ export const Profile = () => {
     const imgRef = useRef<HTMLImageElement>(null);
 
     // Password State
+    const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordLoading, setPasswordLoading] = useState(false);
@@ -175,12 +176,19 @@ export const Profile = () => {
         setPasswordMessage({ type: '', text: '' });
 
         try {
-            await api.put('/users/me/password', { password: newPassword });
+            await api.put('/users/me/password', { password: newPassword, current_password: currentPassword || undefined });
             setPasswordMessage({ type: 'success', text: 'Senha alterada com sucesso!' });
+            setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
-        } catch (error) {
-            setPasswordMessage({ type: 'error', text: 'Erro ao atualizar senha.' });
+        } catch (error: any) {
+            const detail = error?.response?.data?.detail;
+            setPasswordMessage({
+                type: 'error',
+                text: typeof detail === 'string' ? detail
+                    : error?.response?.status === 422 ? 'A nova senha precisa ter ao menos 8 caracteres.'
+                    : 'Erro ao atualizar senha.',
+            });
         } finally {
             setPasswordLoading(false);
         }
@@ -417,6 +425,22 @@ export const Profile = () => {
                         )}
 
                         <div className="space-y-4">
+                            {user?.has_password && (
+                                <div>
+                                    <label htmlFor="current-password" className="label">Senha Atual</label>
+                                    <input
+                                        id="current-password"
+                                        name="current-password"
+                                        type="password"
+                                        autoComplete="current-password"
+                                        className="input mt-2"
+                                        value={currentPassword}
+                                        onChange={e => setCurrentPassword(e.target.value)}
+                                        required
+                                        placeholder="********"
+                                    />
+                                </div>
+                            )}
                             <div>
                                 <label htmlFor="new-password" className="label">Nova Senha</label>
                                 <input
